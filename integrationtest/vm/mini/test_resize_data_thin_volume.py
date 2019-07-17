@@ -19,7 +19,7 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     global test_obj_dict
     test_util.test_dsc('Create volume and check')
-    volume = test_stub.create_volume(provisioning="ThinProvisioning")
+    volume = test_stub.create_volume(provisioning="thin")
     test_obj_dict.add_volume(volume)
     volume.check()
     volume_uuid = volume.volume.uuid

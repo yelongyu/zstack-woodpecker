@@ -621,15 +621,13 @@ def create_mini_vm(l3_uuid_list, image_uuid, vm_name=None, cpu_num=None, memory_
     vm.create()
     return vm
 
-def create_mini_volume(volume_name=None, provisioning=None, cluster_uuid=None, vm_uuid=None, data_size=None, session_uuid=None):
+def create_mini_volume(volume_name=None, disk_size=None, system_tags=None, session_uuid=None):
     volume_name = volume_name if volume_name else 'mini_volume'
-    data_size = data_size if data_size else 1073741824
+    disk_size = disk_size if disk_size else 1073741824
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_name(volume_name)
-    volume_creation_option.set_provisioning(provisioning)
-    volume_creation_option.set_cluster_uuid(cluster_uuid)
-    volume_creation_option.set_vm_uuid(vm_uuid)
-    volume_creation_option.set_dataSize(data_size)
+    volume_creation_option.set_diskSize(disk_size)
+    volume_creation_option.set_system_tags(system_tags)
     volume_creation_option.set_session_uuid(session_uuid)
     volume_creation_option.set_timeout(900000)
     volume = zstack_volume_header.ZstackTestVolume()
@@ -650,9 +648,12 @@ def create_vm(l3_uuid_list=[], image_name=None, vm_name=None, provisioning='thic
     vm = create_mini_vm(l3_uuid_list, image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, rootVolume_systemTags=rootVolume_systemTags)
     return vm
 
-def create_volume(volume_name=None, provisioning="ThickProvisioning", cluster_uuid=None, vm_uuid=None, data_size=None):
-    cluster_uuid = cluster_uuid if cluster_uuid else res_ops.query_resource(res_ops.CLUSTER)[0].uuid
-    volume = create_mini_volume(volume_name=volume_name, provisioning=provisioning, cluster_uuid=cluster_uuid, vm_uuid=vm_uuid, data_size=data_size)
+def create_volume(volume_name=None, provisioning="thick", disk_size=None):
+    if provisioning == 'thin':
+        system_tags = ["capability::virtio-scsi", "volumeProvisioningStrategy::ThinProvisioning"]
+    else:
+        system_tags = ["capability::virtio-scsi", "volumeProvisioningStrategy::ThickProvisioning"]
+    volume = create_mini_volume(volume_name=volume_name, system_tags=system_tags, disk_size=disk_size)
     return volume
 
 def create_windows_vm():

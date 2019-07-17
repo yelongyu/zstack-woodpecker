@@ -25,7 +25,7 @@ class ZstackTestVolume(volume_header.TestVolume):
 
     def create(self, from_offering=True, for_mini=False):
         if for_mini:
-            self.set_volume(vol_ops.create_volume_for_mini(self.volume_creation_option))
+            self.set_volume(vol_ops.create_volume_from_diskSize(self.volume_creation_option))
         else:
             if from_offering:
                 self.set_volume(vol_ops.create_volume_from_offering(self.volume_creation_option))
