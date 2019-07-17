@@ -1,0 +1,1 @@
+../../basic/test_set_vm_console_password.py

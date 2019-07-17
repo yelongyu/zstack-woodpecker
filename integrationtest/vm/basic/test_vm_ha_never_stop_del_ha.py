@@ -7,10 +7,11 @@ New Integration Test for VM could stop after delete ha never stop
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
-import test_stub
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import time
+
+test_stub = test_lib.lib_get_specific_stub()
 
 vm = None
 
@@ -38,3 +39,4 @@ def error_cleanup():
     global vm
     if vm:
         vm.destroy()
+
