@@ -90,5 +90,13 @@ def test():
         ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
         ssh.execute(cmd, mn_ip2, "root", "password", False, 22)
 
+    # restart mn node after change management ip
+    stop_node_cmd = 'zsha2 stop-node'
+    start_node_cmd = 'zsha2 start-node'
+    ssh.execute(stop_node_cmd, mn_ip1, "root", "password", False, 22)
+    ssh.execute(stop_node_cmd, mn_ip2, "root", "password", False, 22)
+    ssh.execute(start_node_cmd, mn_ip1, "root", "password", False, 22)
+    ssh.execute(start_node_cmd, mn_ip2, "root", "password", False, 22)
+
     test_util.test_pass('Suite Setup Success')
 
