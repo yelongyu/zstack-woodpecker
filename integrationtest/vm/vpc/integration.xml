@@ -33,7 +33,7 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_vm2_one_vpc_2vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_vm2_two_vpc</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_classic_vm2_vpc</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_ops</case>
+        <case timeout='2400' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_ops</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_migrate</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_snapshot</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_volume</case>
@@ -54,7 +54,7 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vip_detach_vnic.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_check_snat_state.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_disable_snat.py::vm1_l3_vlan_vm2_l3_vxlan</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_disable_enable_snat_100_times.py::vm1_l3_vlan_vm2_l3_vxlan</case>
+        <case timeout='2400' repeat='1' noparallel='True'>test_vpc_disable_enable_snat_100_times.py::vm1_l3_vlan_vm2_l3_vxlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_standard_no_auth.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_stub_no_auth.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_nssa_no_auth.py::vm1_l3_vlan_vm2_l3_vlan</case>

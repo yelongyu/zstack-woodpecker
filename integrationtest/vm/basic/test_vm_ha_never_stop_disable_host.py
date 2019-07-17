@@ -20,6 +20,9 @@ def test():
     global vm
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
+    hosts = res_ops.query_resource(res_ops.HOST)
+    if len(hosts) < 2:
+        test_util.test_skip("Not available host to do ha, since there are not 2 hosts")
 
     vm = test_stub.create_vm()
     vm.check()
