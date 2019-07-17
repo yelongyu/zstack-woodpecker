@@ -55,7 +55,7 @@ def test():
     test_util.test_dsc("create testing vpc vm")
     tmp_vr = test_stub.create_vpc_vrouter('test_vpc')
     for nic in tmp_vr.inv.vmNics:
-        if nic.metaData == "3":
+        if nic.metaData == "2":    #2 means management /public net seprate; 3 means management /public net use the same
             vr_pub_nic = nic
             break
 
