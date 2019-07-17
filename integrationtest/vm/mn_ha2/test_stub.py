@@ -815,13 +815,17 @@ def deploy_2ha(scenarioConfig, scenarioFile, deployConfig):
         node3_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 2).ip_
     vip = os.environ['zstackHaVip']
 
-    change_ip_cmd1 = "zstack-ctl change_ip --ip=" + mn_ip1
+    manage_ip_cmd1 = 'ifconfig zsn1 | grep 192.168 | awk \'{print $2}\''
+    ret, manage_ip1, stderr = ssh.execute(manage_ip_cmd1, mn_ip1, "root", "password", False, 22)
+    ret, manage_ip2, stderr = ssh.execute(manage_ip_cmd1, mn_ip2, "root", "password", False, 22)
+
+    change_ip_cmd1 = "zstack-ctl change_ip --ip=" + manage_ip1
     ssh.execute(change_ip_cmd1, mn_ip1, "root", "password", False, 22)
 
     iptables_cmd1 = "iptables -I INPUT -d " + vip + " -j ACCEPT" 
     ssh.execute(iptables_cmd1, mn_ip1, "root", "password", False, 22)
 
-    change_ip_cmd2 = "zstack-ctl change_ip --ip=" + mn_ip2
+    change_ip_cmd2 = "zstack-ctl change_ip --ip=" + manage_ip2
     ssh.execute(change_ip_cmd2, mn_ip2, "root", "password", False, 22)
 
     iptables_cmd2 = "iptables -I INPUT -d " + vip + " -j ACCEPT"
@@ -837,9 +841,9 @@ def deploy_2ha(scenarioConfig, scenarioFile, deployConfig):
     ssh.execute("chmod a+x /root/zstack-hamon", mn_ip1, "root", "password", False, 22)
 
     if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
-        cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.20.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + mn_ip2 + ',' + mn_ip2 + ' -db-root-pw zstack.mysql.password -yes'
+        cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.24.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + mn_ip2 + ',' + mn_ip2 + ' -db-root-pw zstack.mysql.password -yes'
     else:
-        cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.20.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + node3_ip + ',' + mn_ip2 + ' -db-root-pw zstack.mysql.password -yes'
+        cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.24.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + node3_ip + ',' + mn_ip2 + ' -db-root-pw zstack.mysql.password -yes'
     test_util.test_logger("deploy 2ha by cmd: %s" %(cmd))
     ret, output, stderr = ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
     test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd, ret, output, stderr))
