@@ -142,6 +142,11 @@ class change_vm_image(Action):
         self.path.append(vm.stop())
         return vm
 
+    def run(self, tags):
+        Action.run(self, tags)
+        vm = self.check(resource.all_vms, tags)
+        self.path.append(vm.change_vm_image())
+        return self.path
 
 class reboot_vm(Action):
     def __init__(self):
@@ -293,6 +298,25 @@ class clone_vm(Action):
         Action.run(self, tags)
         vm = self.check(resource.all_vms, tags)
         self.path.append(vm.clone_vm())
+        return self.path
+
+
+class clone_vm_with_volume(Action):
+    def __init__(self):
+        Action.__init__(self)
+        self.run_state = [resource.RUNNING, resource.STOPPED]
+
+    def check(self, all_vms, tags):
+        Action.check(self, all_vms, tags)
+        if (len(all_vms.stopped + all_vms.running)) == 0:
+            print "There is no resource vm to change_ha.Must add create_vm"
+            self.path.append(resource.Vm().create([]))
+        return random.choice(all_vms.stopped + all_vms.running)
+
+    def run(self, tags):
+        Action.run(self, tags)
+        vm = self.check(resource.all_vms, tags)
+        self.path.append(vm.clone_vm_with_volume())
         return self.path
 
 

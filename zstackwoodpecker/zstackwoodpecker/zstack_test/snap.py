@@ -369,10 +369,12 @@ class ZstackSnapshotTree(object):
         if next_depth == 1 or self.Newhead:
             self.heads.append(snapshot)
         else:
-            snapshot.set_checking_points(copy.deepcopy(self.get_checking_points()))
             self.current_snapshot.add_child(snapshot)
             snapshot.set_parent(self.current_snapshot)
             snapshot.set_depth(self.current_snapshot.depth + 1)
+
+        if not self.Newhead:
+            snapshot.set_checking_points(copy.deepcopy(self.get_checking_points()))
 
         self.snapshot_list.append(snapshot)
         self.set_current_snapshot(snapshot)

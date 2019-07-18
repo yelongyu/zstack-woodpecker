@@ -18,7 +18,7 @@ fun_dict = {
     "change_ha": change_vm_ha,
     #
     "clone_vm": clone_vm,
-    "clone_vm_with_volume": clone_vm,
+    "clone_vm_with_volume": clone_vm_with_volume,
     #
     "resize_root_volume": resize_root_volume,
     "create_root_backup": create_root_backup,

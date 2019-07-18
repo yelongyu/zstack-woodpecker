@@ -268,6 +268,16 @@ class Vm(Resource):
         all_vms.add(new_vm, RUNNING)
         return "[TestAction.clone_vm, %s, %s]" % (self.name, new_vm.name)
 
+    def clone_vm_with_volume(self):
+        vm_name = "'clone-" + self.name[1:-1] + str(all_vms.len) + "'"
+        new_vm = Vm(vm_name)
+        all_vms.add(new_vm, RUNNING)
+        for volume in self.volumes:
+            name = vm_name.replace(self.name[1:-1], volume.name[1:-1])
+            new_volume = Volume(name)
+            all_volumes.add(new_volume, ATTACHED)
+        return "[TestAction.clone_vm, %s, %s, 'full']" % (self.name, vm_name)
+
     def reboot(self):
         return "[TestAction.reboot_vm, %s]" % self.name
 

@@ -1027,7 +1027,7 @@ def clone_vm(robot_test_obj, args):
     clone_vm_name = args[1]
 
     full = False if len(args) != 3 else True
-    invs = target_vm.clone([clone_vm_name], full=full)[0]
+    invs = vm_ops.clone_vm(target_vm.get_vm().uuid, [clone_vm_name], None, full=full)[0]
 
     vm_uuid = invs.inventory.uuid
     new_vm = zstack_vm_header.ZstackTestVm()
@@ -1048,7 +1048,7 @@ def clone_vm(robot_test_obj, args):
             if vol.type == 'Data':
                 for volume in target_vm.test_volumes:
                     if volume.get_volume().uuid in vol.name:
-                        new_name = "clone-" + volume.get_volume().name
+                        new_name = new_vm.vm.name.replace(target_vm.get_vm().name, volume.name)
                         vol_ops.update_volume(vol.uuid, new_name, "change_name")
 
                         new_volume = zstack_vol_header.ZstackTestVolume()
