@@ -2886,6 +2886,10 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             cond = res_ops.gen_query_conditions('uuid', '=', vm_inv.hostUuid)
                             host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
                             mini_host[(vm_inv.uuid, host_inv.uuid, vm_ip)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
+                            if os.getenv('NOLIC'):
+                                cmd = 'sed -i %s /etc/libvirt/qemu/%s.xml; virsh destroy %s; virsh create /etc/libvirt/qemu/%s.xml' % (os.getenv('SEDREGPATTERN'),
+                                                                                                                                       vm_inv.uuid, vm_inv.uuid, vm_inv.uuid)
+                                ssh.execute(cmd, host_inv.managementIp, "root", host_inv.name, True, 22)
                             break
 
         xml_string = etree.tostring(root_xml, 'utf-8')
