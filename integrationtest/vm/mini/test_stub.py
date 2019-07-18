@@ -660,6 +660,12 @@ def create_windows_vm():
     vm = create_mini_vm([l3_net_uuid], image_uuid, cpu_num=4, memory_size=4294967296)
     return vm
 
+def create_vr_vm(vm_name, image_name, l3_name):
+    imagename = os.environ.get(image_name)
+    l3_net_uuid = test_lib.lib_get_l3_by_name(os.getenv(l3_name)).uuid
+    vm = create_vm(vm_name=vm_name, image_name=imagename, l3_uuid_list=[l3_net_uuid])
+    return vm
+
 def skip_if_vr_not_vyos(vr_image_name):
     cond = res_ops.gen_query_conditions('name', '=', vr_image_name)
     vr_urls_list = res_ops.query_resource_fields(res_ops.IMAGE, cond, None, ['url'])
