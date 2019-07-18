@@ -595,17 +595,13 @@ def up_host_network(host_ip, scenarioConfig, network_type):
         test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
 
 def create_mini_vm(l3_uuid_list, image_uuid, vm_name=None, cpu_num=None, memory_size=None, \
-              system_tags=None, instance_offering_uuid=None, cluster_uuid=None, \
-              rootVolume_systemTags=["volumeProvisioningStrategy::ThickProvisioning"], session_uuid=None):
-    if not vm_name:
-        vm_name = 'mini_vm'
-    if not cpu_num:
-        cpu_num = 1
-    if not memory_size:
-        # set memory size to 1G
-        memory_size = 1073741824
+                   system_tags=None, cluster_uuid=None, rootVolume_systemTags=None, session_uuid=None):
+    vm_name = vm_name if vm_name else 'mini_vm'
+    cpu_num = cpu_num if cpu_num else 1
+    # set memory size to 1G
+    memory_size = memory_size if memory_size else 1073741824
+    rootVolume_systemTags = rootVolume_systemTags if rootVolume_systemTags else ["volumeProvisioningStrategy::ThickProvisioning"]
     vm_creation_option = test_util.VmOption()
-    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     vm_creation_option.set_l3_uuids(l3_uuid_list)
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(vm_name)
@@ -1188,4 +1184,5 @@ class ImageReplication(object):
     def operate_bs_service(self, bs_ip, op='stop'):
         cmd = 'service zstack-imagestorebackupstorage %s' % op
         ssh.execute(cmd, bs_ip, "root", "password", port=22)
+
 

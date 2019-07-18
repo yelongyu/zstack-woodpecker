@@ -2887,9 +2887,17 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             host_inv = query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
                             mini_host[(vm_inv.uuid, host_inv.uuid, vm_ip)] = {'cpu': host_inv.availableCpuCapacity, 'mem': int(host_inv.availableMemoryCapacity)/1024/1024/1024}
                             if os.getenv('NOLIC'):
-                                cmd = 'sed -i %s /etc/libvirt/qemu/%s.xml; virsh destroy %s; virsh create /etc/libvirt/qemu/%s.xml' % (os.getenv('SEDREGPATTERN'),
-                                                                                                                                       vm_inv.uuid, vm_inv.uuid, vm_inv.uuid)
+                                domxml_path = ' /etc/libvirt/qemu/%s.xml' % vm_inv.uuid
+                                cmd = 'virsh shutdown %s; virsh dumpxml %s | sed %s > %s; sync; virsh create %s' % (vm_inv.uuid, vm_inv.uuid, os.getenv('SEDREGPATTERN'), domxml_path, domxml_path)
                                 ssh.execute(cmd, host_inv.managementIp, "root", host_inv.name, True, 22)
+                                domif_cmd = "virsh domiflist %s | awk 'NR>2{print $1}'" % vm_inv.uuid
+                                ret = ssh.execute(domif_cmd, host_inv.managementIp, "root", host_inv.name, True, 22)[1]
+                                for nic in ret.split('\n'):
+                                    if nic:
+                                        up_nic = 'virsh domif-setlink %s %s up' % (vm_inv.uuid, nic)
+                                        ssh.execute(up_nic, host_inv.managementIp, "root", host_inv.name, True, 22)
+                                time.sleep(5)
+                                test_lib.lib_wait_target_up(vm_ip, '22', 360)
                             break
 
         xml_string = etree.tostring(root_xml, 'utf-8')

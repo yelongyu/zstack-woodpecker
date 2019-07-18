@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy-2-mini-cluster.xml</deployConfig>
-    <deployConfigTemplate>deploy-1-mini-cluster.tmpt</deployConfigTemplate>
+    <deployConfigTemplate>deploy-2-mini-cluster-nolic.tmpt</deployConfigTemplate>
     <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>
