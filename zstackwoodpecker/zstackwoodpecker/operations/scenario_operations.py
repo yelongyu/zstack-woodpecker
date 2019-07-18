@@ -2890,6 +2890,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 cmd = 'sed -i %s /etc/libvirt/qemu/%s.xml; virsh destroy %s; virsh create /etc/libvirt/qemu/%s.xml' % (os.getenv('SEDREGPATTERN'),
                                                                                                                                        vm_inv.uuid, vm_inv.uuid, vm_inv.uuid)
                                 ssh.execute(cmd, host_inv.managementIp, "root", host_inv.name, True, 22)
+                                time.sleep(5)
+                                test_lib.lib_wait_target_up(vm_ip, '22', 360)
                             break
 
         xml_string = etree.tostring(root_xml, 'utf-8')
