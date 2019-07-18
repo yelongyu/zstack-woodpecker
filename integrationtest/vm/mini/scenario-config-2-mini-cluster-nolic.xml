@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-2-mini-cluster.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-2-mini-cluster-nolic.tmpt</scenarioConfigTemplate>
+</testConfig>
