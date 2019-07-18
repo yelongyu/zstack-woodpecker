@@ -639,7 +639,7 @@ def lib_check_ping(vm, target, no_exception=None):
     #if os.environ.get('zstackHaVip') != None:
     #    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ['zstackHaVip']
     if lib_is_vm_vr(vm):
-        vm_ip = lib_find_vr_pub_ip(vm)
+        vm_ip = lib_find_vr_mgmt_ip(vm)
         lib_install_testagent_to_vr_with_vr_vm(vm)
         if lib_execute_sh_cmd_by_agent_with_retry(vm_ip, command):
             test_util.test_logger("Ping [target:] %s from [vm:] %s Test Pass" % (target, vm.uuid))
@@ -3957,13 +3957,15 @@ def lib_check_ports_in_a_command(src_vm, src_ip, target_ip, allowed_ports, \
     password = lib_get_vm_password(src_vm)
     if lib_is_vm_vr(src_vm):
         src_vm_ip = lib_find_vr_mgmt_ip(src_vm)
+#    else:
+#        if not l3_uuid:
+#            src_vm_ip = src_vm.vmNics[0].ip
+#        else:
+#            src_vm_ip = lib_get_vm_nic_by_l3(src_vm, l3_uuid).ip
+        test_util.test_logger("Do testing to ssh vm: %s, ip: %s, execute cmd: %s" % (src_vm.uuid, src_vm_ip, port_checking_cmd))
+        test_result = lib_execute_ssh_cmd(src_vm_ip, username, password, port_checking_cmd, 240)
     else:
-        if not l3_uuid:
-            src_vm_ip = src_vm.vmNics[0].ip
-        else:
-            src_vm_ip = lib_get_vm_nic_by_l3(src_vm, l3_uuid).ip
-    test_util.test_logger("Do testing to ssh vm: %s, ip: %s, execute cmd: %s" % (src_vm.uuid, src_vm_ip, port_checking_cmd))
-    test_result = lib_execute_ssh_cmd(src_vm_ip, username, password, port_checking_cmd, 240)
+        test_result = lib_execute_command_in_vm(src_vm, port_checking_cmd, l3_uuid)
 
     if not test_result:
         test_util.test_fail("check [ip:] %s ports failure. Please check the failure information. " % target_ip)

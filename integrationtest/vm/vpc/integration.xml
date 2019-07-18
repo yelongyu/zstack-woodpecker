@@ -24,7 +24,7 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_l3_attach_detach_negative.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ops_loop.py::reboot_vr</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ops_loop.py::reconnect_vr</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_vrouter_ops.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>test_vpc_vrouter_ops.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_eip_two_vm_connection.py::vm1_vm2_one_vpc_1vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_eip_two_vm_connection.py::vm1_vm2_one_vpc_2vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_eip_two_vm_connection.py::vm1_vm2_two_vpc</case>
@@ -48,7 +48,7 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_6vm_connection.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_prometheus.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_anti_spoofing.py</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_sg_anti_spoofing_reconnect_host.py</case>
+        <case timeout='1800' repeat='1' noparallel='True'>test_vpc_sg_anti_spoofing_reconnect_host.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_pf_and_lb_share_one_vip.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vip_delete_vrouter_net_iprange.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vip_detach_vnic.py</case>
