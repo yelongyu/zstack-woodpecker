@@ -2,7 +2,8 @@
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
-import image
+
+image = test_lib.lib_get_specific_stub('e2e_mini/image', 'image')
 
 image_ops = None
 image_name = 'image-' + image.get_time_postfix()
