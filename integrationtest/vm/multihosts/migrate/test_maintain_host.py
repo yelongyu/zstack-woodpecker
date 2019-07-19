@@ -36,7 +36,7 @@ _config_ = {
         'noparallel' : True
         }
 
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def is_host_connected(host_uuid):
@@ -66,11 +66,14 @@ def test():
         test_util.test_skip('skip migrate vm with data volume if localstorate is used')
 
     test_util.test_dsc('Create volume and check')
-    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
-    volume_creation_option = test_util.VolumeOption()
-    volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+    if ps.type != 'MiniStorage':
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
 
-    volume = test_stub.create_volume(volume_creation_option)
+        volume = test_stub.create_volume(volume_creation_option)
+    else:
+        volume = test_stub.create_volume()
     test_obj_dict.add_volume(volume)
 
     test_util.test_dsc('Attach volume and check')
@@ -134,3 +137,4 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     test_lib.lib_error_cleanup(test_obj_dict)
+
