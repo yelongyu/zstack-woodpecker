@@ -2899,6 +2899,11 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 #                                         ssh.execute(up_nic, host_inv.managementIp, "root", host_inv.name, True, 22)
                                 if not test_lib.lib_wait_target_up(vm_ip, '22', 360):
                                     test_util.test_fail('host vm ip is inaccessible')
+                                vm_nic = os.environ.get('nodeNic').replace("eth", "zsn")
+                                vm_netmask = os.environ.get('nodeNetMask')
+                                vm_gateway = os.environ.get('nodeGateway')
+                                cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
+                                ssh.execute(cmd, vm_ip, vm.imageUsername_, vm.imagePassword_, True, 22)
                             break
 
         xml_string = etree.tostring(root_xml, 'utf-8')
