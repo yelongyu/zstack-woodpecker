@@ -65,7 +65,7 @@ def create_vm_with_iso(l3_uuid_list, image_uuid, vm_name = None, root_disk_uuids
     vm_creation_option.set_session_uuid(session_uuid)
     vm_creation_option.set_ps_uuid(ps_uuid)
     vm_creation_option.set_timeout(600000)
-    vm = zstack_vm_header.ZstackTestVm()
+    vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
     return vm
@@ -1000,6 +1000,10 @@ class ImageReplication(object):
         md5 = hashlib.md5(chunk_data)
         return md5.hexdigest()
 
+    def get_chunk_hash(self, chunk_data):
+        sha256sum = hashlib.sha256(chunk_data)
+        return sha256sum.hexdigest()
+
     def get_img_manifests(self, uri):
         rsp = json_post(uri=uri, method='GET', fail_soon=True)
         return jsonobject.loads(rsp)
@@ -1011,7 +1015,7 @@ class ImageReplication(object):
         blobs_chunks = jsonobject.loads(blobs).chunks
         for chunk_hash in blobs_chunks:
             chunk_uri = 'https://%s:8000/v1/%s/blobs/%s/chunks/%s' % (bs_ip, img_uuid, digest, chunk_hash)
-            chunk_md5 = self.get_chunk_md5(json_post(uri=chunk_uri, method='GET', fail_soon=True))
+            chunk_md5 = self.get_chunk_hash(json_post(uri=chunk_uri, method='GET', fail_soon=True))
             md5_list.add(chunk_md5)
         return md5_list
 
