@@ -819,13 +819,19 @@ def deploy_2ha(scenarioConfig, scenarioFile, deployConfig):
     ret, manage_ip1, stderr = ssh.execute(manage_ip_cmd1, mn_ip1, "root", "password", False, 22)
     ret, manage_ip2, stderr = ssh.execute(manage_ip_cmd1, mn_ip2, "root", "password", False, 22)
 
-    change_ip_cmd1 = "zstack-ctl change_ip --ip=" + manage_ip1
+    if manage_ip1 != '':
+        change_ip_cmd1 = "zstack-ctl change_ip --ip=" + manage_ip1
+    else:
+        change_ip_cmd1 = "zstack-ctl change_ip --ip=" + mn_ip1
     ssh.execute(change_ip_cmd1, mn_ip1, "root", "password", False, 22)
 
     iptables_cmd1 = "iptables -I INPUT -d " + vip + " -j ACCEPT" 
     ssh.execute(iptables_cmd1, mn_ip1, "root", "password", False, 22)
 
-    change_ip_cmd2 = "zstack-ctl change_ip --ip=" + manage_ip2
+    if manage_ip2 != '':
+        change_ip_cmd2 = "zstack-ctl change_ip --ip=" + manage_ip2
+    else:
+        change_ip_cmd2 = "zstack-ctl change_ip --ip=" + mn_ip2
     ssh.execute(change_ip_cmd2, mn_ip2, "root", "password", False, 22)
 
     iptables_cmd2 = "iptables -I INPUT -d " + vip + " -j ACCEPT"
