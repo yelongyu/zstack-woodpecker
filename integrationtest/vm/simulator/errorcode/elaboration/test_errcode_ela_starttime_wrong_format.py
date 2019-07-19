@@ -33,13 +33,13 @@ def test():
     try:
          errc_ops.get_missed_elaboration(starttime=input)
     except ApiError as e:
-         #ascii->unicode->utf8
-         err_msg = str([e]).split('elaboration:')[1].split(':',1)[1].decode('unicode-escape').encode('utf8')
-         test_util.test_logger('@@@%s@@@%s@@@' % (check_message, err_msg))
-         if check_message in err_msg or err_msg in check_message:
-             test_util.test_pass("regex check pass,check_message:%s" % check_message)
-         else:
-             test_util.test_fail('@@DEBUG@@\n TEST FAILED\n %s' % err_msg)
+        #ascii->unicode->utf8
+        err_msg = str([e]).decode('unicode-escape').encode('utf8')
+        test_util.test_logger('@@@%s@@@%s@@@' % (check_message, err_msg))
+        if check_message in err_msg or err_msg in check_message:
+            test_util.test_pass("regex check pass,check_message:%s" % check_message)
+        else:
+            test_util.test_fail('@@DEBUG@@\n TEST FAILED\n %s' % err_msg)
     
 def error_cleanup():
     pass

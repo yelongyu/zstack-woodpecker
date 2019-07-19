@@ -1,6 +1,6 @@
 '''
- GetMissedElaboration, startTime = $.float 
- regex: "%s is not a Long value Number"
+  change all Hosts state to 'Maintenance' and start vm
+  regex: "no Enabled hosts found in the \[[0-9]*] candidate hosts"
 '''
 import os
 import zstackwoodpecker.test_util as test_util
@@ -15,23 +15,33 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-input = 1.1
 test_stub = test_lib.lib_get_test_stub()
-regex = "%s is not a Long value Number" 
+regex = "no Enabled hosts found in the \[[0-9]*] candidate hosts"
 
 check_message = None
-check_message_list = errc_ops.get_elaborations(category = 'Elaboration')
+check_message_list = errc_ops.get_elaborations(category = 'VM')
+vm = None
+
+hosts = res_ops.query_resource(res_ops.HOST)
+host_num = str(len(hosts))
+maintain = 'maintain'
+enable = 'enable'
+
 def test():
+    global vm
     test_stub.check_elaboration_properties()
     for message in check_message_list:
         if regex == message.regex:
-            check_message =  message.message_cn.encode('utf8').replace('%1$s',"%s" % input)
+            check_message =  message.message_cn.encode('utf8').replace('%1$s', host_num)
             break
     test_util.test_logger('@@@@DEBUG@@@@: %s' % check_message)
-       
-    #check elaborationcontent with empty_folder_path
+    #change all hosts state to maintain
+    vm = test_stub.create_vm()
+    vm_uuid = vm.get_vm().uuid
+    for host in hosts:
+        host_ops.change_host_state(host.uuid, maintain)
     try:
-        errc_ops.get_missed_elaboration(starttime=input)
+        vm_ops.start_vm(vm_uuid)
     except ApiError as e:
         #ascii->unicode->utf8
         err_msg = str([e]).decode('unicode-escape').encode('utf8')
@@ -40,6 +50,18 @@ def test():
             test_util.test_pass("regex check pass,check_message:%s" % check_message)
         else:
             test_util.test_fail('@@DEBUG@@\n TEST FAILED\n %s' % err_msg)
-    
+
 def error_cleanup():
-    pass
+    if vm:
+        vm.destroy()
+        vm.expunge()
+    for host in hosts:
+        host_ops.change_host_state(host.uuid, enable)
+
+def env_recover():
+    if vm:
+        vm.destroy()
+        vm.expunge()
+    for host in hosts:
+        host_ops.change_host_state(host.uuid, enable)
+
