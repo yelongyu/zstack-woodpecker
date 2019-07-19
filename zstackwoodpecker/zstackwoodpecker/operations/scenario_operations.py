@@ -2903,7 +2903,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                                 vm_netmask = os.environ.get('nodeNetMask')
                                 vm_gateway = os.environ.get('nodeGateway')
                                 cmd = '/usr/local/bin/zs-network-setting -b %s %s %s %s' % (vm_nic, vm_ip, vm_netmask, vm_gateway)
-                                ssh.execute(cmd, vm_ip, vm.imageUsername_, vm.imagePassword_, True, 22)
+                                ssh.execute(cmd, vm_ip, vm.imageUsername_, vm.imagePassword_, False, 22)
                             break
 
         xml_string = etree.tostring(root_xml, 'utf-8')
