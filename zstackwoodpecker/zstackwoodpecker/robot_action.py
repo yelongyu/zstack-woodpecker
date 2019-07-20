@@ -807,6 +807,56 @@ def run_workloads(robot_test_obj, args):
 
     time.sleep(timeout)
 
+def run_host_workloads(robot_test_obj, args):
+    target_host = ""
+    background = False
+    timeout = 30
+    pre_cmd = ""
+
+    if len(args) == 2:
+        target_host = args[0]
+        cmd = args[1]
+    elif len(args) == 3:
+        target_host = args[0]
+        cmd = args[1]
+        if "background" in args[2]:
+            background = True
+        elif "timeout" in args[2]:
+            timeout = int(args[2].split("=")[1])
+    else:
+        test_util.test_fail("arguments invalid for next action: run host workloads")
+
+    if "fio" in cmd:
+        pre_cmd = "yum install fio --nogpgcheck -y"
+    elif "vdbench" in cmd:
+        pre_cmd = "wget -np -r -nH --cut-dirs=2 http://172.20.1.27/mirror/vdbench/; chmod a+x /root/vdbench/vdbench"
+
+    if background:
+        cmd = cmd + ' &'
+
+    if target_host == "all":
+        for host in test_lib.lib_find_hosts_by_status("Connected"):
+            pre_rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), pre_cmd)
+            time.sleep(1)
+            rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd, timeout)
+            if not rsp and not background:
+                test_util.test_fail('%s failed on %s' % (cmd, host.managementIp))
+    elif target_host == "random":
+        host = random.choice(test_lib.lib_find_hosts_by_status("Connected"))
+        pre_rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), pre_cmd)
+        time.sleep(1)
+        rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd, timeout)
+        if not rsp and not backgound:
+            test_util.test_fail('%s failed on %s' % (cmd, host.managementIp))
+    else:
+        host = test_lib.lib_find_host_by_HostIp(target_host)
+        if not host:
+            test_util.test_fail('no host found for IP %s' % (target_host))
+        pre_rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), pre_cmd)
+        time.sleep(1)
+        rsp = test_lib.lib_execute_ssh_cmd(host[0].managementIp, host[0].username, os.environ.get('hostPassword'), cmd, timeout)
+        if not rsp and not background:
+            test_util.test_fail('%s failed on %s' % (cmd, target_host))
 
 def reboot_host(robot_test_obj, args):
     target_host = ""
@@ -1962,6 +2012,7 @@ action_dict = {
     'reboot_vm': reboot_vm,
     'reboot_host': reboot_host,
     'run_workloads': run_workloads,
+    'run_host_workloads': run_host_workloads,
     'destroy_vm': destroy_vm,
     'migrate_vm': migrate_vm,
     'expunge_vm': expunge_vm,
