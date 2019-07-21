@@ -761,6 +761,7 @@ def run_workloads(robot_test_obj, args):
     target_vms = []
     target_cmd = ''
     timeout = 600
+    pre_cmd = ""
 
     WORKLOADS = {
         "FIO": "fio -filename=/root/test-fio -direct=1 -iodepth 32 -thread -rw=randrw -rwmixread=70 -ioengine=libaio -bs=4k -size=90% -numjobs=8 -runtime=600 -group_reporting -name=fio_test.txt",
@@ -784,6 +785,9 @@ def run_workloads(robot_test_obj, args):
             else:
                 target_cmd = cmd
 
+    if "iperf3" in target_cmd:
+        pre_cmd = "yum install iperf3 --nogpgcheck -y; iptables -F; service iptables save"
+
     target_cmd = "echo " + target_cmd + " \& >> /etc/rc.local"
 
     for target_vm in target_vms:
@@ -792,6 +796,11 @@ def run_workloads(robot_test_obj, args):
         test_lib.lib_set_vm_host_l2_ip(target_vm.get_vm())
         default_l3_uuid = target_vm.get_vm().defaultL3NetworkUuid
         nic = target_vm.get_vm().vmNics[0]
+
+        if pre_cmd:
+            pre_cmd_result = test_lib.lib_ssh_vm_cmd_by_agent(host.managementIp, nic.ip,
+                                                          test_lib.lib_get_vm_username(target_vm.get_vm()),
+                                                          test_lib.lib_get_vm_password(target_vm.get_vm()), pre_cmd)
 
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent(host.managementIp, nic.ip,
                                                       test_lib.lib_get_vm_username(target_vm.get_vm()),
@@ -830,6 +839,11 @@ def run_host_workloads(robot_test_obj, args):
         pre_cmd = "yum install fio --nogpgcheck -y"
     elif "vdbench" in cmd:
         pre_cmd = "wget -np -r -nH --cut-dirs=2 http://172.20.1.27/mirror/vdbench/; chmod a+x /root/vdbench/vdbench"
+    elif "iperf3" in cmd:
+        pre_cmd = "yum install iperf3 --nogpgcheck -y"
+        target_vm = robot_test_obj.get_test_dict().vm[cmd.split()[2]]
+        target_ip = target_vm.get_vm().vmNics[0].ip
+        cmd = cmd.replace(cmd.split()[2], target_ip)
 
     if background:
         cmd = cmd + ' &'
@@ -846,7 +860,7 @@ def run_host_workloads(robot_test_obj, args):
         pre_rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), pre_cmd)
         time.sleep(1)
         rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd, timeout)
-        if not rsp and not backgound:
+        if not rsp and not background:
             test_util.test_fail('%s failed on %s' % (cmd, host.managementIp))
     else:
         host = test_lib.lib_find_host_by_HostIp(target_host)
