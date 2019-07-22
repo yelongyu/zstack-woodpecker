@@ -1,8 +1,8 @@
 '''
 
-New Integration test for testing vm migration between hosts when attch ISO. 
+New Integration test for testing vm migration between hosts when attch ISO.
 
-@author: ChenyuanXu 
+@author: ChenyuanXu
 '''
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
@@ -15,7 +15,7 @@ import apibinding.inventory as inventory
 import os
 
 vm = None
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
@@ -40,7 +40,7 @@ def test():
     vm_uuid = vm_inv.uuid
 
     test_util.test_dsc('Add ISO Image')
-    #cond = res_ops.gen_query_conditions('name', '=', 'sftp') 
+    #cond = res_ops.gen_query_conditions('name', '=', 'sftp')
     bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid
 
     img_option = test_util.ImageOption()

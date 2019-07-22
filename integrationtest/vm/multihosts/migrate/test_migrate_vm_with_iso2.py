@@ -18,7 +18,7 @@ import time
 import os
 
 vm = None
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
@@ -59,14 +59,14 @@ def test():
     image = test_image.ZstackTestImage()
     image.set_image(image_inv)
     image.set_creation_option(img_option)
-   
+
     test_obj_dict.add_image(image)
 
     test_util.test_dsc('Attach ISO to VM')
     cond = res_ops.gen_query_conditions('name', '=', 'iso')
     iso_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
     img_ops.attach_iso(iso_uuid, vm_uuid)
-    
+
     ssh_timeout = test_lib.SSH_TIMEOUT
     test_lib.SSH_TIMEOUT = 3600
     cmd = "mount /dev/sr0 /mnt"

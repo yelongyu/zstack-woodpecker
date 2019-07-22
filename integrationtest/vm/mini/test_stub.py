@@ -16,6 +16,7 @@ import zstackwoodpecker.operations.deploy_operations as dpy_ops
 import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.operations.ha_operations as ha_ops
@@ -24,6 +25,8 @@ import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
+import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
+import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 from zstacklib.utils.http import json_post
 import zstackwoodpecker.test_state as test_state
 from cherrypy.scaffold import root
@@ -665,6 +668,41 @@ def create_vr_vm(vm_name, image_name, l3_name):
     l3_net_uuid = test_lib.lib_get_l3_by_name(os.getenv(l3_name)).uuid
     vm = create_vm(vm_name=vm_name, image_name=imagename, l3_uuid_list=[l3_net_uuid])
     return vm
+
+def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=None):
+    if not vip_name:
+        vip_name = 'test vip'
+    if not l3_uuid:
+        l3_name = os.environ.get('public network')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    ip_status = net_ops.get_ip_capacity_by_l3s([l3_uuid])
+    if not ip_status.availableCapacity:
+        test_util.test_fail('no available pub ip left')
+
+    vip_creation_option = test_util.VipOption()
+    vip_creation_option.set_name(vip_name)
+    vip_creation_option.set_l3_uuid(l3_uuid)
+    vip_creation_option.set_session_uuid(session_uuid)
+    vip_creation_option.set_requiredIp(required_ip)
+
+    vip = zstack_vip_header.ZstackTestVip()
+    vip.set_creation_option(vip_creation_option)
+    vip.create()
+    return vip
+
+def create_eip(eip_name=None, vip_uuid=None, nic_uuid=None, vm_obj=None, session_uuid=None):
+    eip_option = test_util.EipOption()
+    eip_option.set_name(eip_name)
+    eip_option.set_vip_uuid(vip_uuid)
+    eip_option.set_vm_nic_uuid(nic_uuid)
+    eip_option.set_session_uuid(session_uuid)
+    eip = zstack_eip_header.ZstackTestEip()
+    eip.set_creation_option(eip_option)
+    if nic_uuid and not vm_obj:
+        test_util.test_fail('vm_obj can not be None in create_eip() API, when setting vm_nic_uuid.')
+    eip.create(vm_obj)
+    return eip
 
 def skip_if_vr_not_vyos(vr_image_name):
     cond = res_ops.gen_query_conditions('name', '=', vr_image_name)

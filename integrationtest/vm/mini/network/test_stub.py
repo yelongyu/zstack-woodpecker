@@ -67,7 +67,7 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=Non
     ip_status = net_ops.get_ip_capacity_by_l3s([l3_uuid])
     if not ip_status.availableCapacity:
         test_util.test_fail('no available pub ip left')
-    
+
     vip_creation_option = test_util.VipOption()
     vip_creation_option.set_name(vip_name)
     vip_creation_option.set_l3_uuid(l3_uuid)

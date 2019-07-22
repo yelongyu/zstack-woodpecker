@@ -62,17 +62,17 @@
         <case timeout="360">test_add_host_ept.py</case>
         <case timeout="220">test_elaboration.py</case>
         <case timeout="180" noparallel='True'>test_get_vm_console_address.py</case>
-	    <case timeout="600" noparallel='True'>vga/test_vm_vga.py</case>
-	    <case timeout="600" noparallel='True'>vga/test_vm_qxl.py</case>
-	    <case timeout="600" noparallel='True'>vga/test_vm_cirrus.py</case>
-	    <case timeout="220" noparallel='True'>vga/test_vm_reboot_vga_mode.py</case>
-	    <case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_host.py</case>
+        <case timeout="600" noparallel='True'>vga/test_vm_vga.py</case>
+        <case timeout="600" noparallel='True'>vga/test_vm_qxl.py</case>
+        <case timeout="600" noparallel='True'>vga/test_vm_cirrus.py</case>
+        <case timeout="220" noparallel='True'>vga/test_vm_reboot_vga_mode.py</case>
+        <case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_host.py</case>
         <case timeout="220" noparallel='True'>test_vm_ha_never_stop_disable_ha.py</case>
         <case timeout="220">test_vm_ha_never_stop_shutdown.py</case>
         <case timeout="220" noparallel='True'>test_vm_ha_never_stop_del_recover.py</case>
         <case timeout="400" noparallel='True'>test_vm_ha_never_stop_del_ha.py</case>
         <case timeout="400" noparallel='True'>test_vm_del_ha_never_stop_recover_auto_start.py</case>
         <case timeout="220" noparallel='True'>test_cluster_config.py</case>
-		<case timeout="240">test_change_vm_image_with_limited_storage_quota.py</case>
+        <case timeout="240">test_change_vm_image_with_limited_storage_quota.py</case>
     </suite>
 </integrationTest>

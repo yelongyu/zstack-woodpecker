@@ -1,5 +1,5 @@
 '''
-Test for auto reconnect host 
+Test for auto reconnect host
 
 @author: quarkonics
 '''
@@ -21,8 +21,8 @@ _config_ = {
         }
 
 DefaultFalseDict = test_lib.DefaultFalseDict
-case_flavor = dict(kill_kvmagent=             DefaultFalseDict(kill=True),
-                   stop_kvmagent=             DefaultFalseDict(kill=False),
+case_flavor = dict(kill_kvmagent=DefaultFalseDict(kill=True),
+                   stop_kvmagent=DefaultFalseDict(kill=False),
                    )
 
 def test():
@@ -62,5 +62,5 @@ def test():
 
     if host.status != "Connected":
         test_util.test_fail("host %s not reconnect success automatically in 60 seconds")
-       
+
     test_util.test_pass("Auto reconnect host pass")

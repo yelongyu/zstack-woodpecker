@@ -1,21 +1,21 @@
 <integrationTest>
-    <suite name="multi hosts test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
-        <case timeout='300' repeat='1'>test_create_vm.py</case>
-        <case timeout='600' repeat='1'>test_prometheus.py</case>
-        <case timeout='600' repeat='1'>test_pkg_list.py</case>
-        <case timeout='600' repeat='1'>test_chrony.py</case>
-        <case timeout='300' repeat='1'>test_create_iso_vm.py</case>
-        <case timeout='600' repeat='1'>test_imagecache_size.py</case>
-        <case timeout='600' repeat='1'>test_imagecache_size2.py</case>
+	<suite name="multi hosts test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
+		<case timeout='300' repeat='1'>test_create_vm.py</case>
+		<case timeout='600' repeat='1'>test_prometheus.py</case>
+		<case timeout='600' repeat='1'>test_pkg_list.py</case>
+		<case timeout='600' repeat='1'>test_chrony.py</case>
+		<case timeout='300' repeat='1'>test_create_iso_vm.py</case>
+		<case timeout='600' repeat='1'>test_imagecache_size.py</case>
+		<case timeout='600' repeat='1'>test_imagecache_size2.py</case>
 		<case timeout='600' repeat='1'>test_add_image_auto_format.py</case>
 		<case timeout='600' repeat='1'>test_create_volume_from_template_attach_vm.py</case>
-        <case timeout='600' repeat='1'>migrate/test_migrate_vm.py</case>
-        <case timeout='600' repeat='1'>migrate/test_migrate_stopped_vm.py</case>
-        <case timeout='720' repeat='1'>migrate/test_migrate_vm_ops.py</case>
+		<case timeout='600' repeat='1'>migrate/test_migrate_vm.py</case>
+		<case timeout='600' repeat='1'>migrate/test_migrate_stopped_vm.py</case>
+		<case timeout='720' repeat='1'>migrate/test_migrate_vm_ops.py</case>
 		<case timeout='720' repeat='1'>migrate/test_migrate_vm_console_access.py</case>
 		<case timeout='720' repeat='1'>migrate/test_migrate_vm_console_access2.py</case>
-        <case timeout='600' repeat='1'>migrate/test_migrate_sg_vm.py</case>
-        <case timeout='600' repeat='1'>migrate/test_migrate_pf_sg_tcp.py</case>
+		<case timeout='600' repeat='1'>migrate/test_migrate_sg_vm.py</case>
+		<case timeout='600' repeat='1'>migrate/test_migrate_pf_sg_tcp.py</case>
 		<case timeout='1200' repeat='1'>migrate/test_migrate_stopped_vm_progress3.py</case>
 		<case timeout='1200' repeat='1'>migrate/test_migrate_stopped_vm_snapshots_progress.py</case>
 		<case timeout='1200' repeat='1'>migrate/test_migrate_vm_with_sp_ops.py</case>
@@ -27,17 +27,17 @@
 		<case timeout='600' repeat='1'>ps/test_create_root_volume_ceph_pool.py</case>
 		<case timeout='600' repeat='1'>ps/test_vm_life_cycle_on_specified_ceph_pool.py</case>
 		<case timeout='600' repeat='1'>ps/test_create_data_volume_ceph_pool.py</case>
-        <case timeout='360' repeat='1' noparallel='True'>test_reconnect_ps.py</case>
-        <case timeout='1200' repeat='1' noparallel='True'>migrate/test_maintain_host.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>migrate/test_maintain_host2.py</case>
+		<case timeout='360' repeat='1' noparallel='True'>test_reconnect_ps.py</case>
+		<case timeout='1200' repeat='1' noparallel='True'>migrate/test_maintain_host.py</case>
+		<case timeout='600' repeat='1' noparallel='True'>migrate/test_maintain_host2.py</case>
 		<case timeout='600' repeat='1'>test_host_active_profile.py</case>
-        <case timeout='3600' repeat='1'>vms/test_4vm_vm_ops.py</case>
+		<case timeout='3600' repeat='1'>vms/test_4vm_vm_ops.py</case>
 		<case timeout='600' repeat='1'>test_collect_logs.py</case>
 		<!--<case timeout='660' repeat='1' noparallel='True'>ha/test_vm_ha_self_fence_no_shutdown.py</case>-->
 		<!--<case timeout='660' repeat='1' noparallel='True'>ha/test_vm_ha_self_fence.py</case>-->
-        <case timeout='900' repeat='1' noparallel='True'>test_imagecache_cleanup.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>test_imagecache_cleanup2.py</case>
-        <case timeout='900' repeat='1' noparallel='True'>test_imagecache_cleanup3.py</case>
+		<case timeout='900' repeat='1' noparallel='True'>test_imagecache_cleanup.py</case>
+		<case timeout='900' repeat='1' noparallel='True'>test_imagecache_cleanup2.py</case>
+		<case timeout='900' repeat='1' noparallel='True'>test_imagecache_cleanup3.py</case>
 		<case timeout='600' repeat='1' noparallel='True'>migrate/test_migrate_stopped_vm_imagecache_cleanup.py</case>
 		<case timeout='600' repeat='1' noparallel='True'>migrate/test_migrate_vm_imagecache_cleanup.py</case>
 		<case timeout='600' repeat='1' noparallel='True'>migrate/test_detach_vm_net_migrate_attach_vm_net.py</case>
@@ -87,32 +87,32 @@
 		<case timeout='2400' repeat='1' noparallel='True'>bs/test_iso_vm_del_ops_all_expg_hot_migrate.py</case>
 		<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_template_dvol_template_ops.py</case>
 		<case timeout='2400' repeat='1' noparallel='True'>bs/test_del_expunge_template_dvol_offering_ops.py</case>
-        <case timeout='600' repeat='1'>migrate/test_migrate_vm_ops2.py</case>
-        <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso.py</case>
-        <case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso2.py</case>
-        <case timeout='600' repeat='1'>migrate/test_migrate_vm_eip_check.py</case>
-        <case timeout='1200' repeat='1'>migrate/test_migrate_vm_eject_iso.py</case>
+		<case timeout='600' repeat='1'>migrate/test_migrate_vm_ops2.py</case>
+		<case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso.py</case>
+		<case timeout='600' repeat='1'>migrate/test_migrate_vm_with_iso2.py</case>
+		<case timeout='600' repeat='1'>migrate/test_migrate_vm_eip_check.py</case>
+		<case timeout='1200' repeat='1'>migrate/test_migrate_vm_eject_iso.py</case>
 		<case timeout='600' repeat='1'>zwatch/test_all_get_op.py</case>
-        <case timeout='600' repeat='1'>zwatch/test_event_host_bs_ps_disconnected_with_email.py</case>
-        <case timeout='600' repeat='1'>zwatch/test_sns_text_template_with_email.py</case>
+		<case timeout='600' repeat='1'>zwatch/test_event_host_bs_ps_disconnected_with_email.py</case>
+		<case timeout='600' repeat='1'>zwatch/test_sns_text_template_with_email.py</case>
 		<case timeout='600' repeat='2'>zwatch/test_alarm_change_state.py</case>
 		<case timeout='600' repeat='1'>zwatch/test_alarm_with_dingtalk.py</case>
-        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_host.py::kill_kvmagent</case>
-        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_host.py::stop_kvmagent</case>
-        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::kill_bs</case>
-        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::stop_bs</case>
-        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::kill_ps</case>
-        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::stop_ps</case>
+		<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_host.py::kill_kvmagent</case>
+		<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_host.py::stop_kvmagent</case>
+		<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::kill_bs</case>
+		<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::stop_bs</case>
+		<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::kill_ps</case>
+		<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_ceph.py::stop_ps</case>
 		<!--<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_bs.py::stop_sftp</case>-->
 		<!--<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_bs.py::kill_sftp</case>-->
 		<!--<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_bs.py::stop_imagestore</case>-->
 		<!--<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_bs.py::kill_imagestore</case>-->
-        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::stop_virtualrouter_agent</case>
-        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_virtualrouter_agent</case>
-        <case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_vrouter_agent</case>
-        <case timeout='600' repeat='1'>test_instance_offering_soft_hard.py</case>
-        <case timeout='1800' repeat='1'>test_instance_offering_last_host_preferred.py</case>
-        <case timeout='1800' repeat='1'>test_instance_offering_designated_host.py</case>
-        <case timeout='1800' repeat='1'>test_iso_create_vm_root_size_not_512_multiple.py</case>
-    </suite>
+		<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::stop_virtualrouter_agent</case>
+		<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_virtualrouter_agent</case>
+		<case timeout='600' repeat='1'>reconnect/test_auto_reconnect_vr.py::kill_vrouter_agent</case>
+		<case timeout='600' repeat='1'>test_instance_offering_soft_hard.py</case>
+		<case timeout='1800' repeat='1'>test_instance_offering_last_host_preferred.py</case>
+		<case timeout='1800' repeat='1'>test_instance_offering_designated_host.py</case>
+		<case timeout='1800' repeat='1'>test_iso_create_vm_root_size_not_512_multiple.py</case>
+	</suite>
 </integrationTest>

@@ -1,6 +1,6 @@
 '''
 
-Test EIP connectability during VM migration. 
+Test EIP connectability during VM migration.
 
 Test step:
     1. Create a VM
@@ -23,7 +23,7 @@ def test():
     test_util.test_dsc('Create test vm migration with EIP and check.')
     vm = test_stub.create_vr_vm('migrate_vm', 'imageName_net', 'l3VlanNetwork2')
     test_obj_dict.add_vm(vm)
-    
+
     pri_l3_name = os.environ.get('l3VlanNetwork2')
     pri_l3_uuid = test_lib.lib_get_l3_by_name(pri_l3_name).uuid
 
@@ -35,9 +35,9 @@ def test():
     vip = test_stub.create_vip('create_eip_test', pub_l3_uuid)
     test_obj_dict.add_vip(vip)
     eip = test_stub.create_eip('create eip test', vip_uuid=vip.get_vip().uuid, vnic_uuid=vm_nic_uuid, vm_obj=vm)
-    
+
     vip.attach_eip(eip)
-    
+
     vm.check()
 
     ping_ret = []
