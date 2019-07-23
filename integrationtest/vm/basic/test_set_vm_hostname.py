@@ -11,7 +11,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.host_operations as host_ops
 
-import test_stub
+test_stub = test_lib.lib_get_specific_stub()
 
 vm = None
 
@@ -69,3 +69,4 @@ def error_cleanup():
     global vm
     if vm:
         vm.destroy()
+

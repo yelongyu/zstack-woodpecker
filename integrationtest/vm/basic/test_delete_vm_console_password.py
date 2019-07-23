@@ -8,8 +8,9 @@ New Integration Test for delete VM console password.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.shell as shell
-import test_stub
 import zstackwoodpecker.operations.account_operations as acc_ops
+
+test_stub = test_lib.lib_get_specific_stub()
 
 vm1 = None
 vm2 = None
@@ -77,3 +78,4 @@ def error_cleanup():
         vm1.destroy()
     if vm2:
         vm2.destroy()
+

@@ -4,8 +4,9 @@ Test MN monitor VM lifecycle START->RUNNING->STOPPED->RUNNING->PAUSED->RUNNING->
 '''
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
-import test_stub
 import time
+
+test_stub = test_lib.lib_get_specific_stub()
 
 vm=None
 
@@ -125,4 +126,5 @@ def error_cleanup():
      global vm
      if vm:
         vm.destroy()
+
 

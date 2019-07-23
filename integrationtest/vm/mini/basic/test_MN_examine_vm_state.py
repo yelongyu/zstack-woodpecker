@@ -1,0 +1,1 @@
+../../basic/test_MN_examine_vm_state.py
