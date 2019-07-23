@@ -59,8 +59,8 @@ def add_rules_to_security_group(sg_uuid, rules, remote_sg_uuids=None, session_uu
         action.remoteSecurityGroupUuids = remote_sg_uuids
     action.timeout = 120000
     action.rules = rules
-    for rule in rules:
-        test_util.action_logger('Add Security Group [Rule:] type: %s, protocol: %s, startPort: %s, endPort: %s, address: %s in [Security Group:] %s' % (rule.type, rule.protocol, rule.startPort, rule.endPort, rule.allowedCidr, sg_uuid))
+    #for rule in rules:
+    #    test_util.action_logger('Add Security Group [Rule:] type: %s, protocol: %s, startPort: %s, endPort: %s, address: %s in [Security Group:] %s' % (rule.type, rule.protocol, rule.startPort, rule.endPort, rule.allowedCidr, sg_uuid))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 

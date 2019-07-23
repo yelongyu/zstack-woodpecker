@@ -4,7 +4,8 @@ test for iam2 no organization vid query permission test
 # 1.create iam2 VirtID
 # 2.create role have IAM2 permission and add role to VirtID
 # 3.log in by VirtID
-# 4.compare VirtID's query results with admin's
+# 4.create organization
+# 5.compare VirtID's query results with admin's
 
 @author: zhaohao.chen
 '''
@@ -19,8 +20,6 @@ password = 'password'
 org_type = 'Company'
 
 check_res_list = [res_ops.IAM2_ORGANIZATION, \
-                  res_ops.IAM2_PROJECT, \
-                  res_ops.IAM2_VIRTUAL_ID_GROUP, \
                   res_ops.IAM2_VIRTUAL_ID, \
                   ]
 
@@ -37,10 +36,10 @@ IAM2_policy_statements =  [{"name": "role-name",
 def query_result_check(res_list, session_uuid):
     unexcept_ret_list = []
     for res in res_list:
-        #test_util.test_logger(res_ops.query_resource(res_list[0]))
+        test_util.test_logger(res_ops.query_resource(res_list[0]))
         ret_adm = res_ops.query_resource(res)
         ret_vid = res_ops.query_resource(res, session_uuid=session_uuid)
-        if len(ret_adm) != len(ret_vid):
+        if res == res_ops.IAM2_VIRTUAL_ID and len(ret_adm) == len(ret_vid):
             unexcept_ret_list.append((ret_adm, ret_vid))
     return unexcept_ret_list
 
@@ -57,7 +56,12 @@ def test():
     iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid_uuid)
     #3.login by virtualID
     vid_session_uuid = iam2_ops.login_iam2_virtual_id(vid_name, password)
-    #4.check query result 
+    #4.create organizations
+    org_add_name = 'org_add'
+    org_empty_name = 'org_empty'
+    org_add_uuid = iam2_ops.create_iam2_organization(org_add_name, org_type).uuid
+    org_empty_uuid = iam2_ops.create_iam2_organization(org_empty_name, org_type).uuid
+    #5.check query result 
     ret_list = query_result_check(check_res_list, vid_session_uuid)
     if len(ret_list):
         test_util.test_fail('Test Failed, failed list %s ' % ret_list)

@@ -62,6 +62,10 @@ def test():
     
     #basic_ops test
     basic_ops(session_uuid, prj_linked_account_uuid=prj_linked_account_uuid)    
+    
+    #remove vid from project
+    iam2_ops.remove_iam2_virtual_ids_from_project([virtual_id_uuid], prj_uuid)
+
     #delete
     acc_ops.logout(session_uuid)
     iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)

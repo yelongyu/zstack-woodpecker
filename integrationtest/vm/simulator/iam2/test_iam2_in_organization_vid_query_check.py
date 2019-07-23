@@ -20,8 +20,6 @@ password = 'password'
 org_type = 'Company'
 
 check_res_list = [res_ops.IAM2_ORGANIZATION, \
-                  res_ops.IAM2_PROJECT, \
-                  res_ops.IAM2_VIRTUAL_ID_GROUP, \
                   res_ops.IAM2_VIRTUAL_ID, \
                   ]
 
@@ -38,18 +36,10 @@ IAM2_policy_statements =  [{"name": "role-name",
 def query_result_check(res_list, session_uuid, cond=[]):
     unexcept_ret_list = []
     for res in res_list:
-        if res != res_ops.IAM2_VIRTUAL_ID:
-            ret_adm = res_ops.query_resource(res, cond)
-        else:
-            ret_adm = res_ops.query_resource(res)
-        #ret_adm = res_ops.query_resource(res)
+        ret_adm = res_ops.query_resource(res)
         ret_vid = res_ops.query_resource(res, session_uuid=session_uuid)
-        for adm,vid in zip(ret_adm,ret_vid):
-            test_util.test_logger('@@adm:%s\n @@vid:%s' % (adm.uuid, vid.uuid))
-            if adm.uuid != vid.uuid:
-                test_util.test_logger('%s Result check fialed!\n admin:%s\n vid:%s' % (res, ret_adm, ret_vid))
-                unexcept_ret_list.append(res)
-                break
+        if len(ret_vid) == len(ret_adm):
+            unexcept_ret_list.append((ret_adm, ret_vid))
     return unexcept_ret_list
 
 def test():
@@ -57,6 +47,8 @@ def test():
     #1.create virtualID
     vid_name = 'vid_test'
     vid_uuid = iam2_ops.create_iam2_virtual_id(vid_name, password).uuid
+    vid_name_2 = 'vid_test_2'
+    iam2_ops.create_iam2_virtual_id(vid_name_2, password)
     #2.create role & add role to virtualID
     role_name = 'IAM2_test'
     role_uuid = iam2_ops.create_role(role_name, statements=IAM2_policy_statements).uuid
