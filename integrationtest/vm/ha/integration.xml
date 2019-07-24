@@ -1,10 +1,10 @@
 <integrationTest>
     <suite name="ha test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
-        <case timeout="860" >test_create_vm.py</case>
-        <case timeout="720" >migrate/test_migrate_vm_ops.py</case>
+        <case timeout="860">test_create_vm.py</case>
+        <case timeout="720">migrate/test_migrate_vm_ops.py</case>
         <case timeout='960' noparallel='True'>test_mysql_stop_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_mysql_stop2_create_vm.py</case>
-	<case timeout='540' noparallel='True'>test_ui_stop.py</case>
+        <case timeout='540' noparallel='True'>test_ui_stop.py</case>
         <case timeout='960' noparallel='True'>test_one_node_shutdown_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_one_node_recovery_create_vm.py</case>
         <case timeout='540' noparallel='True'>test_mn_sync_prometheus.py</case>
@@ -12,10 +12,11 @@
         <case timeout='960' noparallel='True'>test_one_node_network_temp_down_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_one_node_network_temp_down2_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_one_node_network_down_create_vm.py</case>
-	<case timeout='1800' noparallel='True'>test_one_node_shutdown_with_scheduler.py</case>
+        <case timeout='1800' noparallel='True'>test_one_node_shutdown_with_scheduler.py</case>
         <case timeout='1800' noparallel='True'>test_all_nodes_upgrade_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_all_nodes_recovery_with_one_cmd_create_vm.py</case>
         <case timeout='1800' noparallel='True'>test_all_nodes_recovery_scheduler.py</case>
         <case timeout='960' noparallel='True'>test_all_nodes_recovery_create_vm.py</case>
     </suite>
 </integrationTest>
+
