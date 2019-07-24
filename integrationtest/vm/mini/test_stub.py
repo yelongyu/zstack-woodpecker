@@ -1008,6 +1008,7 @@ class ImageReplication(object):
     def get_image_inv(self, image_name):
         conditions = res_ops.gen_query_conditions('name', '=', image_name)
         image_inv = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
+        self.image = image_inv
         return image_inv
 
     def wait_for_image_replicated(self, image_name):
