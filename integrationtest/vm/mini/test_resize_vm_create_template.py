@@ -56,7 +56,7 @@ def test():
         bs_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
         image_option = test_util.ImageOption()
         image_option.set_root_volume_uuid(volume_uuid)
-        image_option.set_name('image_resize_template_small_size_'+vol_size_after)
+        image_option.set_name('image_resize_template_small_size_'+str(vol_size_after))
         image_option.set_backup_storage_uuid_list([bs_list[0].uuid])
         image = img_ops.create_root_volume_template(image_option)
 
@@ -65,7 +65,7 @@ def test():
         l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
         vm_creation_option.set_l3_uuids([l3_net_uuid])
         vm_creation_option.set_image_uuid(image.uuid)
-        vm_creation_option.set_name('test_vm_after_resize_small_size_'+vol_size_after)
+        vm_creation_option.set_name('test_vm_after_resize_small_size_'+str(vol_size_after))
         vm_creation_option.set_cpu_num(2)
         vm_creation_option.set_memory_size(2147483648)
         new_vm = test_vm_header.ZstackTestVm()
