@@ -2655,7 +2655,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                 if os.getenv('hostType') == 'miniHost':
                     time.sleep(200)
                     base_url = "http://172.20.198.234/mirror/mini_master/latest/"
-                    cmd = "curl %s | grep ZStack-mini-server | awk '{print $6}' |awk -F'>' '{print $1}' | awk -F'\"' '{print $2}' | tail -n1" % base_url
+                    cmd = "curl %s | grep ZStack-mini | awk '{print $6}' |awk -F'>' '{print $1}' | awk -F'\"' '{print $2}' | tail -n1" % base_url
                     (retcode, output, erroutput) = ssh.execute(cmd, vm_ip, 'root', 'password')
                     mini_url = base_url + output
                     cmd = "wget %s" % (mini_url)
