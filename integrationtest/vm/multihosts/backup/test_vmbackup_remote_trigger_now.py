@@ -60,9 +60,16 @@ def test():
     else:
         remote_uuid = tags[0].resourceUuid
 
+    vm_name = "test_vm"
+    cond = res_ops.gen_query_conditions("system", '=', "false")
+    cond = res_ops.gen_query_conditions("mediaType", '=', "RootVolumeTemplate", cond)
+    cond = res_ops.gen_query_conditions("platform", '=', "Linux", cond)
+    img_name = res_ops.query_resource(res_ops.IMAGE, cond)[0].name
+    cond = res_ops.gen_query_conditions("category", '=', "Private")
+    l3_name = res_ops.query_resource(res_ops.L3_NETWORK,cond)[0].name
 
-    vm1 = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
-    vm2 = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
+    vm1 = test_stub.create_vm(vm_name, img_name, l3_name)
+    vm2 = test_stub.create_vm(vm_name, img_name, l3_name)
 
     volume = test_stub.create_volume()
     volume.attach(vm2)
