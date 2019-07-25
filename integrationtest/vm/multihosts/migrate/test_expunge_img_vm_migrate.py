@@ -12,7 +12,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 test_obj_dict = test_state.TestStateDict()
 image1 = None
 
@@ -22,7 +22,7 @@ def test():
     allow_bs_list = [inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE, inventory.CEPH_BACKUP_STORAGE_TYPE]
     test_lib.skip_test_when_bs_type_not_in_list(allow_bs_list)
 
-    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint']
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', 'MiniStorage']
     test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
 
     hosts = res_ops.query_resource(res_ops.HOST)
@@ -47,9 +47,7 @@ def test():
     image1.add_root_volume_template()
     image1.check()
 
-    image_name = os.environ.get('imageName_net')
-    l3_name = os.environ.get('l3VlanNetworkName1')
-    vm1 = test_stub.create_vm(image_name1, image_name, l3_name)
+    vm1 = test_stub.create_vr_vm(image_name1, 'imageName_net', 'l3VlanNetworkName1')
     test_obj_dict.add_vm(vm1)
 
     image1.delete()
@@ -69,3 +67,4 @@ def error_cleanup():
         image1.delete()
     except:
         pass
+

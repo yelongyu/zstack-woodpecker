@@ -8,8 +8,9 @@ New Integration Test for creating KVM VM with ISO.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.image_operations as img_ops
-import test_stub
 import os
+
+test_stub = test_lib.lib_get_specific_stub()
 
 vm = None
 vm2 = None
@@ -33,3 +34,4 @@ def error_cleanup():
             pass
     if vm2:
         vm2.destroy()
+
