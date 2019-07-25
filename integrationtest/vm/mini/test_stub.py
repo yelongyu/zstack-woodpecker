@@ -704,6 +704,27 @@ def create_eip(eip_name=None, vip_uuid=None, nic_uuid=None, vm_obj=None, session
     eip.create(vm_obj)
     return eip
 
+def create_vm_with_fake_iso(vm_name, l3_name, session_uuid=None):
+    root_disk_size = 10737418240
+    disk_offering_option = test_util.DiskOfferingOption()
+    disk_offering_option.set_name('root-disk-iso')
+    disk_offering_option.set_diskSize(root_disk_size)
+    root_disk_offering = vol_ops.create_volume_offering(disk_offering_option)
+    root_disk_uuid = root_disk_offering.uuid
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    img_option = test_util.ImageOption()
+    img_option.set_name('fake_iso')
+    bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], session_uuid)[0].uuid
+    img_option.set_backup_storage_uuid_list([bs_uuid])
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
+        img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
+    else:
+        img_option.set_url('http://%s:8080/zstack/static/zstack-dvd/ks.cfg' % (mn_ip))
+    image_uuid = img_ops.add_iso_template(img_option).uuid
+    vm = create_vm_with_iso([l3_net_uuid], image_uuid, vm_name, root_disk_uuid)
+    return vm
+
 def skip_if_vr_not_vyos(vr_image_name):
     cond = res_ops.gen_query_conditions('name', '=', vr_image_name)
     vr_urls_list = res_ops.query_resource_fields(res_ops.IMAGE, cond, None, ['url'])
