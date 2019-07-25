@@ -367,7 +367,11 @@ class DataMigration(TestChain):
         file_name = os.path.basename(file_path)
         dst_file = os.path.join('/mnt', file_name)
         src_file_md5 = commands.getoutput('md5sum %s' % file_path).split(' ')[0]
-        ssh.scp_file(file_path, dst_file, vm_ip, 'root', 'password')
+        try:
+            ssh.scp_file(file_path, dst_file, vm_ip, 'root', 'password')
+        except:
+            time.sleep(5)
+            ssh.scp_file(file_path, dst_file, vm_ip, 'root', 'password')
         (_, dst_md5, _)= ssh.execute('sync; sync; sleep 60; md5sum %s' % dst_file, vm_ip, 'root', 'password')
         dst_file_md5 = dst_md5.split(' ')[0]
         test_util.test_dsc('src_file_md5: [%s], dst_file_md5: [%s]' % (src_file_md5, dst_file_md5))
