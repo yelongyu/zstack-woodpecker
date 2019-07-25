@@ -397,14 +397,14 @@ class zstack_kvm_snapshot_tree_checker(checker_header.TestChecker):
                             backing_file = get_qcow_backing_file_by_ip(devPath, activate_host)
                             break
 
-                    if not backing_file:
-                        break
-
                     if not activate_host:
                         activate_host = test_lib.lib_find_hosts_by_ps_uuid(ps_uuid)[0].managementIp
                         test_lib.lib_execute_ssh_cmd(activate_host, 'root', 'password', cmd_activate)
                         backing_file = get_qcow_backing_file_by_ip(devPath, activate_host)
                         test_lib.lib_execute_ssh_cmd(activate_host, 'root', 'password', cmd_unactivate)
+
+                    if not backing_file:
+                        break
 
                     backing_file = backing_file.replace("\n", "")
 

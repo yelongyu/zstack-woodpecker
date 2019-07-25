@@ -26,7 +26,7 @@ def path():
 		[TestAction.resize_volume, 'vm1', 5*1024*1024],
 		[TestAction.delete_volume_snapshot, 'volume1-snapshot1'],
 		[TestAction.delete_volume_snapshot, 'volume1-snapshot4'],
-		TestAction.batch_delete_snapshots, ['volume2-snapshot4','volume3-snapshot15',],
+		[TestAction.batch_delete_snapshots, ['volume2-snapshot4','volume3-snapshot15',]],
 ])
 
 

@@ -77,12 +77,13 @@ class ZstackSnapshot(sp_header.TestSnapshot):
         return self.depth
 
     def get_all_child_list(self):
-        child_list = []
-        for i in self.children:
-            if i.children:
-                child_list.extend(self.get_all_child_list())
-            child_list.append(i)
-        return child_list
+        all_child = []
+        temp = self.children
+        all_child.extend(temp)
+        for i in temp:
+            _t = i.get_all_child_list()
+            all_child.extend(_t)
+        return all_child
 
     def get_children_tree_list(self):
         c_tree = {}
@@ -404,11 +405,17 @@ class ZstackSnapshotTree(object):
         elif snapshot == self.current_snapshot or self.current_snapshot in snapshot.get_all_child_list():
             self.current_snapshot = snapshot.parent
 
+        print self.snapshot_list
+        print snapshot
+        print snapshot.parent
+        print snapshot.children
+
         if snapshot.parent:
             snapshot.parent.children.remove(snapshot)
 
         self.snapshot_list.remove(snapshot)
         for child in snapshot.get_all_child_list():
+            print child
             self.snapshot_list.remove(child)
         snapshot.remove_children()
 

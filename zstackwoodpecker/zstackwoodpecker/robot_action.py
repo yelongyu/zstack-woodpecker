@@ -1773,7 +1773,7 @@ def use_volume_snapshot(robot_test_obj, args):
 
 def batch_delete_volume_snapshot(robot_test_obj, args, real=True):
     if len(args) != 1:
-        test_util.test_fail("no resource available for next action: use volume snapshot")
+        test_util.test_fail("no resource available for next action: batch delete volume snapshot")
 
     target_snapshot_uuid_list = []
     snapshot_tree_list = {}
@@ -1785,6 +1785,7 @@ def batch_delete_volume_snapshot(robot_test_obj, args, real=True):
     if real:
         vol_ops.batch_delete_snapshot(target_snapshot_uuid_list)
 
+    print args[0]
     for name in args[0]:
         target_snapshot = robot_test_obj.get_test_dict().snapshot[name]
         if not snapshot_tree_list.has_key(target_snapshot.snapshot_tree):
@@ -1876,7 +1877,25 @@ def cleanup_ps_cache(robot_test_obj, args):
 
 
 def ps_migrate_vm(robot_test_obj, args):
-    pass
+    if len(args) != 1:
+        test_util.test_fail("no resource available for next action: ps_migrate_vm")
+
+    target_vm_name = args[0]
+    target_vm = robot_test_obj.test_dict.vm[target_vm_name]
+    target_volume_uuid = test_lib.lib_get_root_volume(target_vm.get_vm()).uuid
+
+    import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
+    target_pss = datamigr_ops.get_ps_candidate_for_vol_migration(target_volume_uuid)
+
+    if not target_pss:
+        test_util.test_fail("no resource available for next action: ps_migrate_vm")
+
+    datamigr_ops.ps_migrage_volume(target_pss[0].uuid, target_volume_uuid, withDataVolumes=True, withSnapshots=True)
+
+    target_vm.update()
+    for volume in target_vm.test_volumes:
+        volume.update()
+        volume.update_volume()
 
 
 def create_mini_vm(robot_test_obj, args):
@@ -2090,8 +2109,8 @@ def use_vm_snapshot(robot_test_obj, args):
     vol_ops.revert_vm_from_snapshot_group(root_snapshot.snapshot.groupUuid)
 
     for name,snapshot in robot_test_obj.test_dict.snapshot.items():
-        if snapshot_num in name:
-            if name == vm_snap_name:
+        if snapshot_num == name.split('-')[1]:
+            if 'vm' in name:
                 volume_name = name.split("-")[0] + "-root"
             else:
                 volume_name = name.split("-")[0]
@@ -2126,7 +2145,7 @@ def delete_vm_snapshot(robot_test_obj, args):
     vol_ops.delete_volume_snapshot_group(root_snapshot.snapshot.groupUuid)
 
     for name,snapshot in robot_test_obj.test_dict.snapshot.items():
-        if snapshot_num in name:
+        if snapshot_num == name.split("-")[1]:
             snapshot_name_list.append(name)
 
     batch_delete_volume_snapshot(robot_test_obj, [snapshot_name_list], real=False)

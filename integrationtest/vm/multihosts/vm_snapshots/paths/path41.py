@@ -31,7 +31,7 @@ def path():
 		[TestAction.reinit_vm, 'vm1'],
 		[TestAction.delete_volume_snapshot, 'volume3-snapshot2'],
 		[TestAction.delete_volume_snapshot, 'volume3-snapshot7'],
-		TestAction.batch_delete_snapshots, ['volume2-snapshot2','vm1-snapshot12',],
+		[TestAction.batch_delete_snapshots, ['volume2-snapshot2','vm1-snapshot12',]],
 ])
 
 

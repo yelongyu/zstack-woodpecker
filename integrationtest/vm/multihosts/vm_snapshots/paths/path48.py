@@ -28,7 +28,7 @@ def path():
 		[TestAction.create_vm_backup, 'vm1', 'vm1-backup1'],
 		[TestAction.delete_volume_snapshot, 'vm1-snapshot6'],
 		[TestAction.delete_volume_snapshot, 'volume3-snapshot2'],
-		TestAction.batch_delete_snapshots, ['vm1-root-snapshot20','volume1-snapshot2',],
+		[TestAction.batch_delete_snapshots, ['vm1-root-snapshot20','volume1-snapshot2',]],
 ])
 
 
