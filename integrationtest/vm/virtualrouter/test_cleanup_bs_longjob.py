@@ -24,7 +24,7 @@ def test():
     else:
         test_util.test_logger('The BS type is: %s.' % i.type)
         test_util.test_skip('Skip test on non-imagestore')
-    longjob.add_image(img_url='file:///opt/zstack-dvd/zstack-image-1.4.qcow2')
+    longjob.add_image(img_url='file:///opt/zstack-dvd/zstack-image-1.4.qcow2', bs='ImageStore')
     time.sleep(10)
     longjob.delete_image()
     longjob.expunge_image()
