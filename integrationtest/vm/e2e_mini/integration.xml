@@ -1,5 +1,5 @@
 <integrationTest>
-    <suite name="simulator test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
+    <suite name="e2e_mini" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
         <case timeout='1200' noparallel='True'>account/test_change_mini_password.py</case>
         <case timeout='1200' noparallel='True'>account/test_check_about_page.py</case>
         <case timeout='1200' noparallel='True'>account/test_check_config_page.py</case>

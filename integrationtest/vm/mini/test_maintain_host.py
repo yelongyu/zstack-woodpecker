@@ -65,7 +65,7 @@ def test():
 
     #need to update vm's inventory, since they will be changed by maintenace mode
     vm.update()
-    vm.set_state(vm_header.STOPPED)
+#    vm.set_state(vm_header.STOPPED)
 
     vm.check()
 
