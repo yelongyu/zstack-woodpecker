@@ -376,7 +376,7 @@ class DataMigration(TestChain):
         dst_file_md5 = dst_md5.split(' ')[0]
         test_util.test_dsc('src_file_md5: [%s], dst_file_md5: [%s]' % (src_file_md5, dst_file_md5))
         assert dst_file_md5 == src_file_md5, 'dst_file_md5 [%s] and src_file_md5 [%s] is not match, stop test' % (dst_file_md5, src_file_md5)
-        extract_cmd = 'tar xvf /mnt/zstack-all-in-one.* -C /mnt > /dev/null 2>&1'
+        extract_cmd = 'tar xvf /mnt/zstack-all-in-one.* -C /mnt > /dev/null 2>&1;sync;sync'
         ssh.execute(extract_cmd, vm_ip, 'root', 'password')
         return self
 
