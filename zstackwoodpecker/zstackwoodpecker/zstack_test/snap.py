@@ -10,7 +10,6 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
-
 import uuid
 import os
 import time
@@ -422,17 +421,32 @@ class ZstackSnapshotTree(object):
     # when snapshot_tree is the first created and ps_migrate must update snapshot tree
     def update(self, update_utility=False):
         if not self.utility_vm or update_utility:
+            hostUuid = None
             cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")
             cond = res_ops.gen_query_conditions('state', '=', "Running", cond)
+            cond_tag = res_ops.gen_query_conditions('resourceUuid', '=', self.get_target_volume().get_volume().uuid)
+            volume_systemtags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond_tag)
+            for tag in volume_systemtags:
+                if 'hostUuid' in tag.tag:
+                    hostUuid = tag.tag.split('::')[-1]
+                    cond = res_ops.gen_query_conditions('hostUuid', '=', hostUuid, cond)
+                    break
             vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
-            for vm in vms:
-                if self.get_target_volume().get_volume().primaryStorageUuid == vm.allVolumes[0].primaryStorageUuid:
-                    import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
-                    utility_vm_uuid = vm.uuid
-                    utility_vm = zstack_vm_header.ZstackTestVm()
-                    utility_vm.create_from(utility_vm_uuid)
-
-                    self.utility_vm = utility_vm
+            utility_creation_option = test_util.VmOption()
+            utility_creation_option.set_name('utility_vm_for_robot_test')
+            if len(vms):
+                for vm in vms:
+                    if self.get_target_volume().get_volume().primaryStorageUuid == vm.allVolumes[0].primaryStorageUuid:
+                        import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+                        utility_vm_uuid = vm.uuid
+                        utility_vm = zstack_vm_header.ZstackTestVm()
+                        utility_vm.create_from(utility_vm_uuid)
+                        self.utility_vm = utility_vm
+            elif hostUuid:
+                utility_creation_option.set_host_uuid(hostUuid)
+                self.utility_vm = test_lib.lib_create_vm(utility_creation_option)
+            else:
+                self.utility_vm = test_lib.lib_create_vm(utility_creation_option)
 
         for snapshot in self.snapshot_list:
             snapshot.update()
