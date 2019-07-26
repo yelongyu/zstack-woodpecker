@@ -12,7 +12,7 @@ largeDiskOfferingSize = 1G
 mediumDiskOfferingName = mediumDiskOffering
 mediumDiskOfferingSize = 100M
 
-MINI_SERVER_URL = http://192.168.200.100/mirror/kefeng.wang/mini-server/
+MINI_SERVER_URL = http://172.20.198.234/mirror/mini_master/latest/
 SELENIUM_SERVER = 172.20.11.61
 
 imageStoreBackupStorageName = imagestore
