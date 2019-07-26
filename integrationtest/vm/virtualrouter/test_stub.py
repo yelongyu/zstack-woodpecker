@@ -44,6 +44,7 @@ from lib2to3.pgen2.token import STAR
 from zstacklib.utils import shell
 from collections import OrderedDict
 import telnetlib
+import types
 
 PfRule = test_state.PfRule
 Port = test_state.Port
@@ -1303,7 +1304,11 @@ class Longjob(object):
         longjob = res_ops.query_resource(res_ops.LONGJOB, cond_longjob)[0]
         assert longjob.state == "Succeeded"
         if job_type == 'cleanup':
-            assert int(longjob.jobResult.freedSpaceInBytes) > 0
+            test_util.test_logger('longjob result: %s' % jsonobject.dumps(longjob))
+            job_result = longjob.jobResult
+            if isinstance(job_result, types.StringType):
+                job_result = jsonobject.loads(job_result)
+            assert int(job_result.freedSpaceInBytes) > 0
         else:
             assert longjob.jobResult == "Succeeded"
         job_data_name = job_data.split('"')[3]
@@ -1319,13 +1324,18 @@ class Longjob(object):
                 assert image_inv.mediaType == 'RootVolumeTemplate'
             self.image_uuid = image_inv.uuid
 
-    def add_image(self, platform="Linux", img_format="qcow2"):
+    def add_image(self, platform="Linux", img_format="qcow2", img_url=None, bs=None):
+        if not img_url:
+            img_url = self.url
         name = "longjob_image"
-        bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+        if bs == 'ImageStore':
+            bs = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE)
+        else:
+            bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
         bs = [_bs for _bs in bs if _bs.status == 'Connected']
         self.target_bs = bs[random.randint(0, len(bs) - 1)]
         job_data = '{"name":"%s", "url":"%s", "mediaType"="RootVolumeTemplate", "format"="%s", "platform"="%s", \
-        "backupStorageUuids"=["%s"]}' % (self.image_add_name, self.url, img_format, platform, self.target_bs.uuid)
+        "backupStorageUuids"=["%s"]}' % (self.image_add_name, img_url, img_format, platform, self.target_bs.uuid)
         self.submit_longjob(job_data, name, job_type='image')
         self.image.check()
 
@@ -1336,6 +1346,8 @@ class Longjob(object):
         conditions = res_ops.gen_query_conditions('uuid', '=', self.target_bs.uuid)
         self.target_bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, conditions)[0]
         avail_capacity_after = self.target_bs.availableCapacity
+        test_util.test_logger('BS available capacity before cleanup: %s' % avail_capacity_before)
+        test_util.test_logger('BS available capacity after cleanup: %s' % avail_capacity_after)
         assert avail_capacity_after > avail_capacity_before
 
     def delete_image(self):
