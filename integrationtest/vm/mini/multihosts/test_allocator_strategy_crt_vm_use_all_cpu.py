@@ -1,0 +1,1 @@
+../../multihosts/test_allocator_strategy_crt_vm_use_all_cpu.py

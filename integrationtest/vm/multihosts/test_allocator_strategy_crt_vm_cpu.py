@@ -18,8 +18,8 @@ import random
 
 vm = None
 pre_vms = []
-vms  = []
-ts   = []
+vms = []
+ts = []
 invs = []
 vm_num = 9
 exec_info = []
@@ -43,7 +43,7 @@ def check_threads_exception():
     """
     """
     global exec_info
-    
+
     if exec_info:
         issue_vms_string = ' '.join(exec_info)
         test_util.test_fail("%s is failed to be created." %(issue_vms_string))
@@ -57,17 +57,21 @@ def prepare_host_with_different_cpu_scenario():
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    l3_name = os.environ.get('l3NoVlanNetworkName1')
+    l3_name = os.environ.get('l3VlanNetworkName1')
     #l3_name = os.environ.get('l3PublicNetworkName')
 
-
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-    instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
-    #instance_offering_uuid = new_offering.uuid
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
-    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
+    if ps_type != 'MiniStorage':
+        conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    else:
+        # 5Core128M
+        vm_creation_option.set_cpu_num(5)
+        vm_creation_option.set_memory_size(134217728)
 
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     hosts = test_lib.lib_find_hosts_by_ps_uuid(ps_uuid)
@@ -82,7 +86,7 @@ def prepare_host_with_different_cpu_scenario():
             vm.set_creation_option(vm_creation_option)
             vm.create()
             pre_vms.append(vm)
-        
+
 
 def get_vm_num_based_cpu_available_on_host(host_uuid, each_vm_cpu_consume):
     """
@@ -95,7 +99,7 @@ def get_vm_num_based_cpu_available_on_host(host_uuid, each_vm_cpu_consume):
 
     print "total: %s; avail: %s" %(host_total_cpu, host_avail_cpu)
     return host_avail_cpu / each_vm_cpu_consume
-    
+
 
 def compute_total_vm_num_based_on_ps(ps_uuid, each_vm_cpu_consume):
     """
@@ -137,7 +141,7 @@ def test():
     global vms
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
-    l3_name = os.environ.get('l3NoVlanNetworkName1')
+    l3_name = os.environ.get('l3VlanNetworkName1')
     #l3_name = os.environ.get('l3PublicNetworkName')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
 
@@ -145,26 +149,29 @@ def test():
     #cpuSpeed = 16
     #memorySize = 536870912
     memorySize = 134217728
-    name = 'vm-offering-allocator-strategy'
-    new_offering_option = test_util.InstanceOfferingOption()
-    new_offering_option.set_cpuNum(cpuNum)
-    #new_offering_option.set_cpuSpeed(cpuSpeed)
-    new_offering_option.set_memorySize(memorySize)
-    new_offering_option.set_name(name)
-    new_offering = vm_ops.create_instance_offering(new_offering_option)
-    test_obj_dict.add_instance_offering(new_offering)
-
-    #conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
-    #instance_offering_inv = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0]
-    #instance_offering_uuid = instance_offering_inv.uuid
-    instance_offering_uuid = new_offering.uuid
-    each_vm_cpu_consume = cpuNum 
-
+    each_vm_cpu_consume = cpuNum
     vm_creation_option = test_util.VmOption()
     vm_creation_option.set_l3_uuids([l3_net_uuid])
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_timeout(600000)
-    vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
+    if ps_type != 'MiniStoragy':
+        name = 'vm-offering-allocator-strategy'
+        new_offering_option = test_util.InstanceOfferingOption()
+        new_offering_option.set_cpuNum(cpuNum)
+        #new_offering_option.set_cpuSpeed(cpuSpeed)
+        new_offering_option.set_memorySize(memorySize)
+        new_offering_option.set_name(name)
+        new_offering = vm_ops.create_instance_offering(new_offering_option)
+        test_obj_dict.add_instance_offering(new_offering)
+        #conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
+        #instance_offering_inv = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0]
+        #instance_offering_uuid = instance_offering_inv.uuid
+        instance_offering_uuid = new_offering.uuid
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+    else:
+        vm_creation_option.set_cpu_num(cpuNum)
+        vm_creation_option.set_memory_size(memorySize)
 
     #create different cpu usage of hosts scenario
     prepare_host_with_different_cpu_scenario()
@@ -202,4 +209,5 @@ def error_cleanup():
     test_lib.lib_error_cleanup(test_obj_dict)
     clean_host_with_different_cpu_scenario()
     clean_parallel_created_vm()
+
 
