@@ -29,7 +29,7 @@
 		<case timeout='600' repeat='1'>ps/test_create_data_volume_ceph_pool.py</case>
 		<case timeout='360' repeat='1' noparallel='True'>test_reconnect_ps.py</case>
 		<case timeout='1200' repeat='1' noparallel='True'>migrate/test_maintain_host.py</case>
-		<case timeout='600' repeat='1' noparallel='True'>migrate/test_maintain_host2.py</case>
+		<case timeout='1200' repeat='1' noparallel='True'>migrate/test_maintain_host2.py</case>
 		<case timeout='600' repeat='1'>test_host_active_profile.py</case>
 		<case timeout='3600' repeat='1'>vms/test_4vm_vm_ops.py</case>
 		<case timeout='600' repeat='1'>test_collect_logs.py</case>
@@ -42,11 +42,11 @@
 		<case timeout='600' repeat='1' noparallel='True'>migrate/test_migrate_vm_imagecache_cleanup.py</case>
 		<case timeout='600' repeat='1' noparallel='True'>migrate/test_detach_vm_net_migrate_attach_vm_net.py</case>
 		<case timeout='1800' repeat='1' noparallel='True'>ha/test_vm_ha_never_stop.py</case>
-		<case timeout='840' repeat='1' noparallel='True'>ha/test_vm_ha_last_host.py</case>
+		<case timeout='2400' repeat='1' noparallel='True'>ha/test_vm_ha_last_host.py</case>
 		<case timeout='840' repeat='1' noparallel='True'>ha/test_concur_expunge_ha_vms.py</case>
 		<case timeout='840' repeat='1' noparallel='True'>test_allocator_strategy_crt_vm_cpu.py</case>
 		<case timeout='840' repeat='1' noparallel='True'>test_allocator_strategy_crt_vm_mem.py</case>
-		<case timeout='840' repeat='1' noparallel='True'>test_allocator_strategy_crt_vm_use_all_cpu.py</case>
+		<case timeout='1200' repeat='1' noparallel='True'>test_allocator_strategy_crt_vm_use_all_cpu.py</case>
 		<case timeout='2400' repeat='1' noparallel='True'>ha/test_nols_10_stop_vm_ha_grace_stop_start_host.py</case>
 		<case timeout='2400' repeat='1' noparallel='True'>ha/test_ls_10_stop_vm_ha_force_stop_host.py</case>
 		<case timeout='2400' repeat='1' noparallel='True'>ha/test_nols_stopped_ha_vm_grace_stop_host_expect_vm_stopped.py</case>

@@ -133,7 +133,7 @@
         <case timeout='1200'  repeat='1'>snapshot/test_crt_other_sp_in_live_vm.py</case>
         <!--<case timeout='2200' repeat='1' noparallel='True'>snapshot/test_change_max_sp_depth.py</case> -->
         <case timeout='600'  repeat='1'>regression/delete_sg_with_2_attached_nics.py</case>
-        <case timeout='400'  repeat='1'>regression/rm_nic_sg_on_stopped_vm.py</case>
+        <case timeout='600'  repeat='1'>regression/rm_nic_sg_on_stopped_vm.py</case>
         <case timeout='900'  repeat='1'>regression/test_data_volume_with_vm_ops.py</case>
         <case timeout='1000'  repeat='1' noparallel='True'>vr/test_ping_vms_reboot_vr.py</case>
         <case timeout='600'  repeat='1'>vr/test_vr_ha.py</case>

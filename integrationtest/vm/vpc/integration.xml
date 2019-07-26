@@ -34,9 +34,9 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_vm2_two_vpc</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_classic_vm2_vpc</case>
         <case timeout='2400' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_ops</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_migrate</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_snapshot</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_volume</case>
+        <case timeout='2400' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_migrate</case>
+        <case timeout='2400' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_snapshot</case>
+        <case timeout='2400' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_volume</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_pf.py::vm1_vm2_one_vpc_1vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_pf.py::vm1_vm2_one_vpc_2vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_pf.py::vm1_vm2_two_vpc</case>
@@ -45,7 +45,7 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_vip_two_pf.py::vm1_vm2_one_vpc_2vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_2_pub_nic_vrouter_route.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_sg_ingress.py</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_6vm_connection.py</case>
+        <case timeout='2400' repeat='1' noparallel='True'>test_vpc_6vm_connection.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_prometheus.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_anti_spoofing.py</case>
         <case timeout='1800' repeat='1' noparallel='True'>test_vpc_sg_anti_spoofing_reconnect_host.py</case>

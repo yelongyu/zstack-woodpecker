@@ -33,7 +33,7 @@
         <case timeout='600' repeat='1'>qos/test_net_inbound_qos.py</case>
         <case timeout='600' repeat='1'>qos/test_net_outbound_inbound_qos.py</case>
         <case timeout='600' repeat='1'>qos/test_set_disk_qos.py</case>
-        <case timeout='600' repeat='1'>qos/test_set_outbound_qos2.py</case>
+        <case timeout='1200' repeat='1'>qos/test_set_outbound_qos2.py</case>
         <case timeout='600' repeat='1'>qos/test_set_outbound_qos3.py</case>
         <case timeout='600' repeat='1'>qos/test_data_vol_read_qos.py</case>
         <case timeout='600' repeat='1'>qos/test_data_vol_rw_qos.py</case>
@@ -50,8 +50,8 @@
         <case timeout='600' repeat='1'>qos/test_vm_full_clone_read_qos.py</case>
         <case timeout='600' repeat='1'>qos/test_vm_full_clone_rw_qos.py</case>
         <case timeout='600' repeat='1'>qos/test_vm_full_clone_write_qos.py</case>
-	<case timeout='600' repeat='1'>qos/test_set_attached_outbound_qos.py</case>
-	<case timeout='600' repeat='1'>qos/test_set_attached_outbound_qos2.py</case>
+	<case timeout='1200' repeat='1'>qos/test_set_attached_outbound_qos.py</case>
+	<case timeout='1200' repeat='1'>qos/test_set_attached_outbound_qos2.py</case>
 	<case timeout='600' repeat='1'>qos/test_del_outbound_qos.py</case>
 	<case timeout='600' repeat='1'>qos/test_del_disk_qos.py</case>
 	<case timeout='600' repeat='1'>qos/test_data_vol_qos.py</case>
