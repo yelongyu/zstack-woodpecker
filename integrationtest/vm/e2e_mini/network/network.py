@@ -17,7 +17,7 @@ class NETWORK(MINI):
             return
         super(NETWORK, self).__init__()
 
-    def create_network(self, name=None, dsc=None, vlan=None, physical_interface='zsn0',start_ip='192.168.53.2',
+    def create_network(self, name=None, dsc=None, vlan=None, physical_interface='zsn1',start_ip='192.168.53.2',
                        end_ip='192.168.53.5', netmask='255.255.255.0', gateway='192.168.53.1', dhcp_server=None, dns=None, view='card'):
         self.network_name = name if name else 'network-' + get_time_postfix()
         self.network_list.append(self.network_name)

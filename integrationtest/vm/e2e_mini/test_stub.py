@@ -533,7 +533,7 @@ class MINI(E2E):
             test_util.test_fail("The first parameter of function[check_res_item] expected list_type")
         for res in res_list:
             expected = '[%s] is expected to be [%s]!' % (res, target)
-            all_res_text = self.get_element(SPINCONTAINER).text
+            all_res_text = self.get_elements(SPINCONTAINER)[-1].text
             if target == 'displayed':
                 assert res in all_res_text, expected
             else:
