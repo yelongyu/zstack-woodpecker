@@ -387,7 +387,7 @@ class robot(object):
                 root_volume.snapshot_tree = root_snap_tree
                 self.test_dict.add_volume(name=new_vm.vm.name + "-root", vol_obj=root_volume)
                 self.test_dict.add_snap_tree(name=new_vm.vm.name + "-root", snap_tree=root_snap_tree)
-                self.default_config['HOST'] = new_vm.get_vm().HostUuid
+                self.default_config['HOST'] = new_vm.get_vm().hostUuid
                 self.default_config['PS'] = root_volume.get_volume().primaryStorageUuid
 
                 # import Volume already attached
@@ -1890,7 +1890,7 @@ def ps_migrate_vm(robot_test_obj, args):
     if not target_pss:
         test_util.test_fail("no resource available for next action: ps_migrate_vm")
 
-    datamigr_ops.ps_migrage_volume(target_pss[0].uuid, target_volume_uuid, withDataVolumes=True, withSnapshots=True)
+    datamigr_ops.ps_migrage_vm(target_pss[0].uuid, target_volume_uuid, withDataVolumes=True, withSnapshots=True)
 
     target_vm.update()
     for volume in target_vm.test_volumes:
