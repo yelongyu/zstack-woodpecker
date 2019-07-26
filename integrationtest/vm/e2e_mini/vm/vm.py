@@ -100,6 +100,8 @@ class VM(MINI):
         elif not ha and (self.get_element('ant-switch-inner').text == u"打开"):
             self.get_element("button[id='haLevel']").click()
         self.click_ok()
+        if details_page:
+            self.navigate('vm')
         self.switch_view('list')
         vm_elem = self.get_res_element(vm_name)
         checker = MINICHECKER(self, vm_elem)
