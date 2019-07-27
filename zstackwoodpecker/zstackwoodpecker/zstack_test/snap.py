@@ -442,23 +442,26 @@ class ZstackSnapshotTree(object):
                         utility_vm = zstack_vm_header.ZstackTestVm()
                         utility_vm.create_from(utility_vm_uuid)
                         self.utility_vm = utility_vm
-            elif hostUuid:
-                utility_creation_option.set_host_uuid(hostUuid)
-                self.utility_vm = test_lib.lib_create_vm(utility_creation_option)
-            else:
-                self.utility_vm = test_lib.lib_create_vm(utility_creation_option)
+            if not self.utility_vm:
+                utility_creation_option.set_ps_uuid(self.get_target_volume().get_volume().primaryStorageUuid)
+                if hostUuid:
+                    utility_creation_option.set_host_uuid(hostUuid)
+                    self.utility_vm = test_lib.lib_create_vm(utility_creation_option)
+                else:
+                    self.utility_vm = test_lib.lib_create_vm(utility_creation_option)
+            test_util.test_logger("set_utility_vm: [%s] for snap_tree: [%s]" % (self.utility_vm.vm.uuid, self.__repr__()))
 
         for snapshot in self.snapshot_list:
             snapshot.update()
             snapshot.set_utility_vm(self.utility_vm)
-            test_util.test_logger("children for snapshot: %s" % snapshot)
-            test_util.test_logger(snapshot.get_children_tree_list())
+            test_util.test_logger("set_utility_vm: [%s] for snap: [%s]" % (self.utility_vm.vm.uuid, snapshot))
+            test_util.test_logger("children for snapshot [%s] list %s" % (snapshot, str(snapshot.get_all_child_list())))
 
         new_snap = self.find_new_auto_create_snapshot()
         if new_snap:
             self.add_snapshot(new_snap.uuid)
 
-        test_util.test_logger(self.snapshot_list)
+        test_util.test_logger("snap_tree [%s] list: %s" % (self.__repr__(), str(self.snapshot_list)))
 
     def use(self, snapshot, real=True):
         if real:
