@@ -2,7 +2,7 @@
 Test Steps:
     1. grace stop host where vip located.
     2. check vip switch to another MN.
-    3. create vm to validate everything goes on well. 
+    3. create vm to validate everything goes on well.
 
 @author: SyZhao
 '''
@@ -11,6 +11,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.node_operations as node_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import time
 import os
@@ -47,6 +48,10 @@ def test():
     test_stub.ensure_bss_connected(exclude_host=[vip_s_vm_cfg_lst[0]])
     #test_stub.ensure_pss_connected()
 
+    ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
+    cluster_num = len(res_ops.query_resource(res_ops.CLUSTER))
+    if ps_type == 'MiniStorage' and cluster_num == 1:
+        test_util.test_pass('Single Cluster MINI Env Test Success')
     vm = test_stub.create_basic_vm()
     vm.check()
     vm.destroy()

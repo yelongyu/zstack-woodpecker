@@ -297,7 +297,7 @@ def get_expected_vip_s_vm_cfg_lst_after_switch(scenarioConfig, scenarioFile, vip
             return host.ip_
     else:
         test_util.test_fail("not found the differ host ip vip can be used")
-        
+
 
 def recover_host(host_vm, scenarioConfig, deploy_config):
     stop_host(host_vm, scenarioConfig)
@@ -647,6 +647,9 @@ def create_vm(l3_uuid_list=[], image_name=None, vm_name=None, provisioning='thic
     vm = create_mini_vm(l3_uuid_list, image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, rootVolume_systemTags=rootVolume_systemTags)
     return vm
 
+def create_basic_vm():
+    return create_vm()
+
 def create_volume(volume_name=None, provisioning="thick", disk_size=None):
     if provisioning == 'thin':
         system_tags = ["capability::virtio-scsi", "volumeProvisioningStrategy::ThinProvisioning"]
@@ -757,9 +760,12 @@ def ensure_bss_connected(exclude_host=[]):
         bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
         for exh in exclude_host:
             for bs in bs_list:
-                if exh.managementIp_ == bs.hostname or exh.ip_ == bs.hostname:
+                try:
+                    host_ip = exh.managementIp_
+                except:
+                    host_ip = exh.ip_
+                if host_ip == bs.hostname:
                     bs_list.remove(bs)
-
         for bs in bs_list:
             bs_ops.reconnect_backup_storage(bs.uuid)
             cond = res_ops.gen_query_conditions('uuid', '=', bs.uuid)
@@ -778,9 +784,12 @@ def ensure_hosts_connected(exclude_host=[]):
         host_list = res_ops.query_resource(res_ops.HOST)
         for exh in exclude_host:
             for host in host_list:
-                if exh.managementIp_ == host.managementIp or exh.ip_ == host.managementIp:
+                try:
+                    host_ip = exh.managementIp_
+                except:
+                    host_ip = exh.ip_
+                if host_ip ==  host.managementIp:
                     host_list.remove(host)
-
         for host in host_list:
             try:
                 host_ops.reconnect_host(host.uuid)

@@ -2,7 +2,7 @@
 Test Steps:
     1. force stop both mn host and recover.
     2. check vip and all service recovered.
-    3. create vm to validate everything goes on well. 
+    3. create vm to validate everything goes on well.
 
 @author: SyZhao
 '''
@@ -19,7 +19,7 @@ vm = None
 vip_s_vm_cfg_lst = None
 s_vm0 = None
 s_vm1 = None
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 
 def test():
     global vm
@@ -40,8 +40,8 @@ def test():
     time.sleep(5)
     test_stub.start_host(s_vm0, test_lib.all_scenario_config)
     test_stub.start_host(s_vm1, test_lib.all_scenario_config)
-    test_stub.recover_vlan_in_host(s_vm0.ip_, test_lib.all_scenario_config, test_lib.deploy_config) 
-    test_stub.recover_vlan_in_host(s_vm1.ip_, test_lib.all_scenario_config, test_lib.deploy_config) 
+    test_stub.recover_vlan_in_host(s_vm0.ip_, test_lib.all_scenario_config, test_lib.deploy_config)
+    test_stub.recover_vlan_in_host(s_vm1.ip_, test_lib.all_scenario_config, test_lib.deploy_config)
 
     vip_s_vm_cfg_lst_new = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file, 3)
     if len(vip_s_vm_cfg_lst_new) != 1:

@@ -2,7 +2,7 @@
 Test Steps:
     1. disconnect slave mn host network 10s and recover.
     2. check vip has not been changed.
-    3. create vm to validate everything goes on well. 
+    3. create vm to validate everything goes on well.
 
 @author: SyZhao
 '''
@@ -17,7 +17,7 @@ import os
 
 vm = None
 non_vip_s_vm_cfg_lst = None
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 
 def test():
     global vm
@@ -33,9 +33,9 @@ def test():
         test_util.test_fail('find %d non vip mn hosts.' % len(non_vip_s_vm_cfg_lst))
 
     test_util.test_logger("disconnect host [%s]" % (vip_s_vm_cfg_lst[0].ip_))
-    test_stub.down_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
+    test_stub.down_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")
     time.sleep(10)
-    test_stub.up_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
+    test_stub.up_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")
 
     expected_vip_s_vm_cfg_lst_ip = vip_s_vm_cfg_lst[0].ip_
     if not test_stub.check_if_vip_is_on_host(test_lib.all_scenario_config, test_lib.scenario_file, expected_vip_s_vm_cfg_lst_ip):
@@ -61,7 +61,7 @@ def test():
 def env_recover():
     global non_vip_s_vm_cfg_lst
     test_util.test_logger("recover host: %s" % (non_vip_s_vm_cfg_lst[0].ip_))
-    test_stub.up_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
+    test_stub.up_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")
     test_stub.exec_zsha2_version(vip_s_vm_cfg_lst[0].ip_, "root", "password")
 
 #Will be called only if exception happens in test().

@@ -2,7 +2,7 @@
 Test Steps:
     1. disconnect both mn host and recover.
     2. check vip and all service recovered.
-    3. create vm to validate everything goes on well. 
+    3. create vm to validate everything goes on well.
 
 @author: SyZhao
 '''
@@ -19,7 +19,7 @@ vm = None
 vip_s_vm_cfg_lst = None
 s_vm0 = None
 s_vm1 = None
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 
 def test():
     global vm
@@ -36,11 +36,11 @@ def test():
     s_vm1 = test_stub.get_host_by_index_in_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, 1)
     test_util.test_logger("disconnect both hosts [%s] and [%s]" % (s_vm0.ip_, s_vm1.ip_))
 
-    test_stub.down_host_network(s_vm0.ip_, test_lib.all_scenario_config, "managment_net")  
-    test_stub.down_host_network(s_vm1.ip_, test_lib.all_scenario_config, "managment_net")  
+    test_stub.down_host_network(s_vm0.ip_, test_lib.all_scenario_config, "managment_net")
+    test_stub.down_host_network(s_vm1.ip_, test_lib.all_scenario_config, "managment_net")
     time.sleep(10)
-    test_stub.up_host_network(s_vm0.ip_, test_lib.all_scenario_config, "managment_net")  
-    test_stub.up_host_network(s_vm1.ip_, test_lib.all_scenario_config, "managment_net")  
+    test_stub.up_host_network(s_vm0.ip_, test_lib.all_scenario_config, "managment_net")
+    test_stub.up_host_network(s_vm1.ip_, test_lib.all_scenario_config, "managment_net")
     time.sleep(10)
 
     vip_s_vm_cfg_lst_new = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file)

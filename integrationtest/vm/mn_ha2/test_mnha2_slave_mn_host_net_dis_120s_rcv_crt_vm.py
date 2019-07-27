@@ -2,7 +2,7 @@
 Test Steps:
     1. disconnect slave mn host network 120s and recover.
     2. check vip has not been changed.
-    3. create vm to validate everything goes on well. 
+    3. create vm to validate everything goes on well.
 
 @author: SyZhao
 '''
@@ -11,6 +11,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.node_operations as node_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import test_stub
 import time
@@ -33,9 +34,9 @@ def test():
         test_util.test_fail('find %d non vip mn hosts.' % len(non_vip_s_vm_cfg_lst))
 
     test_util.test_logger("disconnect host [%s]" % (vip_s_vm_cfg_lst[0].ip_))
-    test_stub.down_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
+    test_stub.down_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")
     time.sleep(120)
-    test_stub.up_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
+    test_stub.up_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")
 
     expected_vip_s_vm_cfg_lst_ip = vip_s_vm_cfg_lst[0].ip_
     if not test_stub.check_if_vip_is_on_host(test_lib.all_scenario_config, test_lib.scenario_file, expected_vip_s_vm_cfg_lst_ip):
@@ -51,6 +52,10 @@ def test():
     test_stub.ensure_bss_connected(exclude_host=[non_vip_s_vm_cfg_lst[0]])
     #test_stub.ensure_pss_connected()
 
+    ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
+    cluster_num = len(res_ops.query_resource(res_ops.CLUSTER))
+    if ps_type == 'MiniStorage' and cluster_num == 1:
+        test_util.test_pass('Single Cluster MINI Env Test Success')
     vm = test_stub.create_basic_vm()
     vm.check()
     vm.destroy()
@@ -61,7 +66,7 @@ def test():
 def env_recover():
     global non_vip_s_vm_cfg_lst
     test_util.test_logger("recover host: %s" % (non_vip_s_vm_cfg_lst[0].ip_))
-    test_stub.up_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
+    test_stub.up_host_network(non_vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")
     test_stub.exec_zsha2_version(vip_s_vm_cfg_lst[0].ip_, "root", "password")
 
 #Will be called only if exception happens in test().

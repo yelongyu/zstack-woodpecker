@@ -2,7 +2,7 @@
 Test Steps:
     1. zsha2 demote in host where vip located.
     2. check vip switch to another MN.
-    3. create vm to validate everything goes on well. 
+    3. create vm to validate everything goes on well.
 
 @author: SyZhao
 '''
@@ -17,7 +17,7 @@ import os
 
 vm = None
 vip_s_vm_cfg_lst = None
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 
 def test():
     global vm
@@ -29,7 +29,7 @@ def test():
         test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst))
 
     test_util.test_logger("disconnect host [%s]" % (vip_s_vm_cfg_lst[0].ip_))
-    #test_stub.down_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
+    #test_stub.down_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")
     test_stub.exec_zsha2_demote(vip_s_vm_cfg_lst[0].ip_, "root", "password")
 
     time.sleep(5)
@@ -58,7 +58,7 @@ def test():
 def env_recover():
     test_stub.exec_zsha2_version(vip_s_vm_cfg_lst[0].ip_, "root", "password")
     #test_util.test_logger("recover host: %s" % (vip_s_vm_cfg_lst[0].ip_))
-    #test_stub.up_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")  
+    #test_stub.up_host_network(vip_s_vm_cfg_lst[0].ip_, test_lib.all_scenario_config, "managment_net")
     #test_stub.recover_host(vip_s_vm_cfg_lst[0], test_lib.all_scenario_config, test_lib.deploy_config)
     #test_stub.wait_for_mn_ha_ready(test_lib.all_scenario_config, test_lib.scenario_file)
 
