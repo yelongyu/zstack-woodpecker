@@ -379,7 +379,7 @@ class robot(object):
                 new_vm.create_from(resource["VmInstance"]["uuid"])
                 new_vm.update()
                 root_volume = zstack_vol_header.ZstackTestVolume()
-                root_volume.create_from(new_vm.vm.allVolumes[0].uuid)
+                root_volume.create_from(test_lib.lib_get_root_volume(new_vm.get_vm()).uuid)
 
                 new_vm.test_volumes.append(root_volume)
                 root_snap_tree = robot_snapshot_header.ZstackSnapshotTree(root_volume)
@@ -1076,7 +1076,7 @@ def change_vm_image(robot_test_obj, args):
     target_vm = robot_test_obj.get_test_dict().vm[args[0]]
     vm_root_image_uuid = target_vm.get_vm().imageUuid
 
-    ps_uuid = target_vm.get_vm().allVolumes[0].primaryStorageUuid
+    ps_uuid = test_lib.lib_get_root_volume(target_vm.get_vm()).primaryStorageUuid
     cond = res_ops.gen_query_conditions('uuid', '!=', vm_root_image_uuid)
     cond = res_ops.gen_query_conditions('mediaType', '=', "RootVolumeTemplate", cond)
     cond = res_ops.gen_query_conditions('system', '=', "false", cond)
@@ -1679,6 +1679,7 @@ def ps_migrate_volume(robot_test_obj, args):
     if len(args) != 1:
         test_util.test_fail("no resource available for next action: ps_migrate volume")
     target_volume = robot_test_obj.get_test_dict().volume[args[0]]
+    old_ps_uuid = target_volume.primaryStorageUuid
 
     target_pss = datamigr_ops.get_ps_candidate_for_vol_migration(target_volume.get_volume().uuid)
 
@@ -1694,6 +1695,8 @@ def ps_migrate_volume(robot_test_obj, args):
     target_volume.update()
     target_volume.update_volume()
     target_volume.snapshot_tree.update(update_utility=True)
+
+    ps_ops.clean_up_trash_on_primary_storage(old_ps_uuid)
 
 
 def create_sg():
@@ -1882,20 +1885,21 @@ def ps_migrate_vm(robot_test_obj, args):
 
     target_vm_name = args[0]
     target_vm = robot_test_obj.test_dict.vm[target_vm_name]
-    target_volume_uuid = test_lib.lib_get_root_volume(target_vm.get_vm()).uuid
+    old_ps_uuid = test_lib.lib_get_root_volume(target_vm.get_vm()).primaryStorageUuid
 
-    import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
-    target_pss = datamigr_ops.get_ps_candidate_for_vol_migration(target_volume_uuid)
+    target_pss = datamigr_ops.get_ps_candidate_for_vm_migration(target_vm.get_vm().uuid)
 
     if not target_pss:
         test_util.test_fail("no resource available for next action: ps_migrate_vm")
 
-    datamigr_ops.ps_migrage_vm(target_pss[0].uuid, target_volume_uuid, withDataVolumes=True, withSnapshots=True)
+    datamigr_ops.ps_migrage_vm(target_pss[0].uuid, target_vm.get_vm().uuid, withDataVolumes=True, withSnapshots=True)
 
     target_vm.update()
     for volume in target_vm.test_volumes:
         volume.update()
         volume.update_volume()
+
+    ps_ops.clean_up_trash_on_primary_storage(old_ps_uuid)
 
 
 def create_mini_vm(robot_test_obj, args):
