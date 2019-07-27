@@ -147,7 +147,6 @@ class robot_test_dict(object):
             snap_tree.check()
 
     def cleanup(self):
-
         for k, backup_dict in self.backup.items():
             backup = backup_dict['backup']
             bs_uuids = [_bs.backupStorageUuid for _bs in backup.backupStorageRefs]
@@ -161,8 +160,10 @@ class robot_test_dict(object):
             vm.clean()
         # volume.check
         for k, volume in self.volume.items():
-            volume.clean()
-
+            try:
+                volume.clean()
+            except:# root_volume can not clean
+                pass
 
 
 class robot(object):
@@ -2283,6 +2284,8 @@ action_dict = {
 def robot_create_utility_vm():
     '''
             Create utility vm for all ps for robot testing
+            we adandon this function to create utility vm
+            by using volume.update() or snap_tree.update() to create utility vm
         '''
     cond = res_ops.gen_query_conditions('state', '=', "Enabled")
     cond = res_ops.gen_query_conditions('status', '=', "Connected", cond)
