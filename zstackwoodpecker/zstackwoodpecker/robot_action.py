@@ -397,8 +397,17 @@ class robot(object):
                         continue
                     if volume.uuid in imported_resource:
                         continue
-                    vol_ops.update_volume(volume.uuid, "%s-volume%s" % (resource["VmInstance"]["name"], volume_index),
-                                          None)
+                    new_volume_name = "%s-volume%s" % (resource["VmInstance"]["name"], volume_index)
+                    vol_ops.update_volume(volume.uuid, new_volume_name, None)
+                    new_volume = zstack_vol_header.ZstackTestVolume()
+                    new_volume.create_from(volume.uuid)
+                    new_volume_snap_tree = robot_snapshot_header.ZstackSnapshotTree(new_volume)
+                    new_volume_snap_tree.update()
+                    new_volume.snapshot_tree = new_volume_snap_tree
+                    self.test_dict.add_volume(new_volume_name, new_volume)
+                    test_util.test_logger("@@test_dict_volume_keys:{}@@".format(self.test_dict.volume.keys()))
+                    test_util.test_logger("@@test_dict_volume_values:{}@@".format(self.test_dict.volume.values()))
+                    self.test_dict.add_snap_tree(volume.name + "-st", snap_tree=new_volume_snap_tree)
                     imported_resource.append(volume.uuid)
                     volume_index += 1
                 new_vm.update()
