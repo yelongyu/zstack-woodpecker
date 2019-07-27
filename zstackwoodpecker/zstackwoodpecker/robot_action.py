@@ -1561,6 +1561,7 @@ def create_data_volume_from_image(robot_test_obj, args):
     host_uuid = None
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
         host_uuid = robot_test_obj.get_default_config()['HOST']
+        systemtags.append("localStorage::hostUuid::%s" % (host_uuid))
 
     volume_inv = vol_ops.create_volume_from_template(target_images[0]['uuid'], ps_uuid, target_volume_name, host_uuid,
                                                      systemtags)
