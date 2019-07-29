@@ -35,14 +35,14 @@ IAM2_policy_statements =  [{"name": "role-name",
                                         ]}]
 
 def query_result_check(res_list, session_uuid):
-    unexcept_ret_list = []
+    unexpected_ret_list = []
     for res in res_list:
         #test_util.test_logger(res_ops.query_resource(res_list[0]))
         ret_adm = res_ops.query_resource(res)
         ret_vid = res_ops.query_resource(res, session_uuid=session_uuid)
         if len(ret_adm) != len(ret_vid):
-            unexcept_ret_list.append((ret_adm, ret_vid))
-    return unexcept_ret_list
+            unexpected_ret_list.append((ret_adm, ret_vid))
+    return unexpected_ret_list
 
 def test():
     iam2_ops.clean_iam2_enviroment()
