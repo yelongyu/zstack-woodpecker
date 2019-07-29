@@ -23,5 +23,11 @@ def path():
 		[TestAction.create_volume_backup, "volume3", "backup2"], \
 		[TestAction.stop_vm, "vm1"], \
 		[TestAction.use_volume_backup, "backup2"], \
+		[TestAction.create_volume_snapshot, "volume3", "snapshot1"], \
+		[TestAction.create_volume_snapshot, "volume3", "snapshot2"], \
+		[TestAction.create_volume_snapshot, "volume3", "snapshot3"], \
+		[TestAction.create_volume_snapshot, "volume3", "snapshot4"], \
+		[TestAction.create_volume_snapshot, "volume3", "snapshot5"], \
+		[TestAction.batch_delete_volume_snapshot, ["snapshot4", "snapshot1", "snapshot5"]], \
 		[TestAction.start_vm, "vm1"], \
 		[TestAction.reboot_vm, "vm1"]])
