@@ -49,6 +49,27 @@ def install_mini_server():
     install_cmd = 'wget -c %s -P /tmp; bash /tmp/%s' % (bin_url, ms_bins[-2])
     ssh.execute(install_cmd, vm_ip, 'root', 'password')
 
+def deploy_selenium_docker():
+    with open('/home/upload_test_result/test_target', 'r') as f:
+            test_browser = f.readline().strip()
+    if test_browser and test_browser.lower() == 'firefox':
+        _node = 'node-firefox-debug'
+    else:
+        _node = 'node-chrome-debug'
+    zs_node_ip = os.getenv('ZSTACK_BUILT_IN_HTTP_SERVER_IP')
+    remote_registry = os.getenv('REMOTE_REGISTRY')
+    with open('/home/mn_node_ip', 'w') as nip_file:
+        nip_file.write(zs_node_ip)
+    install_docker_cmd = 'yum --enablerepo=* clean all && yum --disablerepo=* --enablerepo=zstack-mn,qemu-kvm-ev-mn install -y docker'
+    pull_workaound_cmd = '''echo '{ "insecure-registries":["%s:5000"]}' > /etc/docker/daemon.json;
+                            systemctl daemon-reload; service docker restart''' % remote_registry
+    pull_image_cmd = 'docker pull %s:5000/selenium/hub; \
+                      docker pull %s:5000/selenium/%s;' % (remote_registry, remote_registry, _node)
+    selenium_hub_run_cmd = 'docker run -d -p 4444:4444 -d --name hub selenium/hub'
+    selenium_node_run_cmd = 'docker run -d -p 5900:5900 --link hub:hub selenium/node-chrome'
+    for cmd in [install_docker_cmd, pull_workaound_cmd, pull_image_cmd, selenium_hub_run_cmd, selenium_node_run_cmd]:
+        ssh.execute(cmd, zs_node_ip, 'root', 'password')
+
 def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_name):
     '''
     Judge if list is empty. If not, return the 1st item.
