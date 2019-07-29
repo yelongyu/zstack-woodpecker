@@ -66,7 +66,8 @@ def deploy_selenium_docker():
     pull_image_cmd = 'docker pull %s:5000/selenium/hub; \
                       docker pull %s:5000/selenium/%s;' % (remote_registry, remote_registry, _node)
     selenium_hub_run_cmd = 'docker run -d -p 4444:4444 --name selenium-hub selenium/hub'
-    selenium_node_run_cmd = 'docker run -d -p 5900:5900 --link selenium-hub:hub selenium/node-chrome'
+    selenium_node_run_cmd = 'docker run -d -p 5900:5900 -e SCREEN_WIDTH=1920 -e SCREEN_HEIGHT=1080 -e SCREEN_DEPTH=24 -e SCREEN_DPI=150 \
+                             --link selenium-hub:hub selenium/%s' % _node
     for cmd in [install_docker_cmd, pull_workaround_cmd, pull_image_cmd, selenium_hub_run_cmd, selenium_node_run_cmd]:
         ssh.execute(cmd, zs_node_ip, 'root', 'password')
 
