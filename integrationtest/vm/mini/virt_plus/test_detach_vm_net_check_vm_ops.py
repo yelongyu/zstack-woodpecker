@@ -1,0 +1,1 @@
+../../virt_plus/test_detach_vm_net_check_vm_ops.py

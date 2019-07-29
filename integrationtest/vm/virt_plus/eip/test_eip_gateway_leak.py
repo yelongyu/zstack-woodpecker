@@ -12,7 +12,7 @@ import os
 import time
 import zstacklib.utils.ssh as ssh
 
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 test_obj_dict = test_state.TestStateDict()
 
 ext_host_ip = "172.20.1.106"
@@ -78,3 +78,4 @@ def test():
 def error_cleanup():
     global test_obj_dict
     test_lib.lib_error_cleanup(test_obj_dict)
+

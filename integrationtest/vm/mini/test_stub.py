@@ -650,6 +650,13 @@ def create_vm(l3_uuid_list=[], image_name=None, vm_name=None, provisioning='thic
 def create_basic_vm():
     return create_vm()
 
+def create_vlan_vm(l3_name=None):
+    if not l3_name:
+        l3_name = os.environ.get('l3VlanNetworkName1')
+    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    vm = create_vm([l3_net_uuid])
+    return vm
+
 def create_volume(volume_name=None, provisioning="thick", disk_size=None):
     if provisioning == 'thin':
         system_tags = ["capability::virtio-scsi", "volumeProvisioningStrategy::ThinProvisioning"]
@@ -694,15 +701,15 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=Non
     vip.create()
     return vip
 
-def create_eip(eip_name=None, vip_uuid=None, nic_uuid=None, vm_obj=None, session_uuid=None):
+def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, session_uuid=None):
     eip_option = test_util.EipOption()
     eip_option.set_name(eip_name)
     eip_option.set_vip_uuid(vip_uuid)
-    eip_option.set_vm_nic_uuid(nic_uuid)
+    eip_option.set_vm_nic_uuid(vnic_uuid)
     eip_option.set_session_uuid(session_uuid)
     eip = zstack_eip_header.ZstackTestEip()
     eip.set_creation_option(eip_option)
-    if nic_uuid and not vm_obj:
+    if vnic_uuid and not vm_obj:
         test_util.test_fail('vm_obj can not be None in create_eip() API, when setting vm_nic_uuid.')
     eip.create(vm_obj)
     return eip
@@ -727,6 +734,30 @@ def create_vm_with_fake_iso(vm_name, l3_name, session_uuid=None):
     image_uuid = img_ops.add_iso_template(img_option).uuid
     vm = create_vm_with_iso([l3_net_uuid], image_uuid, vm_name, root_disk_uuid)
     return vm
+
+def execute_shell_in_process(cmd, timeout=10, logfd=None):
+    if not logfd:
+        process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, universal_newlines=True)
+    else:
+        process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=logfd, stderr=logfd, universal_newlines=True)
+
+    start_time = time.time()
+    while process.poll() is None:
+        curr_time = time.time()
+        TEST_TIME = curr_time - start_time
+        if TEST_TIME > timeout:
+            process.kill()
+            test_util.test_logger('[shell:] %s timeout ' % cmd)
+            return False
+        time.sleep(1)
+
+    test_util.test_logger('[shell:] %s is finished.' % cmd)
+    return process.returncode
+
+def run_command_in_vm(vm_inv, command):
+    managerip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
+    vm_ip = vm_inv.vmNics[0].ip
+    return test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root', 'password', command)
 
 def skip_if_vr_not_vyos(vr_image_name):
     cond = res_ops.gen_query_conditions('name', '=', vr_image_name)
@@ -1263,5 +1294,6 @@ class ImageReplication(object):
     def operate_bs_service(self, bs_ip, op='stop'):
         cmd = 'service zstack-imagestorebackupstorage %s' % op
         ssh.execute(cmd, bs_ip, "root", "password", port=22)
+
 
 
