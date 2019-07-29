@@ -61,13 +61,13 @@ def deploy_selenium_docker():
     with open('/home/mn_node_ip', 'w') as nip_file:
         nip_file.write(zs_node_ip)
     install_docker_cmd = 'yum --enablerepo=* clean all && yum --disablerepo=* --enablerepo=zstack-mn,qemu-kvm-ev-mn install -y docker'
-    pull_workaound_cmd = '''echo '{ "insecure-registries":["%s:5000"]}' > /etc/docker/daemon.json;
+    pull_workaround_cmd = '''echo '{ "insecure-registries":["%s:5000"]}' > /etc/docker/daemon.json;
                             systemctl daemon-reload; service docker restart''' % remote_registry
     pull_image_cmd = 'docker pull %s:5000/selenium/hub; \
                       docker pull %s:5000/selenium/%s;' % (remote_registry, remote_registry, _node)
-    selenium_hub_run_cmd = 'docker run -d -p 4444:4444 -d --name hub selenium/hub'
-    selenium_node_run_cmd = 'docker run -d -p 5900:5900 --link hub:hub selenium/node-chrome'
-    for cmd in [install_docker_cmd, pull_workaound_cmd, pull_image_cmd, selenium_hub_run_cmd, selenium_node_run_cmd]:
+    selenium_hub_run_cmd = 'docker run -d -p 4444:4444 --name selenium-hub selenium/hub'
+    selenium_node_run_cmd = 'docker run -d -p 5900:5900 --link selenium-hub:hub selenium/node-chrome'
+    for cmd in [install_docker_cmd, pull_workaround_cmd, pull_image_cmd, selenium_hub_run_cmd, selenium_node_run_cmd]:
         ssh.execute(cmd, zs_node_ip, 'root', 'password')
 
 def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_name):
