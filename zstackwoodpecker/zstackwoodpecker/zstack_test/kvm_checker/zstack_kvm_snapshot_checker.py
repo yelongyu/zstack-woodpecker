@@ -584,7 +584,7 @@ depth is : %s. The real snapshot max depth is: %s' % \
 
                 while True:
                     cmd_info = "ls %s" % devPath
-                    image_cache = 0
+                    image_cached = 0
 
                     result = test_lib.lib_execute_ssh_cmd(activate_host, 'root', 'password', cmd_info)
                     if result:
