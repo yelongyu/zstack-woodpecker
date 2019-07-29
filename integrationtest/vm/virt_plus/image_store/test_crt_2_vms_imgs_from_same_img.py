@@ -46,6 +46,9 @@ def test():
 
     image1 = test_image.ZstackTestImage()
     image1.set_creation_option(image_creation_option)
+    image1.create()
+    test_obj_dict.add_image(image1)
+    # image1.check()
 
     #vm1.stop()
 
@@ -64,7 +67,8 @@ def test():
     image2.create()
     test_obj_dict.add_image(image2)
     # image2.check()
-    vm3 = test_stub.create_vm(image_name = image2_name)
+
+    vm3 = test_stub.create_vm(image_name = 'test_create_vm_images_with_same_name')
     test_obj_dict.add_vm(vm3)
     vm2.check()
     vm3.check()
