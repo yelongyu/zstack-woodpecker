@@ -985,4 +985,20 @@ def test():
             ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
             ssh.execute(cmd, mn_ip2, "root", "password", False, 22)
 
+    # deploy selenium docker
+    zs_node_ip = os.getenv('ZSTACK_BUILT_IN_HTTP_SERVER_IP')
+    remote_registry = os.getenv('REMOTE_REGISTRY')
+    with open('/home/mn_node_ip', 'w') as nip_file:
+        nip_file.write(zs_node_ip)
+    install_docker_cmd = 'yum install docker -y'
+    pull_workaound_cmd = '''echo '{ "insecure-registries":["%s:5000"]}' > /etc/docker/daemon.json;
+                            systemctl daemon-reload; service docker restart''' % remote_registry
+    pull_image_cmd = 'docker pull %s:5000/selenium/hub; \
+                      docker pull %s:5000/selenium/node-chrome; \
+                      docker pull %s:5000/selenium/node-firefox;' % (remote_registry, remote_registry, remote_registry)
+    selenium_hub_run_cmd = 'docker run -p 4444:4444 -d --name hub selenium/hub'
+    selenium_node_run_cmd = 'docker run -d -p 5900:5900 --link hub:hub selenium/node-chrome'
+    for cmd in [install_docker_cmd, pull_workaound_cmd, pull_image_cmd, selenium_hub_run_cmd, selenium_node_run_cmd]:
+        ssh.execute(cmd, zs_node_ip, 'root', 'password')
+
     test_util.test_pass('Suite Setup Success')

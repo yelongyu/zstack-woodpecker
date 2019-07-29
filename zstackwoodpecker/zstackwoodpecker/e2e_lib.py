@@ -30,7 +30,10 @@ class E2E(object):
         with open('/home/upload_test_result/test_target', 'r') as f:
             test_browser = f.readline().strip()
         test_browser = test_browser if test_browser in ['chrome', 'firefox'] else 'chrome'
-        self.uri = 'http://%s:4444/wd/hub/session' % os.getenv('SELENIUM_SERVER')
+        with open('/home/mn_node_ip', 'r') as nip_file:
+            selenium_server = nip_file.read()
+        self.uri = 'http://%s:4444/wd/hub/session' % selenium_server
+#         self.uri = 'http://%s:4444/wd/hub/session' % os.getenv('SELENIUM_SERVER')
         body = '{"desiredCapabilities":{"browserName":"%s"}}' % test_browser
         session = self._post(self.uri, body=body)
         self.session_id = session.sessionId

@@ -14,6 +14,7 @@ mediumDiskOfferingSize = 100M
 
 MINI_SERVER_URL = http://172.20.198.234/mirror/mini_master/latest/
 SELENIUM_SERVER = 172.20.11.61
+REMOTE_REGISTRY = 172.20.11.191
 
 imageStoreBackupStorageName = imagestore
 imageStoreBackupStorageName2 = imagestore2
