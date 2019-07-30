@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-1-mini-bootstrap-cluster.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-1-mini-bootstrap-cluster.tmpt</scenarioConfigTemplate>
+</testConfig>

@@ -1,0 +1,5 @@
+import ./deploy.tmpt
+import ../multihosts/deploy.tmpt
+
+zoneName = Zone-1
+hostPort = 22

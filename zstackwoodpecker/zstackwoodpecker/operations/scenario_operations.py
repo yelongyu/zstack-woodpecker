@@ -354,6 +354,7 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
     udev_config = ''
     change_nic_back_cmd = ''
     nic_id = 0
+    device_id = 0
     modify_cfg = []
     modify_cfg.append(r"cp /etc/sysconfig/network-scripts/ifcfg-eth0 /root/ifcfg-eth0;sync;sync;sync")
     for l3network in xmlobject.safe_list(vm_config.l3Networks.l3Network):
@@ -369,6 +370,7 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
             for vmnic in vm_inv.vmNics:
                 if vmnic.l3NetworkUuid == l3network.uuid_:
                     vmnic_mac = vmnic.mac
+                    device_id = vmnic.deviceId
                     break
         #nic_name = None
         #if hasattr(l3network, 'l2NetworkRef'):
@@ -378,11 +380,27 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
         #            break
         #if nic_name == None:
             #nic_name = "eth%s" % (nic_id)
-        nic_name = "zsn%s" % (nic_id)
+
+        # hardcode for mini bootstrap
+        # device id 1/2 for enoX
+        # device id 3/4 for ens2fX
+        if os.getenv('hostType') == 'miniHost-bootstrap':
+            if device_id == 0:
+                nic_name = "eth0"
+            elif device_id == 1:
+                nic_name = "eno1"
+            elif device_id == 2:
+                nic_name = "eno2"
+            elif device_id == 3:
+                nic_name = "ens2f0"
+            elif device_id == 4:
+                nic_name = "ens2f1"
+        else:
+            nic_name = "zsn%s" % (nic_id)
         udev_config = udev_config + r'\\nACTION==\"add\", SUBSYSTEM==\"net\", DRIVERS==\"?*\", ATTR{type}==\"1\", ATTR{address}==\"%s\", NAME=\"%s\"' % (vmnic_mac, nic_name)
         modify_cfg.append(r"rm -rf /etc/sysconfig/network-scripts/ifcfg-eth%s || True" %(nic_id))
-        modify_cfg.append(r"cp /root/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-zsn%s" %(nic_id))
-        modify_cfg.append(r"sed -i 's:eth0:zsn%s:g' /etc/sysconfig/network-scripts/ifcfg-zsn%s" %(nic_id, nic_id))
+        modify_cfg.append(r"cp /root/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-%s" %(nic_name))
+        modify_cfg.append(r"sed -i 's:eth0:%s:g' /etc/sysconfig/network-scripts/ifcfg-%s" %(nic_name, nic_name))
         nic_id += 1
 
     cmd = 'echo -e %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
@@ -2570,7 +2588,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     if xmlobject.has_element(l3network, 'pxeRef'):
                         print "xcy baremetal debug"
                         shell.call('route add default gw 172.24.0.1')
-#        for ip_range in ip_ranges:
+#        for ip_range in ip_ranges
 #            if last_ip_range != ip_range:
 #                shell.call('ip route del %s/24 || true' % ip_range)
 #                shell.call('ip route add %s/24 via %s dev eth0' % (ip_range, last_ip_gateway))
@@ -2600,13 +2618,16 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                         if not default_l3_uuid:
                             default_l3_uuid = l3network.uuid_
 
-                if len(l3_uuid_list) >=3:
+                if len(l3_uuid_list) >=3 and os.getenv('hostType') != 'miniHost-bootstrap':
                     for l3_uuid in l3_uuid_list:
                         if l3_uuid == os.environ.get('vmStorageL3Uuid') or l3_uuid == os.environ.get('vmManageL3Uuid'): 
                             l3_uuid_list_ge_3.append(l3_uuid)
                             l3_uuid_list.remove(l3_uuid)
                             if len(l3_uuid_list) < 3:
                                 break
+
+                if os.getenv('hostType') == 'miniHost-bootstrap':
+                    vm_creation_option.set_system_tags(['vmSystemSerialNumber::%s' % (vm.vmSerial_)])
 
                 vm_creation_option.set_instance_offering_uuid(vm.vmInstranceOfferingUuid_)
                 vm_creation_option.set_l3_uuids(l3_uuid_list)
