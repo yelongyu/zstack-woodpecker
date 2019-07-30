@@ -13,28 +13,28 @@ def path():
 		[TestAction.attach_volume, 'vm1', 'volume3'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot1'],
 		[TestAction.reboot_vm, 'vm1'],
-		[TestAction.create_volume_snapshot, 'volume1', 'volume1-snapshot5'],
+		[TestAction.create_volume_snapshot, 'volume2', 'volume2-snapshot5'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot6'],
 		[TestAction.clone_vm, 'vm1', 'vm2'],
-		[TestAction.create_vm_snapshot, 'vm2', 'vm2-snapshot10'],
-		[TestAction.stop_vm, 'vm1'],
-		[TestAction.ps_migrate_vm, 'vm1'],
-		[TestAction.start_vm, 'vm1'],
-		[TestAction.delete_volume_snapshot, 'vm1-snapshot1'],
-		[TestAction.create_volume_snapshot, 'vm2-root', 'vm2-root-snapshot11'],
-		[TestAction.delete_vm_snapshot, 'vm2-snapshot10'],
+		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot10'],
+		[TestAction.stop_vm, 'vm2'],
+		[TestAction.ps_migrate_vm, 'vm2'],
+		[TestAction.start_vm, 'vm2'],
+		[TestAction.delete_volume_snapshot, 'vm1-snapshot10'],
+		[TestAction.create_volume_snapshot, 'vm2-root', 'vm2-root-snapshot14'],
+		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
 ])
 
 
 
 '''
 The final status:
-Running:['vm2', 'vm1']
+Running:['vm1', 'vm2']
 Stopped:[]
-Enadbled:['volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1', 'volume1-snapshot5', 'vm1-snapshot6', 'volume1-snapshot6', 'volume2-snapshot6', 'volume3-snapshot6', 'vm2-root-snapshot11']
+Enadbled:['volume2-snapshot5', 'vm1-snapshot6', 'volume1-snapshot6', 'volume2-snapshot6', 'volume3-snapshot6', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'vm2-root-snapshot14']
 attached:['volume1', 'volume2', 'volume3']
 Detached:[]
-Deleted:['vm1-snapshot1', 'vm2-snapshot10']
+Deleted:['vm1-snapshot10', 'vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
 Expunged:[]
 Ha:[]
 Group:

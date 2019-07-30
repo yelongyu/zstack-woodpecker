@@ -13,31 +13,31 @@ def path():
 		[TestAction.attach_volume, 'vm1', 'volume3'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot1'],
 		[TestAction.clone_vm, 'vm1', 'vm2'],
-		[TestAction.create_data_vol_template_from_volume, 'volume1', 'volume1-image1'],
-		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
-		[TestAction.clone_vm, 'vm2', 'vm3'],
-		[TestAction.create_vm_snapshot, 'vm2', 'vm2-snapshot9'],
-		[TestAction.reboot_vm, 'vm3'],
-		[TestAction.delete_volume_snapshot, 'volume2-snapshot1'],
-		[TestAction.stop_vm, 'vm2'],
-		[TestAction.use_volume_snapshot, 'vm2-snapshot9'],
-		[TestAction.start_vm, 'vm2'],
-		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
+		[TestAction.create_data_vol_template_from_volume, 'volume2', 'volume2-image1'],
+		[TestAction.create_vm_snapshot, 'vm2', 'vm2-snapshot5'],
+		[TestAction.clone_vm, 'vm1', 'vm3'],
+		[TestAction.create_vm_snapshot, 'vm3', 'vm3-snapshot6'],
+		[TestAction.reboot_vm, 'vm2'],
+		[TestAction.delete_volume_snapshot, 'volume3-snapshot1'],
+		[TestAction.stop_vm, 'vm1'],
+		[TestAction.use_volume_snapshot, 'vm1-snapshot1'],
+		[TestAction.start_vm, 'vm1'],
+		[TestAction.delete_vm_snapshot, 'vm2-snapshot5'],
 ])
 
 
 
 '''
 The final status:
-Running:['vm1', 'vm3', 'vm2']
+Running:['vm2', 'vm3', 'vm1']
 Stopped:[]
-Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'vm2-snapshot9', 'volume1-image1']
+Enadbled:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'vm3-snapshot6', 'volume2-image1']
 attached:['volume1', 'volume2', 'volume3']
 Detached:[]
-Deleted:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
+Deleted:['volume3-snapshot1', 'vm2-snapshot5']
 Expunged:[]
 Ha:[]
 Group:
-	vm_snap2:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5']---vm1volume1_volume2_volume3
-	vm_snap3:['vm2-snapshot9']---vm2
+	vm_snap3:['vm3-snapshot6']---vm3
+	vm_snap1:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']---vm1volume1_volume2_volume3
 '''

@@ -19,7 +19,7 @@ def path():
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot8'],
 		[TestAction.clone_vm, 'vm1', 'vm2'],
 		[TestAction.create_volume_backup, 'volume2', 'volume2-backup1'],
-		[TestAction.migrate_vm, 'vm2'],
+		[TestAction.migrate_vm, 'vm1'],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot5'],
 ])
 

@@ -17,29 +17,29 @@ def path():
 		[TestAction.stop_vm, 'vm2'],
 		[TestAction.use_volume_backup, 'volume4-backup1'],
 		[TestAction.start_vm, 'vm2'],
-		[TestAction.create_vm_snapshot, 'vm2', 'vm2-snapshot5'],
+		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.create_image_from_volume, 'vm2', 'vm2-image1'],
-		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot9'],
-		[TestAction.stop_vm, 'vm1'],
-		[TestAction.use_volume_snapshot, 'vm1-snapshot9'],
-		[TestAction.start_vm, 'vm1'],
-		[TestAction.create_volume_snapshot, 'volume3', 'volume3-snapshot13'],
-		[TestAction.delete_vm_snapshot, 'vm2-snapshot5'],
+		[TestAction.create_vm_snapshot, 'vm2', 'vm2-snapshot9'],
+		[TestAction.stop_vm, 'vm2'],
+		[TestAction.use_volume_snapshot, 'vm2-snapshot9'],
+		[TestAction.start_vm, 'vm2'],
+		[TestAction.create_volume_snapshot, 'volume1', 'volume1-snapshot13'],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
+		[TestAction.delete_vm_snapshot, 'vm2-snapshot9'],
 ])
 
 
 
 '''
 The final status:
-Running:['vm2', 'vm1']
+Running:['vm1', 'vm2']
 Stopped:[]
-Enadbled:['vm1-snapshot9', 'volume1-snapshot9', 'volume2-snapshot9', 'volume3-snapshot9', 'volume3-snapshot13', 'volume4-backup1', 'vm2-image1']
+Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'volume1-snapshot13', 'volume4-backup1', 'vm2-image1']
 attached:['volume1', 'volume2', 'volume3', 'volume4', 'volume5', 'volume6']
 Detached:[]
-Deleted:['vm2-snapshot5', 'volume4-snapshot5', 'volume5-snapshot5', 'volume6-snapshot5', 'vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
+Deleted:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1', 'vm2-snapshot9', 'volume4-snapshot9', 'volume5-snapshot9', 'volume6-snapshot9']
 Expunged:[]
 Ha:[]
 Group:
-	vm_snap3:['vm1-snapshot9', 'volume1-snapshot9', 'volume2-snapshot9', 'volume3-snapshot9']---vm1volume1_volume2_volume3
+	vm_snap2:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5']---vm1volume1_volume2_volume3
 '''

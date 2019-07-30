@@ -6,16 +6,19 @@ def path():
     return dict(initial_formation="template5", path_list=[
 		[TestAction.create_vm, 'vm1', 'flag=sblk'],
 		[TestAction.create_volume, 'volume1', 'flag=ceph,scsi'],
+		[TestAction.attach_volume, 'vm1', 'volume1'],
 		[TestAction.create_volume, 'volume2', 'flag=sblk,scsi'],
+		[TestAction.attach_volume, 'vm1', 'volume2'],
 		[TestAction.create_volume, 'volume3', 'flag=ceph,scsi'],
+		[TestAction.attach_volume, 'vm1', 'volume3'],
 		[TestAction.create_volume_snapshot, 'vm1-root', 'vm1-root-snapshot1'],
-		[TestAction.create_volume_snapshot, 'volume2', 'volume2-snapshot2'],
+		[TestAction.create_volume_snapshot, 'volume1', 'volume1-snapshot2'],
 		[TestAction.create_volume_snapshot, 'vm1-root', 'vm1-root-snapshot3'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot4'],
-		[TestAction.create_volume_snapshot, 'volume2', 'volume2-snapshot5'],
-		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot6'],
-		[TestAction.create_volume_snapshot, 'vm1-root', 'vm1-root-snapshot7'],
-		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot8'],
+		[TestAction.create_volume_snapshot, 'volume2', 'volume2-snapshot8'],
+		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot9'],
+		[TestAction.create_volume_snapshot, 'vm1-root', 'vm1-root-snapshot13'],
+		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot14'],
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.use_vm_snapshot, 'vm1-snapshot4'],
 		[TestAction.start_vm, 'vm1'],
@@ -23,9 +26,9 @@ def path():
 		[TestAction.use_volume_snapshot, 'vm1-snapshot4'],
 		[TestAction.start_vm, 'vm1'],
 		[TestAction.reboot_vm, 'vm1'],
-		[TestAction.batch_delete_volume_snapshot, ['vm1-root-snapshot3','vm1-snapshot6',]],
-		[TestAction.delete_volume_snapshot, 'volume2-snapshot2'],
-		[TestAction.delete_volume_snapshot, 'vm1-root-snapshot1'],
+		[TestAction.batch_delete_volume_snapshot, ['volume3-snapshot4','volume2-snapshot14',]],
+		[TestAction.delete_volume_snapshot, 'volume2-snapshot4'],
+		[TestAction.delete_volume_snapshot, 'vm1-snapshot14'],
 ])
 
 
@@ -34,13 +37,12 @@ def path():
 The final status:
 Running:['vm1']
 Stopped:[]
-Enadbled:['vm1-snapshot4', 'volume2-snapshot5', 'vm1-root-snapshot7', 'vm1-snapshot8']
-attached:[]
-Detached:['volume1', 'volume2', 'volume3']
-Deleted:['vm1-root-snapshot3', 'vm1-snapshot6', 'volume2-snapshot2', 'vm1-root-snapshot1']
+Enadbled:['vm1-root-snapshot1', 'volume1-snapshot2', 'vm1-root-snapshot3', 'vm1-snapshot4', 'volume1-snapshot4', 'volume2-snapshot8', 'vm1-snapshot9', 'volume1-snapshot9', 'volume2-snapshot9', 'volume3-snapshot9', 'vm1-root-snapshot13', 'volume1-snapshot14', 'volume3-snapshot14']
+attached:['volume1', 'volume2', 'volume3']
+Detached:[]
+Deleted:['volume3-snapshot4', 'volume2-snapshot14', 'volume2-snapshot4', 'vm1-snapshot14']
 Expunged:[]
 Ha:[]
 Group:
-	vm_snap3:['vm1-snapshot8']---vm1
-	vm_snap1:['vm1-snapshot4']---vm1
+	vm_snap2:['vm1-snapshot9', 'volume1-snapshot9', 'volume2-snapshot9', 'volume3-snapshot9']---vm1volume1_volume2_volume3
 '''

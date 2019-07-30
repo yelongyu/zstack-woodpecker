@@ -22,7 +22,7 @@ def path():
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot9'],
 		[TestAction.reboot_vm, 'vm1'],
 		[TestAction.stop_vm, 'vm1'],
-		[TestAction.use_volume_snapshot, 'volume2-snapshot1'],
+		[TestAction.use_volume_snapshot, 'volume3-snapshot1'],
 		[TestAction.start_vm, 'vm1'],
 		[TestAction.clone_vm, 'vm1', 'vm2', 'full'],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],

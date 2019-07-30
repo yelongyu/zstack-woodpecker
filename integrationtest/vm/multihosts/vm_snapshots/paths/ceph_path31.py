@@ -14,7 +14,7 @@ def path():
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot1'],
 		[TestAction.create_vm_backup, 'vm1', 'vm1-backup1'],
 		[TestAction.stop_vm, 'vm1'],
-		[TestAction.use_volume_snapshot, 'volume1-snapshot1'],
+		[TestAction.use_volume_snapshot, 'volume2-snapshot1'],
 		[TestAction.start_vm, 'vm1'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.stop_vm, 'vm1'],

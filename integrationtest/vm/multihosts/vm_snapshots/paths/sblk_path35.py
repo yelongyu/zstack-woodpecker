@@ -13,7 +13,7 @@ def path():
 		[TestAction.attach_volume, 'vm1', 'volume3'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot1'],
 		[TestAction.create_volume_backup, 'vm1-root', 'vm1-root-backup1'],
-		[TestAction.detach_volume, 'volume1'],
+		[TestAction.detach_volume, 'volume2'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.change_vm_image, 'vm1'],
@@ -31,13 +31,13 @@ def path():
 The final status:
 Running:['vm1']
 Stopped:[]
-Enadbled:['vm1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'vm1-snapshot8', 'volume2-snapshot8', 'volume3-snapshot8', 'vm1-root-backup1']
-attached:['volume2', 'volume3']
-Detached:['volume1']
+Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume3-snapshot5', 'vm1-snapshot8', 'volume1-snapshot8', 'volume3-snapshot8', 'vm1-root-backup1']
+attached:['volume1', 'volume3']
+Detached:['volume2']
 Deleted:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
 Expunged:[]
 Ha:[]
 Group:
-	vm_snap2:['vm1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5']---vm1volume2_volume3
-	vm_snap3:['vm1-snapshot8', 'volume2-snapshot8', 'volume3-snapshot8']---vm1volume2_volume3
+	vm_snap2:['vm1-snapshot5', 'volume1-snapshot5', 'volume3-snapshot5']---vm1volume1_volume3
+	vm_snap3:['vm1-snapshot8', 'volume1-snapshot8', 'volume3-snapshot8']---vm1volume1_volume3
 '''

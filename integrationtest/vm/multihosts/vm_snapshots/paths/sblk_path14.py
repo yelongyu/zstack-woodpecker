@@ -17,11 +17,11 @@ def path():
 		[TestAction.attach_volume, 'vm1', 'volume4'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.stop_vm, 'vm1'],
-		[TestAction.use_volume_snapshot, 'vm1-snapshot5'],
+		[TestAction.use_volume_snapshot, 'vm1-snapshot1'],
 		[TestAction.start_vm, 'vm1'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot10'],
 		[TestAction.migrate_vm, 'vm1'],
-		[TestAction.resize_data_volume, 'volume2', 5*1024*1024],
+		[TestAction.resize_data_volume, 'volume4', 5*1024*1024],
 		[TestAction.clone_vm, 'vm1', 'vm2', 'full'],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
 ])

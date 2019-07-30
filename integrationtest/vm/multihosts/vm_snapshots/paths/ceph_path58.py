@@ -20,10 +20,10 @@ def path():
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.resize_volume, 'vm1', 5*1024*1024],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot10'],
-		[TestAction.batch_delete_volume_snapshot, ['vm1-snapshot5','vm1-snapshot10',]],
-		[TestAction.delete_volume, 'volume3'],
+		[TestAction.batch_delete_volume_snapshot, ['vm1-snapshot5','volume3-snapshot5',]],
+		[TestAction.delete_volume, 'volume1'],
 		[TestAction.stop_vm, 'vm1'],
-		[TestAction.use_volume_snapshot, 'vm1-snapshot1'],
+		[TestAction.use_volume_snapshot, 'vm1-snapshot10'],
 		[TestAction.start_vm, 'vm1'],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
 ])
@@ -34,11 +34,12 @@ def path():
 The final status:
 Running:['vm1']
 Stopped:[]
-Enadbled:['volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'volume4-snapshot5', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume4-snapshot10']
-attached:['volume1', 'volume2', 'volume4']
+Enadbled:['volume1-snapshot5', 'volume2-snapshot5', 'volume4-snapshot5', 'vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume4-snapshot10']
+attached:['volume2', 'volume3', 'volume4']
 Detached:[]
-Deleted:['volume3', 'vm1-snapshot5', 'vm1-snapshot10', 'vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
+Deleted:['volume1', 'vm1-snapshot5', 'volume3-snapshot5', 'vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
 Expunged:[]
 Ha:[]
 Group:
+	vm_snap3:['vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume4-snapshot10']---vm1volume1_volume2_volume3_volume4
 '''

@@ -13,11 +13,11 @@ def path():
 		[TestAction.attach_volume, 'vm1', 'volume3'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot1'],
 		[TestAction.migrate_vm, 'vm1'],
-		[TestAction.create_data_vol_template_from_volume, 'volume2', 'volume2-image1'],
+		[TestAction.create_data_vol_template_from_volume, 'volume3', 'volume3-image1'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.create_volume_snapshot, 'vm1-root', 'vm1-root-snapshot9'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot10'],
-		[TestAction.batch_delete_volume_snapshot, ['volume1-snapshot1','vm1-snapshot10',]],
+		[TestAction.batch_delete_volume_snapshot, ['volume3-snapshot1','volume3-snapshot10',]],
 		[TestAction.create_volume, 'volume4', 'flag=scsi'],
 		[TestAction.attach_volume, 'vm1', 'volume4'],
 		[TestAction.reboot_vm, 'vm1'],
@@ -30,10 +30,10 @@ def path():
 The final status:
 Running:['vm1']
 Stopped:[]
-Enadbled:['vm1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1', 'vm1-root-snapshot9', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume2-image1']
+Enadbled:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'vm1-root-snapshot9', 'vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-image1']
 attached:['volume1', 'volume2', 'volume3', 'volume4']
 Detached:[]
-Deleted:['volume1-snapshot1', 'vm1-snapshot10', 'vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5']
+Deleted:['volume3-snapshot1', 'volume3-snapshot10', 'vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5']
 Expunged:[]
 Ha:[]
 Group:

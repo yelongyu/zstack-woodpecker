@@ -19,14 +19,14 @@ def path():
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.reinit_vm, 'vm1'],
+		[TestAction.start_vm, 'vm1'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot9'],
 		[TestAction.clone_vm, 'vm1', 'vm2'],
-		[TestAction.start_vm, 'vm1'],
 		[TestAction.create_volume_backup, 'volume1', 'volume1-backup2'],
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.use_volume_backup, 'volume1-backup2'],
 		[TestAction.start_vm, 'vm1'],
-		[TestAction.migrate_vm, 'vm1'],
+		[TestAction.migrate_vm, 'vm2'],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
 ])
 

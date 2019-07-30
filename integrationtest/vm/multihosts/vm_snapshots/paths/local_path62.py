@@ -15,12 +15,12 @@ def path():
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.ps_migrate_vm, 'vm1'],
 		[TestAction.start_vm, 'vm1'],
-		[TestAction.delete_volume, 'volume3'],
+		[TestAction.delete_volume, 'volume1'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.resize_volume, 'vm1', 5*1024*1024],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot8'],
 		[TestAction.create_vm_backup, 'vm1', 'vm1-backup1'],
-		[TestAction.delete_volume, 'volume1'],
+		[TestAction.delete_volume, 'volume3'],
 		[TestAction.resize_volume, 'vm1', 5*1024*1024],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
 ])
@@ -31,14 +31,14 @@ def path():
 The final status:
 Running:['vm1']
 Stopped:[]
-Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'vm1-snapshot8', 'volume1-snapshot8', 'volume2-snapshot8', 'vm1-backup1', 'volume1-backup1', 'volume2-backup1']
+Enadbled:['vm1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'vm1-snapshot8', 'volume2-snapshot8', 'volume3-snapshot8', 'vm1-backup1', 'volume2-backup1', 'volume3-backup1']
 attached:['volume2']
 Detached:[]
-Deleted:['volume3', 'volume1', 'vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
+Deleted:['volume1', 'volume3', 'vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
 Expunged:[]
 Ha:[]
 Group:
-	vm_snap2:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5']---vm1volume1_volume2
-	vm_snap3:['vm1-snapshot8', 'volume1-snapshot8', 'volume2-snapshot8']---vm1volume1_volume2
-	vm_backup1:['vm1-backup1', 'volume1-backup1', 'volume2-backup1']---vm1_volume1_volume2
+	vm_snap2:['vm1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5']---vm1volume2_volume3
+	vm_snap3:['vm1-snapshot8', 'volume2-snapshot8', 'volume3-snapshot8']---vm1volume2_volume3
+	vm_backup1:['vm1-backup1', 'volume2-backup1', 'volume3-backup1']---vm1_volume2_volume3
 '''

@@ -15,17 +15,17 @@ def path():
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.use_volume_snapshot, 'vm1-snapshot1'],
 		[TestAction.start_vm, 'vm1'],
-		[TestAction.create_data_vol_template_from_volume, 'volume2', 'volume2-image1'],
+		[TestAction.create_data_vol_template_from_volume, 'volume3', 'volume3-image1'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.clone_vm, 'vm1', 'vm2'],
-		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot9'],
-		[TestAction.create_volume_backup, 'vm1-root', 'vm1-root-backup1'],
-		[TestAction.create_volume_backup, 'volume3', 'volume3-backup2'],
+		[TestAction.create_vm_snapshot, 'vm2', 'vm2-snapshot9'],
+		[TestAction.create_volume_backup, 'vm2-root', 'vm2-root-backup1'],
+		[TestAction.create_volume_backup, 'volume1', 'volume1-backup2'],
 		[TestAction.stop_vm, 'vm1'],
-		[TestAction.use_volume_backup, 'volume3-backup2'],
+		[TestAction.use_volume_backup, 'volume1-backup2'],
 		[TestAction.start_vm, 'vm1'],
 		[TestAction.create_vm_backup, 'vm2', 'vm2-backup3'],
-		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
+		[TestAction.delete_vm_snapshot, 'vm2-snapshot9'],
 ])
 
 
@@ -34,14 +34,14 @@ def path():
 The final status:
 Running:['vm2', 'vm1']
 Stopped:[]
-Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'vm1-snapshot9', 'volume1-snapshot9', 'volume2-snapshot9', 'volume3-snapshot9', 'vm1-root-backup1', 'volume3-backup2', 'vm2-backup3', 'volume2-image1']
+Enadbled:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1', 'vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'vm2-root-backup1', 'volume1-backup2', 'vm2-backup3', 'volume3-image1']
 attached:['volume1', 'volume2', 'volume3']
 Detached:[]
-Deleted:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
+Deleted:['vm2-snapshot9']
 Expunged:[]
 Ha:[]
 Group:
 	vm_snap2:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5']---vm1volume1_volume2_volume3
-	vm_snap3:['vm1-snapshot9', 'volume1-snapshot9', 'volume2-snapshot9', 'volume3-snapshot9']---vm1volume1_volume2_volume3
+	vm_snap1:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']---vm1volume1_volume2_volume3
 	vm_backup1:['vm2-backup3']---vm2_
 '''

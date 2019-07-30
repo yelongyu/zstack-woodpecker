@@ -1477,7 +1477,7 @@ def expunge_volume(robot_test_obj, args):
     robot_test_obj.test_dict.remove_snap_tree(name)
 
 
-def migrate_volume():
+def migrate_volume(robot_test_obj, args):
     pass
 
 

@@ -1,0 +1,39 @@
+import zstackwoodpecker.test_state as ts_header
+import os
+TestAction = ts_header.TestAction
+def path():
+
+    return dict(initial_formation="template5", path_list=[
+		[TestAction.create_vm, 'vm1', 'flag=sblk'],
+		[TestAction.create_volume, 'volume1', 'flag=ceph,scsi'],
+		[TestAction.attach_volume, 'vm1', 'volume1'],
+		[TestAction.create_volume, 'volume2', 'flag=sblk,scsi'],
+		[TestAction.attach_volume, 'vm1', 'volume2'],
+		[TestAction.create_volume, 'volume3', 'flag=ceph,scsi'],
+		[TestAction.attach_volume, 'vm1', 'volume3'],
+		[TestAction.clone_vm, 'vm1', 'vm2', 'full'],
+		[TestAction.create_vm_snapshot, 'vm2', 'vm2-snapshot1'],
+		[TestAction.reboot_vm, 'vm2'],
+		[TestAction.clone_vm, 'vm1', 'vm3', 'full'],
+		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
+		[TestAction.stop_vm, 'vm2'],
+		[TestAction.use_vm_snapshot, 'vm2-snapshot1'],
+		[TestAction.start_vm, 'vm2'],
+])
+
+
+
+'''
+The final status:
+Running:['vm1', 'vm3', 'vm2']
+Stopped:[]
+Enadbled:['vm2-snapshot1', 'volume4-snapshot1', 'volume5-snapshot1', 'volume6-snapshot1', 'vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5']
+attached:['volume1', 'volume2', 'volume3', 'volume4', 'volume5', 'volume6', 'volume7', 'volume8', 'volume9']
+Detached:[]
+Deleted:[]
+Expunged:[]
+Ha:[]
+Group:
+	vm_snap2:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5']---vm1volume1_volume2_volume3
+	vm_snap1:['vm2-snapshot1', 'volume4-snapshot1', 'volume5-snapshot1', 'volume6-snapshot1']---vm2volume4_volume5_volume6
+'''

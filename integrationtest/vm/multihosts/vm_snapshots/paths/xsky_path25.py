@@ -13,7 +13,7 @@ def path():
 		[TestAction.attach_volume, 'vm1', 'volume3'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot1'],
 		[TestAction.resize_volume, 'vm1', 5*1024*1024],
-		[TestAction.migrate_volume, 'volume1'],
+		[TestAction.migrate_volume, 'volume3'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.ps_migrate_vm, 'vm1'],

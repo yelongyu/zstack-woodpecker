@@ -18,6 +18,7 @@ def path():
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.reinit_vm, 'vm1'],
+		[TestAction.start_vm, 'vm1'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot10'],
 		[TestAction.create_image_from_volume, 'vm1', 'vm1-image1'],
 		[TestAction.detach_volume, 'volume2'],
@@ -29,8 +30,8 @@ def path():
 
 '''
 The final status:
-Running:[]
-Stopped:['vm1']
+Running:['vm1']
+Stopped:[]
 Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'volume4-snapshot5', 'vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume4-snapshot10', 'vm1-backup1', 'volume1-backup1', 'volume2-backup1', 'volume3-backup1', 'vm1-image1']
 attached:['volume1', 'volume3', 'volume4']
 Detached:['volume2']

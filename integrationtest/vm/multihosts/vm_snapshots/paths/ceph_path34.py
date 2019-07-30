@@ -22,6 +22,7 @@ def path():
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot10'],
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.reinit_vm, 'vm1'],
+		[TestAction.start_vm, 'vm1'],
 		[TestAction.delete_volume_snapshot, 'vm1-snapshot10'],
 		[TestAction.clone_vm, 'vm1', 'vm2'],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
@@ -31,8 +32,8 @@ def path():
 
 '''
 The final status:
-Running:['vm2']
-Stopped:['vm1']
+Running:['vm1', 'vm2']
+Stopped:[]
 Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'volume4-snapshot5', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume4-snapshot10']
 attached:['volume1', 'volume2', 'volume3', 'volume4']
 Detached:[]

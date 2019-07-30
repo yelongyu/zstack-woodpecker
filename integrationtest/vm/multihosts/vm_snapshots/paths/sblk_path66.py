@@ -15,12 +15,12 @@ def path():
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.use_volume_snapshot, 'vm1-snapshot1'],
 		[TestAction.start_vm, 'vm1'],
-		[TestAction.create_volume_backup, 'volume1', 'volume1-backup1'],
+		[TestAction.create_volume_backup, 'volume3', 'volume3-backup1'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.create_vm_backup, 'vm1', 'vm1-backup2'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot9'],
 		[TestAction.clone_vm, 'vm1', 'vm2'],
-		[TestAction.delete_volume_snapshot, 'volume3-snapshot1'],
+		[TestAction.delete_volume_snapshot, 'volume2-snapshot1'],
 		[TestAction.clone_vm, 'vm1', 'vm3', 'full'],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
 ])
@@ -31,7 +31,7 @@ def path():
 The final status:
 Running:['vm1', 'vm2', 'vm3']
 Stopped:[]
-Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'vm1-snapshot9', 'volume1-snapshot9', 'volume2-snapshot9', 'volume3-snapshot9', 'volume1-backup1', 'vm1-backup2', 'volume1-backup2', 'volume2-backup2', 'volume3-backup2']
+Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'vm1-snapshot9', 'volume1-snapshot9', 'volume2-snapshot9', 'volume3-snapshot9', 'volume3-backup1', 'vm1-backup2', 'volume1-backup2', 'volume2-backup2', 'volume3-backup2']
 attached:['volume1', 'volume2', 'volume3', 'volume4', 'volume5', 'volume6']
 Detached:[]
 Deleted:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']

@@ -22,7 +22,7 @@ def path():
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.ps_migrate_vm, 'vm1'],
 		[TestAction.start_vm, 'vm1'],
-		[TestAction.detach_volume, 'volume3'],
+		[TestAction.detach_volume, 'volume2'],
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.ps_migrate_vm, 'vm1'],
 		[TestAction.start_vm, 'vm1'],
@@ -36,8 +36,8 @@ The final status:
 Running:['vm1']
 Stopped:[]
 Enadbled:['vm1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'vm1-snapshot8', 'volume2-snapshot8', 'volume3-snapshot8', 'vm1-root-backup1']
-attached:['volume2']
-Detached:['volume1', 'volume3']
+attached:['volume3']
+Detached:['volume1', 'volume2']
 Deleted:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
 Expunged:[]
 Ha:[]

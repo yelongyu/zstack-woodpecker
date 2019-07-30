@@ -21,8 +21,8 @@ def path():
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot8'],
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.reinit_vm, 'vm1'],
-		[TestAction.migrate_volume, 'volume1'],
 		[TestAction.start_vm, 'vm1'],
+		[TestAction.migrate_volume, 'volume1'],
 		[TestAction.migrate_vm, 'vm1'],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
 ])
