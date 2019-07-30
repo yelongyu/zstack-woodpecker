@@ -208,7 +208,6 @@ mnHostName1 = mn_host_name1
 mnHostName2 = mn_host_name2
 nodeNic = eth0
 
-imageName_i_c7_no_tag = centos7-installation-no-system-tag
 imageName_i_c7 = centos7-installation-test
 imageUrl_i_c7 = http://192.168.200.100/mirror/diskimages/centos7-test.qcow2
 

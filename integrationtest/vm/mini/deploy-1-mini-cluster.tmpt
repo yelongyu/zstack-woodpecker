@@ -10,3 +10,12 @@ hostPort = 22
 instanceOfferingMemory_l = 2G
 instanceOfferingCpuNum_l = 2
 imageUrl_vdbench = http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2
+
+imageName_i_c7 = centos7-installation-test
+imageUrl_i_c7 = http://192.168.200.100/mirror/diskimages/centos7-test.qcow2
+
+imageName_i_u14 = ubuntu1404-installation-test
+imageUrl_i_u14 = http://192.168.200.100/mirror/diskimages/ubuntu14.04.4.qcow2
+
+imageName_i_u16 = ubuntu1604-installation-test
+imageUrl_i_u16 = http://192.168.200.100/mirror/diskimages/ubuntu1604.qcow2
