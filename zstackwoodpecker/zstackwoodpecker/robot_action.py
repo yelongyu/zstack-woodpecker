@@ -517,12 +517,21 @@ def idel(robot_test_obj, args):
 def create_vm(robot_test_obj, args):
     name = args[0]
     l3_uuid = None
-    flag = None
     disk_offering_uuid = None
+    ps_type = None
+    provisiong = None
 
     arg_dict = parser_args(args[1:])
     if 'flag' in arg_dict:
         flag = arg_dict['flag']
+        if "thick" in flag:
+            provisiong = "Thick"
+        if "thin" in flag:
+            provisiong = "Thin"
+        if "ceph" in flag:
+            ps_type = "Ceph"
+        if "sblk" in flag:
+            ps_type = "SharedBlock"
 
     if 'network' in arg_dict:
         if arg_dict['network'] == "random":
@@ -538,16 +547,12 @@ def create_vm(robot_test_obj, args):
             else:
                 l3_uuid = l3[0].uuid
 
-    if flag and "thick" in flag:
-        provisiong = "Thick"
-    else:
-        provisiong = "Thin"
-
     if arg_dict.has_key('data_volume') and arg_dict['data_volume'] == 'true':
         disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING)[0].uuid
         dataVolumeSystemTags = ["capability::virtio-scsi"]
 
-    rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
+    if provisiong:
+        rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
 
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
@@ -555,6 +560,13 @@ def create_vm(robot_test_obj, args):
 
     cond = res_ops.gen_query_conditions("type", "=", "UserVm")
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond)[0].uuid
+
+    if ps_type:
+        cond = res_ops.gen_query_conditions("type", "=", ps_type)
+        pss = res_ops.gen_query_conditions(res_ops.PRIMARY_STORAGE, cond)
+        if not pss:
+            test_util.test_fail("there is no primarystorage type: [%s]" % ps_type)
+        vm_creation_option.set_ps_uuid(pss[0].uuid)
 
     if l3_uuid:
         vm_creation_option.set_l3_uuids([l3_uuid])
@@ -1279,6 +1291,7 @@ def create_volume(robot_test_obj, args):
     large_flag = False
     volume_check_flag = True
     disksize = 2 * 1024 * 1024 * 1024
+    ps_type = None
 
     if len(args) < 1:
         test_util.test_fail("no resource available for next action: create volume")
@@ -1295,9 +1308,13 @@ def create_volume(robot_test_obj, args):
             systemtags.append("volumeProvisioningStrategy::ThinProvisioning")
         if 'thick' in tags:
             systemtags.append("volumeProvisioningStrategy::ThickProvisioning")
+        if 'ceph' in tags:
+            ps_type = "Ceph"
+        if 'sharedblock' in tags:
+            ps_type = "SharedBlock"
 
     # parser args[3:] size flag
-    # todo: add ps_uuid, offering_uuid, if loacl_ps appoint host will be better
+    # todo: add ps_type, offering_uuid, if loacl_ps appoint host will be better
     arg_dict = parser_args(args[1:])
     if "flag" in arg_dict:
         flag = arg_dict["flag"]
@@ -1313,6 +1330,10 @@ def create_volume(robot_test_obj, args):
             systemtags.append("volumeProvisioningStrategy::ThinProvisioning")
         if "thick" in flag:
             systemtags.append("volumeProvisioningStrategy::ThickProvisioning")
+        if 'ceph' in flag:
+            ps_type = "Ceph"
+        if 'sblk' in flag:
+            ps_type = "SharedBlock"
 
     if "size" in arg_dict:
         if arg_dict["size"] == "random":
@@ -1332,6 +1353,13 @@ def create_volume(robot_test_obj, args):
         if ps.type in [inventory.LOCAL_STORAGE_TYPE or 'MiniStorage']:
             host_uuid = robot_test_obj.get_default_config()['HOST']
             systemtags.append("localStorage::hostUuid::%s" % (host_uuid))
+
+    if ps_type:
+        cond = res_ops.gen_query_conditions("type", "=", ps_type)
+        pss = res_ops.gen_query_conditions(res_ops.PRIMARY_STORAGE, cond)
+        if not pss:
+            test_util.test_fail("there is no primarystorage type: [%s]" % ps_type)
+        volume_creation_option.set_primary_storage_uuid(pss[0].uuid)
 
     if systemtags:
         volume_creation_option.set_system_tags(systemtags)
