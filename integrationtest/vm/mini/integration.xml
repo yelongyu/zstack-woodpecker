@@ -25,6 +25,14 @@
 		<case timeout='1200' noparallel='True'>network/test_delete_recover_vm_after_attach_eip.py</case>
 		<case timeout='1200' noparallel='True'>network/test_one_eip_one_vm_more_vmNics.py</case>
 		<case timeout='1200' noparallel='True'>network/test_pub_vm_connectivity.py</case>
+		<case timeout='1800' noparallel='True'>volume/test_data_volume_operations.py</case>
+		<case timeout='1800' noparallel='True'>volume/test_create_data_volume.py</case>
+		<case timeout='1800' noparallel='True'>volume/test_check_data_volume_vio_bus_type.py </case>
+		<case timeout='1800' noparallel='True'>volume/test_check_root_volume_vio_bus_type.py</case>
+		<case timeout='1800' noparallel='True'>volume/test_create_data_volume.py</case>
+		<case timeout='1800' noparallel='True'>volume/test_max_allowed_attached_vscsi_volume.py</case>
+		<case timeout='1800' noparallel='True'>volume/test_max_allowed_attached_vblk_volume.py</case>
+		<case timeout='1800' noparallel='True'>volume/test_create_data_volume_backup.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_del_image_replication_grp.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_dst_bs_nic_down.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_dst_bs_off.py</case>
