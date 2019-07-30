@@ -208,30 +208,12 @@ mnHostName1 = mn_host_name1
 mnHostName2 = mn_host_name2
 nodeNic = eth0
 
-imageName_i_c6 = centos6-installation-test
-imageUrl_i_c6 = http://zstack/image/centos6-test.qcow2
-
 imageName_i_c7_no_tag = centos7-installation-no-system-tag
 imageName_i_c7 = centos7-installation-test
-imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
-
-imageName_i_u12 = ubuntu1204-installation-test
-imageUrl_i_u12 = http://zstack/image/ubuntu12-test.qcow2
-
-imageName_i_u13 = ubuntu1304-installation-test
-imageUrl_i_u13 = http://zstack/image/ubuntu13-test.qcow2
+imageUrl_i_c7 = http://192.168.200.100/mirror/diskimages/centos7-test.qcow2
 
 imageName_i_u14 = ubuntu1404-installation-test
-imageUrl_i_u14 = http://zstack/image/ubuntu14-test.qcow2
-
-imageName_i_u15 = ubuntu1504-installation-test
-imageUrl_i_u15 = http://zstack/image/ubuntu15-test.qcow2
+imageUrl_i_u14 = http://192.168.200.100/mirror/diskimages/ubuntu14.04.4.qcow2
 
 imageName_i_u16 = ubuntu1604-installation-test
-imageUrl_i_u16 = http://zstack/image/ubuntu16-test.qcow2
-
-imageName_i_c6_32 = centos6-32-installation-test
-imageUrl_i_c6_32 = http://zstack/image/CentOS-6.8-i386-LiveCD.qcow2
-
-imageName_i_c7_32 = centos7-32-installation-test
-imageUrl_i_c7_32 = http://zstack/image/CentOS-7-i386-LiveGNOME-1511.qcow2
+imageUrl_i_u16 = http://192.168.200.100/mirror/diskimages/ubuntu1604.qcow2
