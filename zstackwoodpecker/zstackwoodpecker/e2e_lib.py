@@ -31,7 +31,7 @@ class E2E(object):
             test_browser = f.readline().strip()
         test_browser = test_browser if test_browser in ['chrome', 'firefox'] else 'chrome'
         with open('/home/mn_node_ip', 'r') as nip_file:
-            selenium_server = nip_file.read()
+            selenium_server = nip_file.read().strip()
         self.uri = 'http://%s:4444/wd/hub/session' % selenium_server
 #         self.uri = 'http://%s:4444/wd/hub/session' % os.getenv('SELENIUM_SERVER')
         body = '{"desiredCapabilities":{"browserName":"%s"}}' % test_browser
@@ -134,7 +134,8 @@ class E2E(object):
             rsp, uri = self._get_element(join(par_uri, 'element'), value=val_list[i], strategy=strategy, exp_if_stale=exp_if_stale)
             if rsp.value is not None:
                 break
-        element = rsp.value.ELEMENT
+#         element = rsp.value.ELEMENT
+        element = rsp.value['element-6066-11e4-a52e-4f735466cecf']
         if element is None:
             if check_result:
                 test_util.test_fail('Can not find the element [strategy="%s", value="%s"]' % (strategy, value))
@@ -158,7 +159,8 @@ class E2E(object):
         elements = rsp.value
         if elements:
             for elem in elements:
-                element_list.append(Element(join(uri, elem.ELEMENT), par_uri, strategy, value))
+#                 element_list.append(Element(join(uri, elem.ELEMENT), par_uri, strategy, value))
+                element_list.append(Element(join(uri, elem['element-6066-11e4-a52e-4f735466cecf']), par_uri, strategy, value))
         elif check_result:
             test_util.test_fail('Can not find the elements [strategy="%s", value="%s"]' % (strategy, value))
         return element_list

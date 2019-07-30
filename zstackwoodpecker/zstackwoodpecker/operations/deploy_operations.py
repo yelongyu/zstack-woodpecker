@@ -53,22 +53,21 @@ def deploy_selenium_docker():
     with open('/home/upload_test_result/test_target', 'r') as f:
             test_browser = f.readline().strip()
     if test_browser and test_browser.lower() == 'firefox':
-        _node = 'node-firefox-debug'
+        selenium_standalone = 'standalone-firefox-debug'
     else:
-        _node = 'node-chrome-debug'
+        selenium_standalone = 'standalone-chrome-debug'
     zs_node_ip = os.getenv('ZSTACK_BUILT_IN_HTTP_SERVER_IP')
     remote_registry = os.getenv('REMOTE_REGISTRY')
     with open('/home/mn_node_ip', 'w') as nip_file:
         nip_file.write(zs_node_ip)
     install_docker_cmd = 'yum --enablerepo=* clean all && yum --disablerepo=* --enablerepo=zstack-mn,qemu-kvm-ev-mn install -y docker'
     pull_workaround_cmd = '''echo '{ "insecure-registries":["%s:5000"]}' > /etc/docker/daemon.json;
-                            systemctl daemon-reload; service docker restart''' % remote_registry
-    pull_image_cmd = 'docker pull %s:5000/selenium/hub; \
-                      docker pull %s:5000/selenium/%s;' % (remote_registry, remote_registry, _node)
-    selenium_hub_run_cmd = 'docker run -d -p 4444:4444 --name selenium-hub selenium/hub'
-    selenium_node_run_cmd = 'docker run -d -p 5900:5900 -e SCREEN_WIDTH=1920 -e SCREEN_HEIGHT=1080 -e SCREEN_DEPTH=24 -e SCREEN_DPI=150 \
-                             --link selenium-hub:hub selenium/%s' % _node
-    for cmd in [install_docker_cmd, pull_workaround_cmd, pull_image_cmd, selenium_hub_run_cmd, selenium_node_run_cmd]:
+                            systemctl enable docker; systemctl start docker''' % remote_registry
+    pull_image_cmd = 'docker pull %s:5000/selenium/%s' % (remote_registry, selenium_standalone)
+#     selenium_hub_run_cmd = 'docker run -d -p 4444:4444 --name selenium-hub selenium/hub'
+    selenium_docker_run_cmd = 'docker run -d -p 4444:4444 -p 5900:5900 -v /dev/shm:/dev/shm -e SCREEN_WIDTH=1920 \
+                               -e SCREEN_HEIGHT=1080 -e SCREEN_DEPTH=24 selenium/%s' % selenium_standalone
+    for cmd in [install_docker_cmd, pull_workaround_cmd, pull_image_cmd, selenium_docker_run_cmd]:
         ssh.execute(cmd, zs_node_ip, 'root', 'password')
 
 def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_name):
