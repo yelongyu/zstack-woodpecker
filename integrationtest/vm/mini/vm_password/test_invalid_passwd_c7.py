@@ -1,0 +1,1 @@
+../../vm_password/test_invalid_passwd_c7.py

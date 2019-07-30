@@ -1,0 +1,1 @@
+../../vm_password/test_chg_vm_passwd_c7_32.py

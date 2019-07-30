@@ -1,0 +1,1 @@
+../../vm_password/test_bath_chg_vm_passwd_c7.py
