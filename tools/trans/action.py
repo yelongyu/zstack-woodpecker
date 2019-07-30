@@ -125,29 +125,6 @@ class change_vm_ha(Action):
         return self.path
 
 
-class change_vm_image(Action):
-    def __init__(self):
-        Action.__init__(self)
-        self.run_state = resource.STOPPED
-
-    def check(self, all_vms, tags):
-        Action.check(self, all_vms, tags)
-        if (len(all_vms.stopped + all_vms.running) - len(all_vms.ha)) == 0:
-            print "There is no resource vm to start.Must add create_vm"
-            self.path.append(resource.Vm().create([]))
-        if len(all_vms.stopped) > 0:
-            vm = random.choice(all_vms.stopped)
-            return vm
-        vm = random.choice(all_vms.get_not_ha_resource())
-        self.path.append(vm.stop())
-        return vm
-
-    def run(self, tags):
-        Action.run(self, tags)
-        vm = self.check(resource.all_vms, tags)
-        self.path.append(vm.change_vm_image())
-        return self.path
-
 class reboot_vm(Action):
     def __init__(self):
         Action.__init__(self)
@@ -172,6 +149,7 @@ class reboot_vm(Action):
         vm = self.check(resource.all_vms, tags)
         self.path.append(vm.reboot())
         return self.path
+
 
 class recover_vm(Action):
     def __init__(self):
@@ -240,6 +218,28 @@ class reinit_vm(Action):
         self.path.append(vm.reinit())
         return self.path
 
+class change_vm_image(Action):
+    def __init__(self):
+        Action.__init__(self)
+        self.run_state = resource.STOPPED
+
+    def check(self, all_vms, tags):
+        Action.check(self, all_vms, tags)
+        if (len(all_vms.stopped + all_vms.running) - len(all_vms.ha)) == 0:
+            print "There is no resource vm to start.Must add create_vm"
+            self.path.append(resource.Vm().create([]))
+        if len(all_vms.stopped) > 0:
+            vm = random.choice(all_vms.stopped)
+            return vm
+        vm = random.choice(all_vms.get_not_ha_resource())
+        self.path.append(vm.stop())
+        return vm
+
+    def run(self, tags):
+        Action.run(self, tags)
+        vm = self.check(resource.all_vms, tags)
+        self.path.append(vm.change_vm_image())
+        return self.path
 
 class migrate_vm(Action):
     def __init__(self):
@@ -615,10 +615,12 @@ class delete_root_snapshot(Action):
         for vm in vm_list:
             if vm.snapshots:
                 snapshot = random.choice(vm.snapshots)
+                print 1
                 return vm, snapshot
         else:
             vm = random.choice(all_vms.stopped + all_vms.running)
             self.path.append(vm.create_root_snapshot())
+            print 2
             return vm, vm.snapshots[0]
 
     def run(self, tags):
@@ -955,8 +957,7 @@ class delete_volume_snapshot(Action):
         random.shuffle(volume_list)
         for volume in volume_list:
             for snapshot in volume.snapshots:
-                self.volume = volume
-                return self.volume, snapshot
+                return volume, snapshot
         else:
             self.volume = random.choice(volume_list)
             if self.volume.state == resource.DELETED:
@@ -1179,10 +1180,10 @@ class use_volume_backup(Action):
         Action.run(self, tags)
         volume, backup = self.check(resource.all_volumes, tags)
         self.path.append(volume.use_volume_backup(backup))
-        if self.reha:
-            self.path.append(volume.vm.change_ha())
         if self.restart:
             self.path.append(volume.vm.start())
+        if self.reha:
+            self.path.append(volume.vm.change_ha())
         if self.redetach:
             self.path.append(volume.detach())
         return self.path
@@ -1219,7 +1220,7 @@ class delete_vm_snapshot(Action):
             vm1 = resource.Vm()
             self.path.append(vm1.create([]))
             self.path.append(vm1.create_vm_snapshot())
-            return vm1, vm1.snapshots[0]
+            return vm1, vm1.snapshots[-1]
         vm_list = all_vms.stopped + all_vms.running
         random.shuffle(vm_list)
         for vm in vm_list:
@@ -1230,7 +1231,7 @@ class delete_vm_snapshot(Action):
         else:
             vm = random.choice(all_vms.stopped + all_vms.running)
             self.path.append(vm.create_vm_snapshot())
-            return vm, vm.snapshots[0]
+            return vm, vm.snapshots[-1]
 
     def run(self, tags):
         Action.run(self, tags)
@@ -1262,7 +1263,7 @@ class use_vm_snapshot(Action):
             else:
                 vm = random.choice(all_vms.stopped)
                 self.path.append(vm.create_vm_snapshot())
-                return vm, vm.snapshots[0]
+                return vm, vm.snapshots[-1]
         self.restart = True
         vm_list = all_vms.get_not_ha_resource()
         random.shuffle(vm_list)
@@ -1275,7 +1276,7 @@ class use_vm_snapshot(Action):
             vm = random.choice(all_vms.get_not_ha_resource())
             self.path.append(vm.create_vm_snapshot())
             self.path.append(vm.stop())
-            return vm, vm.snapshots[0]
+            return vm, vm.snapshots[-1]
 
     def run(self, tags):
         Action.run(self, tags)
@@ -1591,7 +1592,7 @@ class create_vm_from_image(Action):
         if len(all_images.enabled + all_images.deleted) != 0:
             image_list = all_images.enabled + all_images.deleted
             random.shuffle(image_list)
-            for image in  image_list:
+            for image in image_list:
                 if image.type == resource.ROOT:
                     if image.state == resource.DELETED:
                         self.redelete = True
@@ -1665,7 +1666,52 @@ class create_volume_from_image(Action):
         Action.run(self, tags)
 
 
+class change_volume_attached_vm(Action):
+    def __init__(self):
+        Action.__init__(self)
+        self.pair = []
+        self.vol_vm = []
+
+    def check(self, all_volumes, tags):
+        Action.check(self, all_volumes, tags)
+        for volume in all_volumes.attached:
+            old_vm = volume.vm
+            for vm in resource.all_vms.running:
+                if vm != old_vm:
+                    self.pair = [volume, vm]
+            if not self.pair:
+                new_vm = resource.Vm()
+                self.path.append(new_vm.create([]))
+                self.pair = [volume, new_vm]
+            self.vol_vm.append(self.pair)
+            self.pair = []
+
+    def run(self, tags):
+        Action.run(self, tags)
+        self.check(resource.all_volumes, tags)
+        for pair in self.vol_vm:
+            self.path.append(pair[0].detach())
+            self.path.append(pair[0].attach(pair[1]))
+        return self.path
+
+
 if __name__ == "__main__":
+    print create_vm().run([])
     print create_volume().run([])
     print attach_volume().run([])
-    print recover_image().run([])
+    print create_volume().run([])
+    print attach_volume().run([])
+    print create_volume().run([])
+    print attach_volume().run([])
+    print create_volume().run([])
+    print attach_volume().run([])
+    print create_volume().run([])
+    print attach_volume().run([])
+    print attach_volume().run([])
+    # # print recover_volume().run([])
+    # # print create_volume_backup().run([])
+    # print detach_vm_snapshot().run([])
+    # print clone_vm().run([])
+
+    print change_volume_attached_vm().run([])
+    print resource.all_vms + resource.all_backups + resource.all_snapshots + resource.all_volumes + resource.all_images

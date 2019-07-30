@@ -28,8 +28,8 @@ Options:
 | 扩容云主机/扩容根云盘           | scsi             | resize_volume            | Done |
 | 重置云主机                      | share            | reinit_vm                |      |
 | 迁移云主机                      | 带云盘           | migrate_vm               |      |
-| 存储迁移云主机                  |                  | ps_migrate_vm            |      |
-| 更换云主机高可用                |                  | change_vm_ha             | Done |
+| 存储迁移云主机                  | ceph             | ps_migrate_vm            |      |
+| 更换云主机高可用                | sblk             | change_vm_ha             | Done |
 | 克隆云主机                      |                  | clone_vm                 |      |
 | 更换云主机镜像(Todo)            |                  |                          |      |
 | 克隆整机                        |                  |                          |      |

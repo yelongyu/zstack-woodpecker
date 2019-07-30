@@ -42,6 +42,7 @@ zh_en = {
     u"云盘镜像": "data_image",
     u"云盘备份": "data_backup",
     u"云盘从镜像": "volume_from_image",
+    u"云盘加载云主机": "volume_attached_vm",
 
     u"镜像": "image",
     u"iso": "iso",
@@ -65,6 +66,8 @@ zh_en = {
     u"大": "flag=large",
     u"scsi": "flag=scsi",
     u"share": "flag=shareable",
+    u'sblk': "flag=sblk",
+    u'ceph': "flag=ceph"
 
 
 }

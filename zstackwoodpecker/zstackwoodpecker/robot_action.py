@@ -520,6 +520,7 @@ def create_vm(robot_test_obj, args):
     disk_offering_uuid = None
     ps_type = None
     provisiong = None
+    dataVolumeSystemTags = None
 
     arg_dict = parser_args(args[1:])
     if 'flag' in arg_dict:
@@ -551,9 +552,6 @@ def create_vm(robot_test_obj, args):
         disk_offering_uuid = res_ops.query_resource(res_ops.DISK_OFFERING)[0].uuid
         dataVolumeSystemTags = ["capability::virtio-scsi"]
 
-    if provisiong:
-        rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
-
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
@@ -563,7 +561,7 @@ def create_vm(robot_test_obj, args):
 
     if ps_type:
         cond = res_ops.gen_query_conditions("type", "=", ps_type)
-        pss = res_ops.gen_query_conditions(res_ops.PRIMARY_STORAGE, cond)
+        pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
         if not pss:
             test_util.test_fail("there is no primarystorage type: [%s]" % ps_type)
         vm_creation_option.set_ps_uuid(pss[0].uuid)
@@ -582,7 +580,9 @@ def create_vm(robot_test_obj, args):
     vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_creation_option.set_image_uuid(image_uuid)
     vm_creation_option.set_name(name)
-    vm_creation_option.set_rootVolume_systemTags([rootVolumeSystemTag])
+    if provisiong:
+        rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
+        vm_creation_option.set_rootVolume_systemTags([rootVolumeSystemTag])
 
     vm = zstack_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
@@ -1356,7 +1356,7 @@ def create_volume(robot_test_obj, args):
 
     if ps_type:
         cond = res_ops.gen_query_conditions("type", "=", ps_type)
-        pss = res_ops.gen_query_conditions(res_ops.PRIMARY_STORAGE, cond)
+        pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
         if not pss:
             test_util.test_fail("there is no primarystorage type: [%s]" % ps_type)
         volume_creation_option.set_primary_storage_uuid(pss[0].uuid)

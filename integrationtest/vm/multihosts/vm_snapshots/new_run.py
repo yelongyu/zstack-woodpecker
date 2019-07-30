@@ -6,7 +6,6 @@ _config_ = {
     'timeout': 10400,
     'noparallel': True
 }
-Robot.MINI = True
 
 case_flavor = test_util.load_paths(os.path.join(os.path.dirname(__file__), "templates"),
                                    os.path.join(os.path.dirname(__file__), "paths"))
@@ -25,7 +24,7 @@ def test():
     path_list = flavor['path_list']
     repeat = flavor['repeat']
 
-    Robot.robot_create_utility_vm()
+    # Robot.robot_create_utility_vm()
     robot_test_obj = Robot.robot()
     robot_test_obj.initial(path_list)
 
