@@ -33,6 +33,9 @@
 		<case timeout='1800' noparallel='True'>volume/test_max_allowed_attached_vscsi_volume.py</case>
 		<case timeout='1800' noparallel='True'>volume/test_max_allowed_attached_vblk_volume.py</case>
 		<case timeout='1800' noparallel='True'>volume/test_create_data_volume_backup.py</case>
+		<case timeout='1800' noparallel='True'>vm/test_create_vm_with_illegal_parameters.py</case>
+		<case timeout='1800' noparallel='True'>vm/test_create_vm_backup.py</case>
+		<case timeout='1800' noparallel='True'>vm/test_create_vm_from_diff_images.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_del_image_replication_grp.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_dst_bs_nic_down.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_dst_bs_off.py</case>
