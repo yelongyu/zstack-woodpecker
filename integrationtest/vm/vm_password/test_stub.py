@@ -36,7 +36,7 @@ def create_vm(vm_name='virt-vm', \
 
 
     if not image_name:
-        image_name = os.environ.get('imageName_net') 
+        image_name = os.environ.get('imageName_net')
     elif os.environ.get(image_name):
         image_name = os.environ.get(image_name)
 
@@ -66,7 +66,7 @@ def create_vm(vm_name='virt-vm', \
     vm = zstack_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
-    return vm 
+    return vm
 
 
 def create_user_in_vm(vm, username, password):

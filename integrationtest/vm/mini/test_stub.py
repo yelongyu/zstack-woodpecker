@@ -32,6 +32,7 @@ import zstackwoodpecker.test_state as test_state
 from cherrypy.scaffold import root
 import zstackwoodpecker.operations.config_operations as conf_ops
 
+original_root_password = "password"
 
 def migrate_vm_to_random_host(vm):
     test_util.test_dsc("migrate vm to random host")
@@ -598,7 +599,7 @@ def up_host_network(host_ip, scenarioConfig, network_type):
         test_util.test_fail("The candidate password are both not for the physical host %s, tried password %s;%s with username %s" %(host_inv.managementIp, host_password, host_password2, host_username))
 
 def create_mini_vm(l3_uuid_list, image_uuid, vm_name=None, cpu_num=None, memory_size=None, \
-                   system_tags=None, cluster_uuid=None, rootVolume_systemTags=None, session_uuid=None):
+                   system_tags=None, cluster_uuid=None, rootVolume_systemTags=None, session_uuid=None, root_password=None):
     vm_name = vm_name if vm_name else 'mini_vm'
     cpu_num = cpu_num if cpu_num else 1
     # set memory size to 1G
@@ -615,6 +616,8 @@ def create_mini_vm(l3_uuid_list, image_uuid, vm_name=None, cpu_num=None, memory_
     vm_creation_option.set_cluster_uuid(cluster_uuid)
     vm_creation_option.set_session_uuid(session_uuid)
     vm_creation_option.set_timeout(900000)
+    if root_password:
+        vm_creation_option.set_root_password(root_password)
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
     vm.create()
@@ -634,7 +637,7 @@ def create_mini_volume(volume_name=None, disk_size=None, system_tags=None, sessi
     volume.create(for_mini=True)
     return volume
 
-def create_vm(l3_uuid_list=[], image_name=None, vm_name=None, provisioning='thick', cpu_num=None, mem_size=None):
+def create_vm(l3_uuid_list=[], image_name=None, vm_name=None, provisioning='thick', cpu_num=None, mem_size=None, root_password=None):
     if not l3_uuid_list:
         l3_net_uuid = test_lib.lib_get_l3_by_name(os.getenv('l3PublicNetworkName')).uuid
         l3_uuid_list.append(l3_net_uuid)
@@ -644,7 +647,8 @@ def create_vm(l3_uuid_list=[], image_name=None, vm_name=None, provisioning='thic
         rootVolume_systemTags = ["volumeProvisioningStrategy::ThinProvisioning"]
     else:
         rootVolume_systemTags = ["volumeProvisioningStrategy::ThickProvisioning"]
-    vm = create_mini_vm(l3_uuid_list, image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, rootVolume_systemTags=rootVolume_systemTags)
+    vm = create_mini_vm(l3_uuid_list, image_uuid, vm_name=vm_name, cpu_num=cpu_num, memory_size=mem_size, \
+                        rootVolume_systemTags=rootVolume_systemTags, root_password=root_password)
     return vm
 
 def create_basic_vm():
@@ -758,6 +762,25 @@ def run_command_in_vm(vm_inv, command):
     managerip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
     vm_ip = vm_inv.vmNics[0].ip
     return test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root', 'password', command)
+
+def create_user_in_vm(vm, username, password):
+    """
+    create non-root user with password setting
+    """
+    global original_root_password
+    test_util.test_logger("create_user_in_vm: %s:%s" %(username, password))
+
+    vm_ip = vm.vmNics[0].ip
+
+    cmd = "adduser %s" % (username)
+    ret, output, stderr = ssh.execute(cmd, vm_ip, "root", original_root_password, False, 22)
+    if ret != 0:
+        test_util.test_fail("User created failure, cmd[%s], output[%s], stderr[%s]" %(cmd, output, stderr))
+
+    cmd = "echo -e \'%s\n%s\' | passwd %s" % (password, password, username)
+    ret, output, stderr = ssh.execute(cmd, vm_ip, "root", original_root_password, False, 22)
+    if ret != 0:
+        test_util.test_fail("set non-root password failure, cmd[%s], output[%s], stderr[%s]" %(cmd, output, stderr))
 
 def skip_if_vr_not_vyos(vr_image_name):
     cond = res_ops.gen_query_conditions('name', '=', vr_image_name)

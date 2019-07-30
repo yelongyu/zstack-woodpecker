@@ -10,8 +10,11 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.operations.image_operations as img_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
-import test_stub
+import os
+
+test_stub = test_lib.lib_get_specific_stub()
 
 
 vm = None
@@ -25,9 +28,14 @@ def test():
     global vm, vm2, image_uuid
     test_util.test_dsc('create VM with setting password')
 
+    image_name = "imageName_i_c7_no_tag"
+    ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
+    if ps_type == 'MiniStorage':
+        image_name = os.environ.get(image_name)
+
     for root_password in root_password_list:
         test_util.test_dsc("root_password: \"%s\"" %(root_password))
-        vm = test_stub.create_vm(vm_name = 'c7-vm-no-sys-tag', image_name = "imageName_i_c7_no_tag")
+        vm = test_stub.create_vm(vm_name='c7-vm-no-sys-tag', image_name=image_name)
 
         backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
         for bs in backup_storage_list:
@@ -46,6 +54,7 @@ def test():
         #add tag to vm
         tag_ops.create_system_tag('VmInstanceVO', vm.get_vm().uuid, "qemuga")
 
+        vm_ops.set_vm_qga_enable(vm.get_vm().uuid)
         vm_ops.change_vm_password(vm.get_vm().uuid, "root", root_password)
 
         #create image by the vm with tag
@@ -62,17 +71,17 @@ def test():
         image = img_ops.create_root_volume_template(image_option1)
 
         #create vm by new image
-        vm2 = test_stub.create_vm(vm_name = 'c7-vm-add-tag-from-previous-vm', image_name = "add_tag_vm_to_image")
+        vm2 = test_stub.create_vm(vm_name='c7-vm-add-tag-from-previous-vm', image_name="add_tag_vm_to_image")
         if not test_lib.lib_check_login_in_vm(vm2.get_vm(), "root", root_password):
             test_util.test_fail("create vm with user:%s password: %s failed", "root", root_password)
 
+        vm_ops.set_vm_qga_enable(vm2.get_vm().uuid)
         vm_ops.change_vm_password(vm2.get_vm().uuid, "root", root_password)
 
         image_uuid = image.uuid
         if not image_uuid:
             img_ops.delete_image(image_uuid)
             img_ops.expunge_image(image_uuid)
-            
 
     test_util.test_pass('add system tag on a no system tag image test passed')
 

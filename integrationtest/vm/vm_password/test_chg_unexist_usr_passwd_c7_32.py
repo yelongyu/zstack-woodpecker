@@ -8,9 +8,11 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstacklib.utils.ssh as ssh
-import test_stub
+import os
 
+test_stub = test_lib.lib_get_specific_stub()
 
 exist_users = ["root"]
 
@@ -24,7 +26,11 @@ def test():
     global vm, exist_users
     test_util.test_dsc('change unexisted user password test')
 
-    vm = test_stub.create_vm(vm_name = 'cknewusrvmpswd-c7-32', image_name = "imageName_i_c7_32")
+    image_name = "imageName_i_c7_32"
+    ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
+    if ps_type == 'MiniStorage':
+        image_name = os.environ.get(image_name)
+    vm = test_stub.create_vm(vm_name='cknewusrvmpswd-c7-32', image_name=image_name)
     vm.check()
 
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
@@ -38,6 +44,8 @@ def test():
     else:
         vm.destroy()
         test_util.test_skip('Not find image store type backup storage.')
+
+    vm_ops.set_vm_qga_enable(vm.get_vm().uuid)
 
     for (usr,passwd) in zip(users, passwds):
         if usr not in exist_users:
@@ -61,7 +69,7 @@ def test():
 
         if not test_lib.lib_check_login_in_vm(vm.get_vm(), usr, passwd):
             test_util.test_fail("create vm with user:%s password: %s failed", usr, passwd)
-        
+
         #When vm is stopped:
         #vm.stop()
         vm_ops.change_vm_password(vm.get_vm().uuid, "root", test_stub.original_root_password)

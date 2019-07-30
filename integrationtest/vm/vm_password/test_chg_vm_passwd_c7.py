@@ -8,9 +8,11 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstacklib.utils.ssh as ssh
-import test_stub
+import os
 
+test_stub = test_lib.lib_get_specific_stub()
 
 exist_users = ["root"]
 
@@ -31,7 +33,7 @@ def check_vm_is_alive(vm):
 def check_qemu_ga_is_alive(vm):
     global cur_usr, cur_passwd
     cmd = "ps -aux|grep ga|grep qemu"
-    ret, output, stderr = ssh.execute(cmd, vm.get_vm().vmNics[0].ip, cur_usr, cur_passwd, False, 22)	
+    ret, output, stderr = ssh.execute(cmd, vm.get_vm().vmNics[0].ip, cur_usr, cur_passwd, False, 22)
     if ret != 0:
         test_util.test_logger("qemu-ga is not alived when exception triggered: ip:%s; cmd:%s; user:%s; password:%s; stdout:%s, stderr:%s" %(vm.get_vm().vmNics[0].ip, cmd, cur_usr, cur_passwd, output, stderr))
 
@@ -41,7 +43,11 @@ def test():
     global vm, exist_users, cur_usr, cur_passwd
     test_util.test_dsc('change VM with assigned password test')
 
-    vm = test_stub.create_vm(vm_name = 'ckvmpswd-c7-64', image_name = "imageName_i_c7")
+    image_name = "imageName_i_c7"
+    ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
+    if ps_type == 'MiniStorage':
+        image_name = os.environ.get(image_name)
+    vm = test_stub.create_vm(vm_name='ckvmpswd-c7-64', image_name=image_name)
     vm.check()
 
     backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
@@ -59,6 +65,8 @@ def test():
     cur_usr = "root"
     cur_passwd = "password"
 
+    vm_ops.set_vm_qga_enable(vm.get_vm().uuid)
+
     for (usr,passwd) in zip(users, passwds):
 
         #When vm is running:
@@ -69,7 +77,7 @@ def test():
 
         if not test_lib.lib_check_login_in_vm(vm.get_vm(), usr, passwd):
             test_util.test_fail("create vm with user:%s password: %s failed", usr, passwd)
-        
+
         #When vm is stopped:
         #vm.stop()
         vm_ops.change_vm_password(vm.get_vm().uuid, "root", test_stub.original_root_password)

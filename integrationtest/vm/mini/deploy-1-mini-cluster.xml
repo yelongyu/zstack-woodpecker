@@ -116,20 +116,20 @@
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
-      <image name="$imageName_i_c7" description="Test Image3"
+      <image name="$batch_test_image" description="Test Image3"
+        format="$rootImageFormat" url="$batchImageUrl"
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+      </image>
+      <image name="$imageName_i_c6" description="Test Image4"
+        format="$rootImageFormat" url="$imageUrl_i_c6"
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+      </image>
+      <image name="$imageName_i_c7" description="Test Image5"
         format="$rootImageFormat" url="$imageUrl_i_c7"
-        mediaType="$rootMediaType"
-        username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-      </image>
-      <image name="$imageName_i_u14" description="Test Image4"
-        format="$rootImageFormat" url="$imageUrl_i_u14"
-        mediaType="$rootMediaType"
-        username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
-      </image>
-      <image name="$imageName_i_u16" description="Test Image5"
-        format="$rootImageFormat" url="$imageUrl_i_u16"
         mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
