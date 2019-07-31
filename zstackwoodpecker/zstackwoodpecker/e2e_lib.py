@@ -216,7 +216,7 @@ class E2E(object):
 
     def change_window(self, handle):
         uri = join(self.uri, 'window')
-        self._post(uri, body='{"name": "%s"}' % handle)
+        self._post(uri, body='{"handle": "%s"}' % handle)
 
     def close_window(self):
         uri = join(self.uri, 'window')

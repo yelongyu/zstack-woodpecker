@@ -155,18 +155,18 @@ class VM(MINI):
     def open_vm_console(self, vm_name, details_page=False):
         test_util.test_logger('Open the console of [%s]' % vm_name)
         self.navigate('vm')
+        old_handle = self.window_handle
         if details_page:
             self.enter_details_page('vm', vm_name)
             self.get_elements('button', 'tag name')[0].click()
         else:
             _elem = self.get_res_element(vm_name)
-            _elem.get_elements('button', 'tag name')[0].click()
+            _elem.get_elements(ICONBTN)[0].click()
         while True:
             if len(self.get_window_handles()) == 1:
                 time.sleep(0.5)
             else:
                 break
-        old_handle = self.window_handle
         for handle in self.get_window_handles():
             if handle != old_handle:
                 self.change_window(handle)

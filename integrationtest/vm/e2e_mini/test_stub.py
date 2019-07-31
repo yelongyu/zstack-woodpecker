@@ -27,6 +27,7 @@ PRIMARYBTN = 'ant-btn-primary'
 BTN = 'ant-btn'
 EXITBTN = 'ant-modal-close-x'
 MOREOPERATIONBTN = 'ant-dropdown-trigger'
+ICONBTN = 'iconButton___2NyZB'
 TABLEROW = 'ant-table-row ant-table-row-level-0'
 CHECKBOX = 'input[type="checkbox"]'
 FORMEXPLAIN = 'ant-form-explain'
@@ -230,14 +231,17 @@ class MINI(E2E):
             return
         self.wait_for_element(MESSAGETOAST)
         if assure_success:
-            if self.wait_for_element(OPS_ONGOING, timeout=300, target='disappear'):
-                while 1:
-                    if self.get_elements(OPS_FAIL):
-                        test_util.test_fail("Fail: Operation Failed!")
-                    elif self.get_elements(OPS_SUCCESS):
-                        break
-            else:
-                test_util.test_fail("Fail: Operation Timeout!")
+            if self.get_elements(OPS_ONGOING):
+                if self.wait_for_element(OPS_ONGOING, timeout=300, target='disappear'):
+                    while 1:
+                        if self.get_elements(OPS_FAIL):
+                            test_util.test_fail("Fail: Operation Failed!")
+                        elif self.get_elements(OPS_SUCCESS):
+                            break
+                else:
+                    test_util.test_fail("Fail: Operation Timeout!")
+            elif self.get_elements(OPS_FAIL):
+                test_util.test_fail("Fail: Operation Failed!")
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
         time.sleep(1)
 
@@ -357,7 +361,7 @@ class MINI(E2E):
         for res in res_list:
             _elem = self.get_res_element(res)
             if corner_btn:
-                _elem.get_elements('button', 'tag name')[-1].click()
+                _elem.get_elements(ICONBTN)[-1].click()
                 break
             elif expunge and (primary_btn_num < PRIMARYBTNNUM):
                 isExpunge = True
@@ -626,7 +630,7 @@ class MINI(E2E):
         else:
             _elem = self.get_res_element(res_name)
             if corner_btn:
-                _elem.get_elements('button', 'tag name')[1].click()
+                _elem.get_elements(ICONBTN)[1].click()
             else:
                 self.more_operate(u'修改信息', res_name=res_name, res_type=res_type, details_page=details_page)
         if new_name is not None:
