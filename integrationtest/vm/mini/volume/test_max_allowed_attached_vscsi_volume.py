@@ -21,10 +21,12 @@ PROVISION = ["volumeProvisioningStrategy::ThinProvisioning","volumeProvisioningS
 VIRTIOSCSI = "capability::virtio-scsi"
 round_num = 30
 volume = None
+vm = None
 
 def test():
     global round_num
     global volume
+    global vm
     VM_CPU = 2
     VM_MEM = 2147483648
     volume_creation_option = test_util.VolumeOption()
@@ -52,8 +54,8 @@ def test():
     for i in range(round_num):
         volume_name = "volume_%s" % i
         volume_creation_option.set_name(volume_name)
-        max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1048576)/20 
-        disk_size = random.randint(1048576, max_size)
+        max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1048576)/(20 * 512)
+        disk_size = random.randint(2048, max_size) * 512
         volume_creation_option.set_diskSize(disk_size)
         volume_creation_option.set_system_tags([random.choice(PROVISION), VIRTIOSCSI])
         volume = test_volume_header.ZstackTestVolume()
@@ -67,9 +69,18 @@ def test():
     test_util.test_fail("Allowed max num of attached vscsi may is not %s" % round_num )
 
 def error_cleanup():
-    global volume 
+    global volume
+    global vm
     if volume:
         try:
             volume.delete()
+            volume.expunge()
         except:
             pass
+    if vm:
+        try:
+            vm.destroy()
+            vm.expunge()
+        except:
+            pass
+

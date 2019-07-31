@@ -43,10 +43,10 @@ def scsi_check(vol_name, vm, scsi=True):
 
 def vol_create(vol_name, volume_creation_option, systemtags):
     volume_creation_option.set_name(vol_name)
-    max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1048576)/2
-    #max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1048576)/1024
-    disk_size = random.randint(1048576, max_size)
-    #disk_size = random.randint(2048, max_size) * 512
+    #max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1048576)/2
+    max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1048576)/1024
+    #disk_size = random.randint(1048576, max_size)
+    disk_size = random.randint(2048, max_size) * 512
     volume_creation_option.set_diskSize(disk_size)
     volume_creation_option.set_system_tags(systemtags)
     volume = test_volume_header.ZstackTestVolume()
@@ -104,8 +104,16 @@ def test():
 
 def error_cleanup():
     global volume 
+    global vm 
     if volume:
         try:
             volume.delete()
+            volume.expunge()
+        except:
+            pass
+    if vm:
+        try:
+            vm.delete()
+            vm.expunge()
         except:
             pass

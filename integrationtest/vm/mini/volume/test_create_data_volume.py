@@ -31,8 +31,8 @@ def test():
     for i in range(round_num):
         volume_name = "volume_%s" % i
         volume_creation_option.set_name(volume_name)
-        max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1048576)/2 
-        disk_size = random.randint(1048576, max_size) 
+        max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1048576)/(2*512)
+        disk_size = random.randint(2048, max_size) * 512
         volume_creation_option.set_diskSize(disk_size)
         volume_creation_option.set_system_tags([random.choice(PROVISION)])
         volume = test_volume_header.ZstackTestVolume()
@@ -46,5 +46,6 @@ def error_cleanup():
     if volume:
         try:
             volume.delete()
+            volume.expunge()
         except:
             pass

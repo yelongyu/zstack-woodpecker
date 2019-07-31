@@ -20,6 +20,7 @@ import random
 
 test_obj_dict = test_state.TestStateDict()
 def test():
+    global test_obj_dict
     VM_CPU= 8
     VM_MEM = 2147483648 #2GB 
 

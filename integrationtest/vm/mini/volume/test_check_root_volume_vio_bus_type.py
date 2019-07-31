@@ -69,4 +69,10 @@ def test():
     test_util.test_pass("Mini Root Volume VBLK Check Test Success")
 
 def error_cleanup():
-    pass
+    global vm
+    if vm:
+        try:
+            vm.destroy()
+            vm.expunge()
+        except: 
+            pass
