@@ -4,6 +4,7 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 from threading import Thread
 import traceback
+import sys
 
 test_stub = test_lib.lib_get_test_stub()
 
@@ -15,6 +16,7 @@ class Login_logout(Thread):
         super(Login_logout, self).__init__()
         self.exitcode = 0
         self.exception = None
+        self.exc_traceback = ''
 
     def run(self):
         try:
@@ -22,7 +24,7 @@ class Login_logout(Thread):
         except Exception as e:
             self.exitcode = 1
             self.exception = e
-            test_util.test_logger(traceback.format_exc())
+            self.exc_traceback = ''.join(traceback.format_exception(*sys.exc_info()))
 
     def _run(self):
         mini = test_stub.MINI()
@@ -41,16 +43,15 @@ class Login_logout(Thread):
 def test():
     thread_list = []
 
-    try:
-        for _ in range(NUM):
-            thread = Login_logout()
-            thread.start()
-            thread_list.append(thread)
-        for thread in thread_list:
-            thread.join()
-    except Exception as e:
-        test_util.test_logger(str(e))
-        test_util.test_fail('Parallel Login Logout Failed')
+    for _ in range(NUM):
+        thread = Login_logout()
+        thread.start()
+        thread_list.append(thread)
+    for thread in thread_list:
+        thread.join()
+        if thread.exitcode != 0:
+            test_util.test_logger(thread.exc_traceback)
+            raise Exception(thread.exception)
 
     test_util.test_pass('Parallel Login Logout Successful')
 

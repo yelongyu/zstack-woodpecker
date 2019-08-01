@@ -229,7 +229,8 @@ class MINI(E2E):
         if not_check:
             time.sleep(1)
             return
-        self.wait_for_element(MESSAGETOAST)
+        if not self.wait_for_element(MESSAGETOAST):
+            test_util.test_fail('Fail: No Message Toast Appeared After Clicking OK')
         if assure_success:
             if self.get_elements(OPS_ONGOING):
                 if self.wait_for_element(OPS_ONGOING, timeout=300, target='disappear'):
