@@ -20,9 +20,11 @@ PROVISION = ["volumeProvisioningStrategy::ThinProvisioning","volumeProvisioningS
 round_num = 10
 volume = None
 
+test_obj_dict = test_state.TestStateDict()
 def test():
     global round_num
     global volume
+    global test_obj_dict
     volume_creation_option = test_util.VolumeOption()
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     volume_creation_option.set_primary_storage_uuid(ps_uuid)
@@ -37,15 +39,16 @@ def test():
         volume_creation_option.set_system_tags([random.choice(PROVISION)])
         volume = test_volume_header.ZstackTestVolume()
         volume.set_volume(vol_ops.create_volume_from_diskSize(volume_creation_option))
+        test_obj_dict.add_volume(volume)
         volume.check() 
         volume.delete()
+        volume.expunge()
     test_util.test_pass("Mini Create Volume Test Success")
-
 def error_cleanup():
-    global volume 
-    if volume:
-        try:
-            volume.delete()
-            volume.expunge()
-        except:
-            pass
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict)
+
+def env_recover():
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict)
+

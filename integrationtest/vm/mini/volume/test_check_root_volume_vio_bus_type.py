@@ -56,6 +56,8 @@ def test():
     vm.create()
     vm.check()     
     virtio_bus_type_check(vm)
+    vm.destroy()
+    vm.expunge()
 
     #thick
     vm_creation_option.set_rootVolume_systemTags([PROVISION[1]])
@@ -65,6 +67,8 @@ def test():
     vm.create()
     vm.check()     
     virtio_bus_type_check(vm)
+    vm.destroy()
+    vm.expunge()
     
     test_util.test_pass("Mini Root Volume VBLK Check Test Success")
 

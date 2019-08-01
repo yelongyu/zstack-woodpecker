@@ -23,7 +23,7 @@ VM_CPU= 2
 VM_MEM = 2147483648 #2GB 
 volume = None
 vm = None
-
+test_obj_dict = test_state.TestStateDict()
 def scsi_check(vol_name, vm, scsi=True):
     vm_uuid = vm.get_vm().uuid
     cmd = "virsh dumpxml %s|grep bus|grep scsi" % vm_uuid
@@ -56,6 +56,7 @@ def vol_create(vol_name, volume_creation_option, systemtags):
 def test():
     global volume
     global vm
+    global test_obj_dict
     #1.create vm
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_s')
@@ -71,6 +72,7 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
     vm.check()     
+    test_obj_dict.add_vm(vm)
     #2.create thin/thick volume & check scsi
     volume_creation_option = test_util.VolumeOption()
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
@@ -81,39 +83,42 @@ def test():
     volume.attach(vm)
     scsi_check('vol_thin_scsi', vm)
     volume.detach(vm.get_vm().uuid)
+    test_obj_dict.add_volume(volume)
+    volume.delete()
+    volume.expunge()
     #thick & scsi
     volume = vol_create('vol_thick_scsi', volume_creation_option, [PROVISION[1], VIRTIOSCSI]) 
     volume.check() 
     volume.attach(vm)
     scsi_check('vol_thick_scsi', vm)
     volume.detach(vm.get_vm().uuid)
+    test_obj_dict.add_volume(volume)
+    volume.delete()
+    volume.expunge()
     #thin & vblk
     volume = vol_create('vol_thin_vblk', volume_creation_option, [PROVISION[0]]) 
     volume.check() 
     volume.attach(vm)
     scsi_check('vol_thin_vblk', vm, scsi=False)
     volume.detach(vm.get_vm().uuid)
+    test_obj_dict.add_volume(volume)
+    volume.delete()
+    volume.expunge()
     #thick & vblk 
     volume = vol_create('vol_thick_vblk', volume_creation_option, [PROVISION[1]]) 
     volume.check() 
     volume.attach(vm)
     scsi_check('vol_thick_vblk', vm, scsi=False)
     volume.detach(vm.get_vm().uuid)
+    test_obj_dict.add_volume(volume)
+    volume.delete()
+    volume.expunge()
 
     test_util.test_pass("Mini Data Volume VirtIO Bus Type Check Test Success")
 
 def error_cleanup():
-    global volume 
-    global vm 
-    if volume:
-        try:
-            volume.delete()
-            volume.expunge()
-        except:
-            pass
-    if vm:
-        try:
-            vm.delete()
-            vm.expunge()
-        except:
-            pass
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict) 
+def env_recover():
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict)

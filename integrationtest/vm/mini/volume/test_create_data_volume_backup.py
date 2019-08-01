@@ -45,7 +45,9 @@ def test():
     volume_creation_option = test_util.VolumeOption()
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     volume_creation_option.set_primary_storage_uuid(ps_uuid)
-    disk_size = 107374182400 #100GB
+    max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1048576)/(20 * 512)
+    disk_size = random.randint(2048, max_size) * 512
+    #disk_size = 107374182400 #100GB
     volume_creation_option.set_diskSize(disk_size)
     volume_name_thick = "mini_data_volume_thick"
     volume_name_thin = "mini_data_volume_thin"
@@ -94,4 +96,5 @@ def error_cleanup():
     test_lib.lib_error_cleanup(test_obj_dict)
 
 def env_recover():
-    pass 
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict)

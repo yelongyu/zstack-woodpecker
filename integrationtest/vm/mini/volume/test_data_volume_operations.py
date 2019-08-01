@@ -27,7 +27,7 @@ vm = None
 volumes = []
 ts_attach = []
 ts = []
-
+test_obj_dict = test_state.TestStateDict()
 #state
 CREATED = volume_header.CREATED
 DETACHED = volume_header.DETACHED
@@ -63,6 +63,7 @@ def vol_random_ops(vol, vm, vm_uuid):
 
 def test():
     global vm
+    global test_obj_dict
     VM_CPU= 2
     VM_MEM = 2147483648
     #1.create vm
@@ -80,6 +81,7 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
     vm.check()
+    test_obj_dict.add_vm(vm)
     vm_uuid = vm.get_vm().uuid
 
     #2.data volume operations test
@@ -90,13 +92,14 @@ def test():
     for i in range(round_num):
         volume_name = "volume_%s" % i
         volume_creation_option.set_name(volume_name)
-        max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1073741824)/(2 * 512)
+        max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1073741824)/(20 * 512)
         disk_size = random.randint(2048, max_size) * 512
         volume_creation_option.set_diskSize(disk_size)
         volume_creation_option.set_system_tags([random.choice(PROVISION)])
         volume = test_volume_header.ZstackTestVolume()
         volume.set_volume(vol_ops.create_volume_from_diskSize(volume_creation_option))
         volume.check()
+        test_obj_dict.add_volume(volume)
         volume.state = CREATED
         volumes.append(volume)
     for vol in volumes:
@@ -110,10 +113,9 @@ def test():
     test_util.test_pass("Mini Data Volume Operations Test Success")
 
 def error_cleanup():
-    global vm
-    if vm:
-        try:
-            vm.destroy()
-            vm.expunge()
-        except:
-            pass
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict)
+ 
+def env_recover():
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict)

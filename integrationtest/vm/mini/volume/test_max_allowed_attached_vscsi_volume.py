@@ -23,7 +23,9 @@ round_num = 30
 volume = None
 vm = None
 
+test_obj_dict = test_state.TestStateDict()
 def test():
+    global test_obj_dict
     global round_num
     global volume
     global vm
@@ -48,6 +50,7 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
     vm.check()
+    test_obj_dict.add_vm(vm)
     vm_uuid = vm.get_vm().uuid
     #create thin/thick data volume with random disksize and random provision type
     #and attach to vm
@@ -61,6 +64,7 @@ def test():
         volume = test_volume_header.ZstackTestVolume()
         volume.set_volume(vol_ops.create_volume_from_diskSize(volume_creation_option))
         volume.check() 
+        test_obj_dict.add_volume(volume)
         try:
             volume.attach(vm)
         except Exception as e:
@@ -69,18 +73,9 @@ def test():
     test_util.test_fail("Allowed max num of attached vscsi may is not %s" % round_num )
 
 def error_cleanup():
-    global volume
-    global vm
-    if volume:
-        try:
-            volume.delete()
-            volume.expunge()
-        except:
-            pass
-    if vm:
-        try:
-            vm.destroy()
-            vm.expunge()
-        except:
-            pass
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict)
 
+def env_recover():
+    global test_obj_dict
+    test_lib.lib_error_cleanup(test_obj_dict)
