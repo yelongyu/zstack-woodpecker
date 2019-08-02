@@ -8,3 +8,4 @@ vmName5 = test_vm5
 vmInstranceOfferingUuid2 = 234567
 vm2haHostInstranceOfferingUuid = 567890
 imageUuid2 = 234567
+haConfigName = zs-install.config

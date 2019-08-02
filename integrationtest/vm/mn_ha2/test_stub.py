@@ -846,8 +846,20 @@ def deploy_2ha(scenarioConfig, scenarioFile, deployConfig):
     ssh.scp_file(zstack_hamon_path, "/root/zstack-hamon", mn_ip1, "root", "password")
     ssh.execute("chmod a+x /root/zstack-hamon", mn_ip1, "root", "password", False, 22)
 
+    use_ha_config = 0
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'mnHaConfigRef'):
+                use_ha_config = 1
+
     if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
         cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.24.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + mn_ip2 + ',' + mn_ip2 + ' -db-root-pw zstack.mysql.password -yes'
+    elif use_ha_config == 1:
+        cmd = './zsha2 sample-config > zs-install.config'
+        ret, output, stderr = ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
+        cmd = "sed -i -e 's/172.20.0.1/172.24.0.1/' -e 's/172.20.0.2/%s/' -e 's/172.20.0.3/%s/' -e 's/172.20.0.4/%s/' -e 's/somepass/password/' -e 's/zstack.password/zstack.mysql.password/' -e 's/br_eth0/br_zsn0/' zs-install.config" % (vip, mn_ip1, mn_ip2)
+        ret, output, stderr = ssh.execute(cmd, mn_ip1, "root", "password", False, 22)
+        cmd = 'echo yes | ./zsha2 install-ha -config zs-install.config'
     else:
         cmd = '/root/zsha2 install-ha -nic br_zsn0 -gateway 172.24.0.1 -slave "root:password@' + mn_ip2 + '" -vip ' + vip + ' -time-server ' + node3_ip + ',' + mn_ip2 + ' -db-root-pw zstack.mysql.password -yes'
     test_util.test_logger("deploy 2ha by cmd: %s" %(cmd))
