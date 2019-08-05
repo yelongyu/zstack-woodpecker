@@ -1937,6 +1937,7 @@ def ps_migrate_vm(robot_test_obj, args):
     for volume in target_vm.test_volumes:
         volume.update()
         volume.update_volume()
+        volume.snapshot_tree.update(update_utility=True)
 
     ps_ops.clean_up_trash_on_primary_storage(old_ps_uuid)
 

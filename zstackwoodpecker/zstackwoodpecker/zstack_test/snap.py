@@ -194,6 +194,8 @@ umount %s
         snapshot_uuid = self.snapshot.uuid
         if not name:
             name = 'data volume created by sp: %s' % snapshot_uuid
+        if not ps_uuid:
+            ps_uuid = self.get_target_volume().volume.primaryStorageUuid
 
         volume_inv = vol_ops.create_volume_from_snapshot(snapshot_uuid, name, ps_uuid)
 
