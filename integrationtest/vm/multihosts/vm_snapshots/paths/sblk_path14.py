@@ -17,7 +17,7 @@ def path():
 		[TestAction.attach_volume, 'vm1', 'volume4'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
 		[TestAction.stop_vm, 'vm1'],
-		[TestAction.use_volume_snapshot, 'vm1-snapshot1'],
+		[TestAction.use_volume_snapshot, 'vm1-snapshot5'],
 		[TestAction.start_vm, 'vm1'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot10'],
 		[TestAction.migrate_vm, 'vm1'],
@@ -33,7 +33,7 @@ The final status:
 Running:['vm1', 'vm2']
 Stopped:[]
 Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'volume4-snapshot5', 'vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume4-snapshot10']
-attached:['volume1', 'volume2', 'volume3', 'volume4', 'volume5', 'volume6', 'volume7', 'volume8']
+attached:['volume1', 'volume2', 'volume3', 'volume4', 'clone@volume1', 'clone@volume2', 'clone@volume3', 'clone@volume4']
 Detached:[]
 Deleted:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
 Expunged:[]

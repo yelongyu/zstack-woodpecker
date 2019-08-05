@@ -13,14 +13,14 @@ def path():
 		[TestAction.attach_volume, 'vm1', 'volume3'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot1'],
 		[TestAction.clone_vm, 'vm1', 'vm2', 'full'],
-		[TestAction.resize_data_volume, 'volume5', 5*1024*1024],
-		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
-		[TestAction.create_volume_snapshot, 'vm1-root', 'vm1-root-snapshot9'],
-		[TestAction.create_vm_snapshot, 'vm2', 'vm2-snapshot10'],
+		[TestAction.resize_data_volume, 'volume3', 5*1024*1024],
+		[TestAction.create_vm_snapshot, 'vm2', 'vm2-snapshot5'],
+		[TestAction.create_volume_snapshot, 'vm2-root', 'vm2-root-snapshot9'],
+		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot10'],
 		[TestAction.clone_vm, 'vm1', 'vm3', 'full'],
-		[TestAction.migrate_volume, 'volume8'],
+		[TestAction.migrate_volume, 'clone@volume3'],
 		[TestAction.create_vm_backup, 'vm3', 'vm3-backup1'],
-		[TestAction.delete_vm_snapshot, 'vm2-snapshot10'],
+		[TestAction.delete_vm_snapshot, 'vm2-snapshot5'],
 ])
 
 
@@ -29,14 +29,14 @@ def path():
 The final status:
 Running:['vm1', 'vm2', 'vm3']
 Stopped:[]
-Enadbled:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1', 'vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'vm1-root-snapshot9', 'vm3-backup1', 'volume7-backup1', 'volume8-backup1', 'volume9-backup1']
-attached:['volume1', 'volume2', 'volume3', 'volume4', 'volume5', 'volume6', 'volume7', 'volume8', 'volume9']
+Enadbled:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1', 'vm2-root-snapshot9', 'vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'vm3-backup1', 'clone@volume1-backup1', 'clone@volume2-backup1', 'clone@volume3-backup1']
+attached:['volume1', 'volume2', 'volume3', 'clone@volume1', 'clone@volume2', 'clone@volume3', 'clone@volume1', 'clone@volume2', 'clone@volume3']
 Detached:[]
-Deleted:['vm2-snapshot10', 'volume4-snapshot10', 'volume5-snapshot10', 'volume6-snapshot10']
+Deleted:['vm2-snapshot5', 'clone@volume1-snapshot5', 'clone@volume2-snapshot5', 'clone@volume3-snapshot5']
 Expunged:[]
 Ha:[]
 Group:
-	vm_snap2:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5']---vm1volume1_volume2_volume3
-	vm_snap1:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']---vm1volume1_volume2_volume3
-	vm_backup1:['vm3-backup1', 'volume7-backup1', 'volume8-backup1', 'volume9-backup1']---vm3_volume7_volume8_volume9
+	vm_snap3:['vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10']---vm1@volume1_volume2_volume3
+	vm_snap1:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']---vm1@volume1_volume2_volume3
+	vm_backup1:['vm3-backup1', 'clone@volume1-backup1', 'clone@volume2-backup1', 'clone@volume3-backup1']---vm3@clone@volume1_clone@volume2_clone@volume3
 '''

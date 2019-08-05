@@ -19,8 +19,8 @@ def path():
 		[TestAction.reboot_vm, 'vm1'],
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot10'],
 		[TestAction.clone_vm, 'vm1', 'vm2', 'full'],
-		[TestAction.detach_volume, 'volume5'],
-		[TestAction.create_vm_backup, 'vm1', 'vm1-backup1'],
+		[TestAction.detach_volume, 'volume2'],
+		[TestAction.create_vm_backup, 'vm2', 'vm2-backup1'],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
 ])
 
@@ -30,14 +30,14 @@ def path():
 The final status:
 Running:['vm1', 'vm2']
 Stopped:[]
-Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'volume4-snapshot5', 'vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume4-snapshot10', 'vm1-backup1', 'volume1-backup1', 'volume2-backup1', 'volume3-backup1', 'volume4-backup1']
-attached:['volume1', 'volume2', 'volume3', 'volume4', 'volume6', 'volume7', 'volume8']
-Detached:['volume5']
+Enadbled:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'volume4-snapshot5', 'vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume4-snapshot10', 'vm2-backup1', 'clone@volume1-backup1', 'clone@volume2-backup1', 'clone@volume3-backup1', 'clone@volume4-backup1']
+attached:['volume1', 'volume3', 'volume4', 'clone@volume1', 'clone@volume2', 'clone@volume3', 'clone@volume4']
+Detached:['volume2']
 Deleted:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
 Expunged:[]
 Ha:[]
 Group:
-	vm_snap2:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'volume4-snapshot5']---vm1volume1_volume2_volume3_volume4
-	vm_snap3:['vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume4-snapshot10']---vm1volume1_volume2_volume3_volume4
-	vm_backup1:['vm1-backup1', 'volume1-backup1', 'volume2-backup1', 'volume3-backup1', 'volume4-backup1']---vm1_volume1_volume2_volume3_volume4
+	vm_snap2:['vm1-snapshot5', 'volume1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'volume4-snapshot5']---vm1@volume1_volume2_volume3_volume4
+	vm_snap3:['vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume4-snapshot10']---vm1@volume1_volume2_volume3_volume4
+	vm_backup1:['vm2-backup1', 'clone@volume1-backup1', 'clone@volume2-backup1', 'clone@volume3-backup1', 'clone@volume4-backup1']---vm2@clone@volume1_clone@volume2_clone@volume3_clone@volume4
 '''

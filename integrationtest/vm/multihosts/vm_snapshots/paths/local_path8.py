@@ -15,13 +15,13 @@ def path():
 		[TestAction.clone_vm, 'vm1', 'vm2', 'full'],
 		[TestAction.create_volume, 'volume7', 'flag=scsi'],
 		[TestAction.attach_volume, 'vm1', 'volume7'],
-		[TestAction.create_vm_snapshot, 'vm2', 'vm2-snapshot5'],
-		[TestAction.batch_delete_volume_snapshot, ['vm2-snapshot5','volume2-snapshot1',]],
-		[TestAction.create_vm_snapshot, 'vm2', 'vm2-snapshot9'],
+		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot5'],
+		[TestAction.batch_delete_volume_snapshot, ['volume7-snapshot5','volume1-snapshot5',]],
+		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot10'],
 		[TestAction.reboot_vm, 'vm1'],
-		[TestAction.create_volume_backup, 'volume5', 'volume5-backup1'],
-		[TestAction.create_volume_snapshot, 'vm2-root', 'vm2-root-snapshot13'],
-		[TestAction.delete_vm_snapshot, 'vm2-snapshot9'],
+		[TestAction.create_volume_backup, 'clone@volume3', 'clone@volume3-backup1'],
+		[TestAction.create_volume_snapshot, 'vm2-root', 'vm2-root-snapshot15'],
+		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
 ])
 
 
@@ -30,11 +30,12 @@ def path():
 The final status:
 Running:['vm1', 'vm2']
 Stopped:[]
-Enadbled:['vm1-snapshot1', 'volume1-snapshot1', 'volume3-snapshot1', 'volume4-snapshot5', 'volume5-snapshot5', 'volume6-snapshot5', 'vm2-root-snapshot13', 'volume5-backup1']
-attached:['volume1', 'volume2', 'volume3', 'volume4', 'volume5', 'volume6', 'volume7']
+Enadbled:['vm1-snapshot5', 'volume2-snapshot5', 'volume3-snapshot5', 'vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume7-snapshot10', 'vm2-root-snapshot15', 'clone@volume3-backup1']
+attached:['volume1', 'volume2', 'volume3', 'clone@volume1', 'clone@volume2', 'clone@volume3', 'volume7']
 Detached:[]
-Deleted:['vm2-snapshot5', 'volume2-snapshot1', 'vm2-snapshot9', 'volume4-snapshot9', 'volume5-snapshot9', 'volume6-snapshot9']
+Deleted:['volume7-snapshot5', 'volume1-snapshot5', 'vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1']
 Expunged:[]
 Ha:[]
 Group:
+	vm_snap2:['vm1-snapshot10', 'volume1-snapshot10', 'volume2-snapshot10', 'volume3-snapshot10', 'volume7-snapshot10']---vm1@volume1_volume2_volume3_volume7
 '''

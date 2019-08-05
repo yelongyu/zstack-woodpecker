@@ -32,7 +32,7 @@ The final status:
 Running:['vm1', 'vm2']
 Stopped:[]
 Enadbled:['vm1-snapshot5', 'volume2-snapshot5', 'vm1-root-backup1']
-attached:['volume1', 'volume2', 'volume4', 'volume5']
+attached:['volume1', 'volume2', 'clone@volume1', 'clone@volume2']
 Detached:['volume3']
 Deleted:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1', 'volume1-snapshot5', 'vm1-snapshot8', 'volume1-snapshot8', 'volume2-snapshot8']
 Expunged:[]
