@@ -1274,7 +1274,7 @@ def lib_get_backup_storage_host(bs_uuid):
         test_util.test_fail('can not get zstack backup storage inventories.')
 
     host = test_util.HostOption()
-    bss = deploy_config.backupStorages.get_child_node_as_list('sftpBackupStorage') + deploy_config.backupStorages.get_child_node_as_list('imageStoreBackupStorage')
+    bss = deploy_config.backupStorages.get_child_node_as_list('sftpBackupStorage') + deploy_config.backupStorages.get_child_node_as_list('imageStoreBackupStorage')+ deploy_config.backupStorages.get_child_node_as_list('miniBackupStorage')
     for bs in bss:
         if bs.name_ == name:
             host.managementIp = bs.hostname_

@@ -8,6 +8,7 @@ New Integration Test for VM ha never stop operation with host disabled
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.header.vm as vm_header
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import time
