@@ -16,7 +16,7 @@ def check(results):
     regex_exist_check = False
     errorcode_exist_check = False
     errorcode_dup_check = False
-    categories_not_same_check = False
+    #categories_not_same_check = False
     for ret in results:
        if ret.reason == "file name must endWith '.json'":
            filename_suffix_check = True
@@ -28,10 +28,10 @@ def check(results):
            errorcode_exist_check = True
        if ret.reason == "error code duplicated at least twice":
            errorcode_dup_check = True
-       if ret.reason == "not all categories are same in 1 input file":
-           categories_not_same_check = True
+       #if ret.reason == "not all categories are same in 1 input file":
+       #    categories_not_same_check = True
     return [filename_suffix_check, regex_segment_check, regex_exist_check, \
-	errorcode_exist_check, errorcode_dup_check, categories_not_same_check] 
+	errorcode_exist_check, errorcode_dup_check]#, categories_not_same_check] 
 
 def test():
     categories = err_ops.get_elaboration_categories()
