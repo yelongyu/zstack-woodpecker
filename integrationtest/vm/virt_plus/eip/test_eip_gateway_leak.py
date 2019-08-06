@@ -50,13 +50,14 @@ def test():
 
     vm1.check()
 
-    pri_l3_gateway = os.environ.get('vlanIpRangeGateway1')
+#    pri_l3_gateway = os.environ.get('vlanIpRangeGateway1')
+    pub_l3_gateway = os.environ.get('ipRangeGateway')
 
     cmd1 = "ping -c 5 %s" % (vip_ip)
     (retcode1, output1, erroutput1) = ssh.execute(cmd1, ext_host_ip, "root", ext_host_pwd, True, 22)
     print "retcode1 is: %s; output1 is : %s.; erroutput1 is: %s" % (retcode1, output1, erroutput1)
 
-    cmd2 = "arp -n | grep -w %s" % (pri_l3_gateway)
+    cmd2 = "arp -n | grep -w %s" % (pub_l3_gateway)
     if test_lib.lib_execute_command_in_flat_vm(vm2.vm, cmd2, l3_uuid=pri_l3_uuid):
         vm1.destroy()
         vm2.destroy()

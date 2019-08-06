@@ -6,6 +6,7 @@ New Integration Test for creating KVM VM using old DHCP IP.
 '''
 
 import zstackwoodpecker.test_util as test_util
+import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -20,11 +21,16 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 public_ip="223.5.5.5"
-ext_host_ip="172.20.1.106"
-ext_host_pwd="zstack.org"
+ext_host_ip=os.environ.get('zstackManagementHostIp')
+zstack_management_ip = os.environ.get('zstackManagementIp')
+
 
 def test():
     global test_obj_dict
+    cond = res_ops.gen_query_conditions('managementIp', '=', ext_host_ip) 
+    host_inv = sce_ops.query_resource(zstack_management_ip, res_ops.HOST, cond).inventories[0]
+    ext_host_pwd = host_inv.name
+
     cond_l3 = res_ops.gen_query_conditions('name', '=', os.environ.get('l3PublicNetworkName'))
     l3_uuid = res_ops.query_resource(res_ops.L3_NETWORK, cond_l3)[0].uuid
     ip_range_uuid = res_ops.query_resource(res_ops.L3_NETWORK, cond_l3)[0].ipRanges[0].uuid
