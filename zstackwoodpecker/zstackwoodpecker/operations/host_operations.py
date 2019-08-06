@@ -120,3 +120,10 @@ def query_host(conditions, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def poweroff_host(host_uuids, admin_password, session_uuid=None):
+    action = api_actions.PowerOffHostAction()
+    action.hostUuids = host_uuids
+    action.adminPassword = admin_password
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
