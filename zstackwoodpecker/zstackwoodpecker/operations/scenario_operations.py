@@ -2674,6 +2674,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 #for Mini setup
                 if os.getenv('hostType') == 'miniHost':
+                    print "Found current scenario is miniHost, start to download and install mini-server."
                     time.sleep(200)
                     base_url = "http://172.20.198.234/mirror/mini_master/latest/"
                     cmd = "curl %s | grep ZStack-mini | awk '{print $6}' |awk -F'>' '{print $1}' | awk -F'\"' '{print $2}' | tail -n1" % base_url
