@@ -223,7 +223,7 @@ def remove_jobs_from_job_group(jobs_uuid, group_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def run_scheduler_trigger(uuid, job_uuids, session_uuid = None):
+def run_scheduler_trigger(uuid, job_uuids = None, session_uuid = None):
     action = api_actions.RunSchedulerTriggerAction()
     action.uuid = uuid
     action.jobUuids = job_uuids

@@ -110,7 +110,7 @@ def test():
     assert len(job_group_inv.jobsUuid) == 2
 
     trigger1 = sch_ops.create_scheduler_trigger('10min', start_time=int(time.time() + 5), type='cron',
-                                                cron='*0 0/10 * * * ?')
+                                                cron='0 0/10 * * * ?')
 
     sch_ops.add_scheduler_job_group_to_trigger(trigger1.uuid, job_group.uuid, triggerNow=True)
     job_group_inv = res_ops.query_resource(res_ops.SCHEDULERJOBGROUP, cond)[0]
