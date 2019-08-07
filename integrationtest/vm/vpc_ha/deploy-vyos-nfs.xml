@@ -84,12 +84,12 @@
     </instanceOfferings>
   
     <backupStorages>
-      <sftpBackupStorage name="$sftpBackupStorageName"
-        description="Test" url="$sftpBackupStorageUrl" 
-        username="$sftpBackupStorageUsername" 
-        password="$sftpBackupStoragePassword" 
+      <imageStoreBackupStorage name="$sftpBackupStorageName"
+        description="Test" url="$sftpBackupStorageUrl"
+        username="$sftpBackupStorageUsername"
+        password="$sftpBackupStoragePassword"
         hostname="$sftpBackupStorageHostname"
-        port="$sftpBackupStoragePort" />
+        port="$sftpBackupStoragePort"/>
     </backupStorages>
 
     <images>
