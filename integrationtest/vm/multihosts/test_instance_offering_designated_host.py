@@ -29,7 +29,7 @@ def test():
     instance_offering_option.set_allocatorStrategy("")
     instance_offering_option.set_type("UserVm")
     instance_offering_option.set_name('new_offering')
-    instance_offering_option.set_allocatorStrategy("DesignatedHostAllocatorStrategy")
+    instance_offering_option.set_allocatorStrategy("DefaultHostAllocatorStrategy")
     new_offering = vm_ops.create_instance_offering(instance_offering_option)
     test_obj_dict.add_instance_offering(new_offering)    
     image_name = os.environ.get('imageName_s')
