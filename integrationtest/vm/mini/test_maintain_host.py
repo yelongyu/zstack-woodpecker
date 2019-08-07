@@ -73,7 +73,9 @@ def test():
     if not linux.wait_callback_success(is_host_connected, host_uuid, 120):
         test_util.test_fail('host status is not changed to connected, after changing its state to Enable')
 
-    vm.start()
+    test_stub.ensure_hosts_connected()
+#    vm.start()
+    assert vm.vm.state == 'Running'
     vm.check()
     vm.destroy()
     test_obj_dict.rm_vm(vm)

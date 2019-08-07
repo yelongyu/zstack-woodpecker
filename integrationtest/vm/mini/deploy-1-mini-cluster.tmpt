@@ -19,3 +19,8 @@ imageUrl_i_c7 = http://192.168.200.100/mirror/diskimages/CentOS7.4-Cloudinit-QGA
 
 batch_test_image = batch-image
 batchImageUrl = http://192.168.200.100/mirror/diskimages/CentOS7.2_Minimal_40G.qcow2
+
+imageName_windows = windows
+imageUrl_windows = http://192.168.200.16/mirror/diskimages/windows-2012-cn-qcow2.qcow2
+winImageUsername = Administrator
+winImagePassword = linux@123

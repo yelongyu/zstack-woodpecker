@@ -134,6 +134,12 @@
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
       </image>
+      <image name="$imageName_windows" description="Test Image6"
+        format="$rootImageFormat" url="$imageUrl_windows"
+        mediaType="$rootMediaType" platform="Windows"
+        username="$winImageUsername" password="$winImagePassword">
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+      </image>
     </images>
 
     <diskOfferings>
