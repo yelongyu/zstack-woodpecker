@@ -1,7 +1,7 @@
+import json
 import os
 import random
 import time
-import json
 
 import apibinding.inventory as inventory
 import zstacklib.utils.debug as debug
@@ -162,7 +162,7 @@ class robot_test_dict(object):
         for k, volume in self.volume.items():
             try:
                 volume.clean()
-            except:# root_volume can not clean
+            except:  # root_volume can not clean
                 pass
 
 
@@ -521,6 +521,7 @@ def create_vm(robot_test_obj, args):
     ps_type = None
     provisiong = None
     dataVolumeSystemTags = None
+    changePsUuids = []
 
     arg_dict = parser_args(args[1:])
     if 'flag' in arg_dict:
@@ -533,6 +534,8 @@ def create_vm(robot_test_obj, args):
             ps_type = "Ceph"
         if "sblk" in flag:
             ps_type = "SharedBlock"
+        if "xsky" in flag:
+            ps_type = "xskyCeph"
 
     if 'network' in arg_dict:
         if arg_dict['network'] == "random":
@@ -560,8 +563,22 @@ def create_vm(robot_test_obj, args):
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, cond)[0].uuid
 
     if ps_type:
-        cond = res_ops.gen_query_conditions("type", "=", ps_type)
-        pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+        if ps_type == "xskyCeph":
+            cond = res_ops.gen_query_conditions("name", "=", "ceph_ps")
+            pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+            for ps in pss:
+                ps_ops.change_primary_storage_state(ps.uuid, "disable")
+                changePsUuids.append(ps.uuid)
+            ps_type = "Ceph"
+        elif ps_type == "Ceph":
+            cond = res_ops.gen_query_conditions("name", "=", "xsky_ps")
+            pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+            for ps in pss:
+                ps_ops.change_primary_storage_state(ps.uuid, "disable")
+                changePsUuids.append(ps.uuid)
+        cond1 = res_ops.gen_query_conditions("type", "=", ps_type)
+        cond2 = res_ops.gen_query_conditions("state", "=", "Enabled", cond1)
+        pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond2)
         if not pss:
             test_util.test_fail("there is no primarystorage type: [%s]" % ps_type)
         vm_creation_option.set_ps_uuid(pss[0].uuid)
@@ -615,6 +632,9 @@ def create_vm(robot_test_obj, args):
         robot_test_obj.test_dict.add_volume("auto-volume" + name[-1], volume)
         robot_test_obj.test_dict.add_snap_tree("auto-volume" + name[-1], volume_snap_tree)
 
+    if changePsUuids:
+        for uuid in changePsUuids:
+            ps_ops.change_primary_storage_state(uuid, "enable")
 
 def migrate_vm(robot_test_obj, args):
     target_vm = None
@@ -822,8 +842,8 @@ def run_workloads(robot_test_obj, args):
 
         if pre_cmd:
             pre_cmd_result = test_lib.lib_ssh_vm_cmd_by_agent(host.managementIp, nic.ip,
-                                                          test_lib.lib_get_vm_username(target_vm.get_vm()),
-                                                          test_lib.lib_get_vm_password(target_vm.get_vm()), pre_cmd)
+                                                              test_lib.lib_get_vm_username(target_vm.get_vm()),
+                                                              test_lib.lib_get_vm_password(target_vm.get_vm()), pre_cmd)
 
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent(host.managementIp, nic.ip,
                                                       test_lib.lib_get_vm_username(target_vm.get_vm()),
@@ -838,6 +858,7 @@ def run_workloads(robot_test_obj, args):
             volume.update_volume()
 
     time.sleep(timeout)
+
 
 def run_host_workloads(robot_test_obj, args):
     target_host = ""
@@ -873,27 +894,34 @@ def run_host_workloads(robot_test_obj, args):
 
     if target_host == "all":
         for host in test_lib.lib_find_hosts_by_status("Connected"):
-            pre_rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), pre_cmd)
+            pre_rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'),
+                                                   pre_cmd)
             time.sleep(1)
-            rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd, timeout)
+            rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd,
+                                               timeout)
             if not rsp and not background:
                 test_util.test_fail('%s failed on %s' % (cmd, host.managementIp))
     elif target_host == "random":
         host = random.choice(test_lib.lib_find_hosts_by_status("Connected"))
-        pre_rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), pre_cmd)
+        pre_rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'),
+                                               pre_cmd)
         time.sleep(1)
-        rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd, timeout)
+        rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd,
+                                           timeout)
         if not rsp and not background:
             test_util.test_fail('%s failed on %s' % (cmd, host.managementIp))
     else:
         host = test_lib.lib_find_host_by_HostIp(target_host)
         if not host:
             test_util.test_fail('no host found for IP %s' % (target_host))
-        pre_rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), pre_cmd)
+        pre_rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'),
+                                               pre_cmd)
         time.sleep(1)
-        rsp = test_lib.lib_execute_ssh_cmd(host[0].managementIp, host[0].username, os.environ.get('hostPassword'), cmd, timeout)
+        rsp = test_lib.lib_execute_ssh_cmd(host[0].managementIp, host[0].username, os.environ.get('hostPassword'), cmd,
+                                           timeout)
         if not rsp and not background:
             test_util.test_fail('%s failed on %s' % (cmd, target_host))
+
 
 def reboot_host(robot_test_obj, args):
     target_host = ""
@@ -1292,6 +1320,7 @@ def create_volume(robot_test_obj, args):
     volume_check_flag = True
     disksize = 2 * 1024 * 1024 * 1024
     ps_type = None
+    changePsUuids = []
 
     if len(args) < 1:
         test_util.test_fail("no resource available for next action: create volume")
@@ -1312,6 +1341,8 @@ def create_volume(robot_test_obj, args):
             ps_type = "Ceph"
         if 'sharedblock' in tags:
             ps_type = "SharedBlock"
+        if 'xsky' in tags:
+            ps_type = "xskyCeph"
 
     # parser args[3:] size flag
     # todo: add ps_type, offering_uuid, if loacl_ps appoint host will be better
@@ -1334,6 +1365,8 @@ def create_volume(robot_test_obj, args):
             ps_type = "Ceph"
         if 'sblk' in flag:
             ps_type = "SharedBlock"
+        if 'xsky' in flag:
+            ps_type = "xskyCeph"
 
     if "size" in arg_dict:
         if arg_dict["size"] == "random":
@@ -1355,8 +1388,22 @@ def create_volume(robot_test_obj, args):
             systemtags.append("localStorage::hostUuid::%s" % (host_uuid))
 
     if ps_type:
-        cond = res_ops.gen_query_conditions("type", "=", ps_type)
-        pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+        if ps_type == "xskyCeph":
+            cond = res_ops.gen_query_conditions("name", "=", "ceph_ps")
+            pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+            for ps in pss:
+                ps_ops.change_primary_storage_state(ps.uuid, "disable")
+                changePsUuids.append(ps.uuid)
+            ps_type = "Ceph"
+        elif ps_type == "Ceph":
+            cond = res_ops.gen_query_conditions("name", "=", "xsky_ps")
+            pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+            for ps in pss:
+                ps_ops.change_primary_storage_state(ps.uuid, "disable")
+                changePsUuids.append(ps.uuid)
+        cond1 = res_ops.gen_query_conditions("type", "=", ps_type)
+        cond2 = res_ops.gen_query_conditions("state", "=", "Enabled", cond1)
+        pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond2)
         if not pss:
             test_util.test_fail("there is no primarystorage type: [%s]" % ps_type)
         volume_creation_option.set_primary_storage_uuid(pss[0].uuid)
@@ -1377,6 +1424,8 @@ def create_volume(robot_test_obj, args):
     robot_test_obj.test_dict.add_volume(target_volume_name, new_volume, volume_check_flag)
     robot_test_obj.test_dict.add_snap_tree(target_volume_name, snap_tree)
 
+    for uuid in changePsUuids:
+        ps_ops.change_primary_storage_state(uuid, "enable")
 
 def create_scsi_volume():
     pass
@@ -2152,7 +2201,7 @@ def use_vm_snapshot(robot_test_obj, args):
 
     vol_ops.revert_vm_from_snapshot_group(root_snapshot.snapshot.groupUuid)
 
-    for name,snapshot in robot_test_obj.test_dict.snapshot.items():
+    for name, snapshot in robot_test_obj.test_dict.snapshot.items():
         if snapshot_num == name.split('-')[1]:
             if 'vm' in name:
                 volume_name = name.split("-")[0] + "-root"
@@ -2175,7 +2224,6 @@ def ungroup_vm_snapshot(robot_test_obj, args):
     vol_ops.ungroup_volume_snapshot_group(root_snapshot.snapshot.groupUuid)
 
 
-
 def delete_vm_snapshot(robot_test_obj, args):
     if len(args) != 1:
         test_util.test_fail("no resource available for next action: delete_vm_snapshot")
@@ -2188,12 +2236,11 @@ def delete_vm_snapshot(robot_test_obj, args):
     root_snapshot = robot_test_obj.test_dict.snapshot[vm_snap_name]
     vol_ops.delete_volume_snapshot_group(root_snapshot.snapshot.groupUuid)
 
-    for name,snapshot in robot_test_obj.test_dict.snapshot.items():
+    for name, snapshot in robot_test_obj.test_dict.snapshot.items():
         if snapshot_num == name.split("-")[1]:
             snapshot_name_list.append(name)
 
     batch_delete_volume_snapshot(robot_test_obj, [snapshot_name_list], real=False)
-
 
 
 action_dict = {
@@ -2216,7 +2263,7 @@ action_dict = {
     'expunge_vm': expunge_vm,
     'reinit_vm': reinit_vm,
     'clone_vm': clone_vm,
-    #'clone_vm_with_volume': clone_vm_with_volume,
+    # 'clone_vm_with_volume': clone_vm_with_volume,
     'change_vm_image': change_vm_image,
     'create_vm_backup': create_vm_backup,
     'use_vm_backup': use_vm_backup,
