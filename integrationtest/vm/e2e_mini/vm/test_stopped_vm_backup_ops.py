@@ -13,9 +13,10 @@ def test():
     global vm_ops
     vm_ops = vm.VM()
     vm_ops.create_vm(vm_name)
-    vm_ops.vm_ops(vm_name, 'stop')
+#     vm_ops.vm_ops(vm_name, 'stop')
     vm_ops.create_backup(vm_name, 'vm', backup_list[0])
     vm_ops.create_backup(vm_name, 'vm', backup_list[1])
+    vm_ops.vm_ops(vm_name, 'stop')
     vm_ops.restore_backup(vm_name, 'vm', backup_list[0])
     vm_ops.restore_backup(vm_name, 'vm', backup_list[1])
     vm_ops.vm_ops(vm_name, 'start')

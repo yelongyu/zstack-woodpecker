@@ -194,7 +194,7 @@ class MINI(E2E):
     def switch_tab(self, tab_name):
         test_util.test_logger('Switch to tab [%s]' % tab_name.encode('utf-8'))
         self.wait_for_page_render()
-        for tab in self.get_elements('ant-tabs-tab|tab___3GRDV'):
+        for tab in self.get_elements('div'):
             if tab_name in tab.text:
                 tab.click()
                 break
