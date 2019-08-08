@@ -48,7 +48,7 @@ def test():
         # stop vm && change vm password
         #vm.stop()
         vm.check()
-        vm_ops.set_vm_qga_enable(vm.get_vm().uuid)
+#        vm_ops.set_vm_qga_enable(vm.get_vm().uuid)
         try:
             vm_ops.change_vm_password(vm.get_vm().uuid, "root", root_password)
         except Exception, e:
