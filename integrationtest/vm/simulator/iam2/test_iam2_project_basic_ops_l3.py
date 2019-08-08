@@ -62,6 +62,10 @@ def test():
         attributes = [{"name": "__ProjectAdmin__", "value": project_uuid}]
         iam2_ops.add_attributes_to_iam2_virtual_id(project_admin_uuid, attributes)
 
+        # 4 add the project admin role
+        projectadminrole_uuid='55553cefbbfb42468873897c95408a43'
+        iam2_ops.add_roles_to_iam2_virtual_id([projectadminrole_uuid], virtual_id_uuid)
+
         # login in project by project admin
         project_admin_session_uuid = iam2_ops.login_iam2_virtual_id(project_admin_name, project_admin_password)
         project_login_uuid = iam2_ops.login_iam2_project(project_name, session_uuid=project_admin_session_uuid).uuid

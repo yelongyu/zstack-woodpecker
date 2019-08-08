@@ -32,6 +32,9 @@ def test():
     vid_tst_obj = test_vid.ZstackTestVid()
     virtual_id_uuid = vid_tst_obj.get_vid().uuid
     test_stub.create_system_admin(username, password, vid_tst_obj)
+    systemadminrole_uuid='2069fe8ff0fb49efac0d4db3650a8076'
+    iam2_ops.add_roles_to_iam2_virtual_id([systemadminrole_uuid], virtual_id_uuid)
+
     system_admin_session_uuid = acc_ops.login_by_account(username, password)
 
     # Image related ops: Add, Delete, Expunge, sync image size, Update QGA, delete, expunge

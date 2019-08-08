@@ -33,6 +33,8 @@ def test():
         vid_tst_obj = test_vid.ZstackTestVid()
         test_stub.create_system_admin(username, password, vid_tst_obj)
         virtual_id_uuid = vid_tst_obj.get_vid().uuid
+        systemadminrole_uuid='2069fe8ff0fb49efac0d4db3650a8076'
+        iam2_ops.add_roles_to_iam2_virtual_id([systemadminrole_uuid], virtual_id_uuid)
         system_admin_session_uuid = acc_ops.login_by_account(username, password)
 
         #create systemadmin by systemadmin session
@@ -51,12 +53,16 @@ def test():
         vid_tst_obj.create(username, password, without_default_role="true")
         vid_uuid = vid_tst_obj.get_vid().uuid
         iam2_ops.add_attributes_to_iam2_virtual_id(vid_uuid, attributes)
+        securityrole_uuid='58db081b0bbf4e93b63dc4ac90a423ad'
+        iam2_ops.add_roles_to_iam2_virtual_id([securityrole_uuid], vid_uuid) 
     elif flavor['target_role'] == 'audit_admin':
         attributes = [{"name": "__AuditAdmin__"}]
         username = "auditAdmin"
         vid_tst_obj.create(username, password, without_default_role="true")
         vid_uuid = vid_tst_obj.get_vid().uuid
         iam2_ops.add_attributes_to_iam2_virtual_id(vid_uuid, attributes)
+        aduitrole_uuid='434a5e418a114714848bb0923acfbb9c'
+        iam2_ops.add_roles_to_iam2_virtual_id([aduitrole_uuid], vid_uuid) 
     else:
         test_util.test_fail("not a candidate role")
 
