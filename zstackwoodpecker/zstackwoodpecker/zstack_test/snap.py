@@ -422,7 +422,8 @@ class ZstackSnapshotTree(object):
 
     # when snapshot_tree is the first created and ps_migrate must update snapshot tree
     def update(self, update_utility=False):
-        if not self.utility_vm or update_utility:
+        if (not self.utility_vm) or update_utility:
+            self.utility_vm = None
             hostUuid = None
             cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")
             cond = res_ops.gen_query_conditions('state', '=', "Running", cond)
@@ -434,8 +435,6 @@ class ZstackSnapshotTree(object):
                     cond = res_ops.gen_query_conditions('hostUuid', '=', hostUuid, cond)
                     break
             vms = res_ops.query_resource(res_ops.VM_INSTANCE, cond)
-            utility_creation_option = test_util.VmOption()
-            utility_creation_option.set_name('utility_vm_for_robot_test')
             if len(vms):
                 for vm in vms:
                     if self.get_target_volume().get_volume().primaryStorageUuid == vm.allVolumes[0].primaryStorageUuid:
@@ -445,6 +444,8 @@ class ZstackSnapshotTree(object):
                         utility_vm.create_from(utility_vm_uuid)
                         self.utility_vm = utility_vm
             if not self.utility_vm:
+                utility_creation_option = test_util.VmOption()
+                utility_creation_option.set_name('utility_vm_for_robot_test')
                 utility_creation_option.set_ps_uuid(self.get_target_volume().get_volume().primaryStorageUuid)
                 if hostUuid:
                     utility_creation_option.set_host_uuid(hostUuid)

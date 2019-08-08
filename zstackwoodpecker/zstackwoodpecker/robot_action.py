@@ -564,14 +564,14 @@ def create_vm(robot_test_obj, args):
 
     if ps_type:
         if ps_type == "xskyCeph":
-            cond = res_ops.gen_query_conditions("name", "=", "ceph_ps")
+            cond = res_ops.gen_query_conditions("name", "=", "ceph-ps")
             pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
             for ps in pss:
                 ps_ops.change_primary_storage_state(ps.uuid, "disable")
                 changePsUuids.append(ps.uuid)
             ps_type = "Ceph"
         elif ps_type == "Ceph":
-            cond = res_ops.gen_query_conditions("name", "=", "xsky_ps")
+            cond = res_ops.gen_query_conditions("name", "=", "xsky-ps")
             pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
             for ps in pss:
                 ps_ops.change_primary_storage_state(ps.uuid, "disable")
@@ -1389,14 +1389,14 @@ def create_volume(robot_test_obj, args):
 
     if ps_type:
         if ps_type == "xskyCeph":
-            cond = res_ops.gen_query_conditions("name", "=", "ceph_ps")
+            cond = res_ops.gen_query_conditions("name", "=", "ceph-ps")
             pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
             for ps in pss:
                 ps_ops.change_primary_storage_state(ps.uuid, "disable")
                 changePsUuids.append(ps.uuid)
             ps_type = "Ceph"
         elif ps_type == "Ceph":
-            cond = res_ops.gen_query_conditions("name", "=", "xsky_ps")
+            cond = res_ops.gen_query_conditions("name", "=", "xsky-ps")
             pss = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
             for ps in pss:
                 ps_ops.change_primary_storage_state(ps.uuid, "disable")
@@ -1781,8 +1781,7 @@ def ps_migrate_volume(robot_test_obj, args):
         test_vm = robot_test_obj.get_test_dict().vm[vm_name]
         test_vm.update()
     target_volume.update()
-    target_volume.update_volume()
-    target_volume.snapshot_tree.update(update_utility=True)
+    target_volume.update_volume(update_utility=True)
 
     ps_ops.clean_up_trash_on_primary_storage(old_ps_uuid)
 
@@ -1985,8 +1984,8 @@ def ps_migrate_vm(robot_test_obj, args):
     target_vm.update()
     for volume in target_vm.test_volumes:
         volume.update()
-        volume.update_volume()
-        volume.snapshot_tree.update(update_utility=True)
+        volume.update_volume(update_utility=True)
+
 
     ps_ops.clean_up_trash_on_primary_storage(old_ps_uuid)
 

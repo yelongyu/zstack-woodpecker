@@ -124,7 +124,7 @@ class ZstackTestVolume(volume_header.TestVolume):
                     else:
                         super(ZstackTestVolume, self).delete()
 
-    def update_volume(self):
+    def update_volume(self, update_utility=False):
         '''
         Called by snapshot actions, since snapshot action will change volume 
         installPath
@@ -133,7 +133,7 @@ class ZstackTestVolume(volume_header.TestVolume):
             self.set_volume(test_lib.lib_get_volume_by_uuid(self.volume.uuid))
 
         if self.snapshot_tree:
-            self.snapshot_tree.update()
+            self.snapshot_tree.update(update_utility)
 
     def set_original_checking_points(self, original_checking_points):
         '''
