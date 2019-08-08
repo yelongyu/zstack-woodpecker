@@ -246,6 +246,10 @@ def test():
         policy_uuid = iam2_ops.create_policy('noDeletePolicy', statements).uuid
         iam2_ops.attach_policy_to_role(policy_uuid, role_uuid)
         iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid_test_obj.get_vid().uuid)
+        # add the project admin role
+        projectadminrole_uuid='55553cefbbfb42468873897c95408a43'
+        iam2_ops.add_roles_to_iam2_virtual_id([projectadminrole_uuid], vid_uuid)
+
         vid_test_obj.set_customized("noDeleteAdminPermission")
         vid_test_obj.set_vid_statements(statements)
         vid_test_obj.check()
