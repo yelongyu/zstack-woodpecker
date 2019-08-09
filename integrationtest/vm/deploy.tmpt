@@ -74,6 +74,8 @@ imagePassword = password
 
 imageName_net = image_for_sg_test
 imageUrl_net = http://10.1.101.1/image/centos_400m_140527.img
+imageName_with_network_tools = image_with_network_tools
+imageUrl_with_network_tools = http://172.20.1.22/mirror/diskimages/centos7_iperf-netperf-qperf-netcat-wrk.qcow2
 
 imageName_windows = windows
 imageUrl_windows = http://192.168.200.16/mirror/diskimages/windows-2012-cn-qcow2.qcow2

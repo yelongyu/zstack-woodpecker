@@ -111,6 +111,12 @@
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
+      <image name="$imageName_with_network_tools" description="Test Image4" 
+        format="$rootImageFormat" url="$imageUrl_with_network_tools" 
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      </image>
       <image name="$virtualRouterImageName" 
         description="virtual router image" format="$rootImageFormat" 
         username="$vrImageUsername" password="$vrImagePassword"
