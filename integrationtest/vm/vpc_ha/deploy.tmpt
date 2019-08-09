@@ -6,6 +6,9 @@ nfsPrimaryStorageUrl2 = zstack:/home/nfs2
 imageName3 = centos
 imageUrl3 = http://zstack.yyk.net/image/centos_400m_140527.img
 
+imageName_with_network_tools = image_with_network_tools
+imageUrl_with_network_tools = http://172.20.1.22/mirror/diskimages/centos7_iperf-netperf-qperf-netcat-wrk.qcow2
+
 largeDiskOfferingName = largeDiskOffering
 largeDiskOfferingSize = 1G
 
