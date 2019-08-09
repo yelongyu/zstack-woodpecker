@@ -100,6 +100,11 @@ def test():
         vid_tst_obj = test_vid.ZstackTestVid()
         test_stub.create_system_admin(username, password, vid_tst_obj)
         virtual_id_uuid = vid_tst_obj.get_vid().uuid
+
+        # add the system admin role
+        systemadminrole_uuid='2069fe8ff0fb49efac0d4db3650a8076'
+        iam2_ops.add_roles_to_iam2_virtual_id([systemadminrole_uuid], virtual_id_uuid)
+
         project_login_uuid = acc_ops.login_by_account(username, password)
 
 

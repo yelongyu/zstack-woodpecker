@@ -247,7 +247,7 @@ def test():
         iam2_ops.attach_policy_to_role(policy_uuid, role_uuid)
         iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], vid_test_obj.get_vid().uuid)
         # add the project admin role
-        projectadminrole_uuid='55553cefbbfb42468873897c95408a43'
+        projectadminrole_uuid='0445a3fd50d24009b791ca00e812d396'
         iam2_ops.add_roles_to_iam2_virtual_id([projectadminrole_uuid], vid_uuid)
 
         vid_test_obj.set_customized("noDeleteAdminPermission")
