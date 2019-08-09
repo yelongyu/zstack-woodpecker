@@ -202,6 +202,9 @@ class zstack_vid_attr_checker(checker_header.TestChecker):
             vxlan_pool_uuid = vxlan_ops.create_l2_vxlan_network_pool('vxlan_poll_for networks_polocy_checker', zone_uuid).uuid
             vni_uuid = vxlan_ops.create_vni_range('vni_range_for_networks_policy_checker', '10000', '20000', vxlan_pool_uuid).uuid
             clear_vxlan_pool = True
+        elif len(vxlan_pool[0].attachedVniRanges) == 0:
+            vni_uuid = vxlan_ops.create_vni_range('vni_range_for_networks_policy_checker', '10000', '20000', vxlan_pool[0].uuid).uuid
+            clear_vxlan_pool = True
         else:
             vxlan_pool_uuid = vxlan_pool[0].uuid
         vxlan_pool_uuid = res_ops.get_resource(res_ops.L2_VXLAN_NETWORK_POOL, session_uuid=session_uuid)[0].uuid
@@ -1274,6 +1277,9 @@ class zstack_vid_policy_checker(checker_header.TestChecker):
         if vxlan_pool == None or len(vxlan_pool) == 0:
             vxlan_pool_uuid = vxlan_ops.create_l2_vxlan_network_pool('vxlan_poll_for networks_polocy_checker', zone_uuid).uuid
             vni_uuid = vxlan_ops.create_vni_range('vni_range_for_networks_policy_checker', '10000', '20000', vxlan_pool_uuid).uuid
+            clear_vxlan_pool = True
+        elif len(vxlan_pool[0].attachedVniRanges) == 0:
+            vni_uuid = vxlan_ops.create_vni_range('vni_range_for_networks_policy_checker', '10000', '20000', vxlan_pool[0].uuid).uuid
             clear_vxlan_pool = True
         else:
             vxlan_pool_uuid = vxlan_pool[0].uuid
