@@ -617,7 +617,7 @@ def update_iam2_virtual_id(uuid, name=None, description=None, password=None, ses
 def get_policy_statement_uuid_of_role(role_uuid,action):
     policy_statements=res_ops.get_resource(res_ops.ROLE,uuid=role_uuid)[0].statements
     for policy_statement in policy_statements:
-        if policy_statement.statement.actions[0]==action:
+        if len(policy_statement.statement.actions) and policy_statement.statement.actions[0]==action:
             return policy_statement.uuid
 
 def get_attribute_uuid_of_project(project_uuid,attribute_name):
