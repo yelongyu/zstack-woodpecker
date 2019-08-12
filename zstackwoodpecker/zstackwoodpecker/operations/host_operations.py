@@ -12,6 +12,8 @@ import resource_operations
 import apibinding.inventory as inventory
 import zstacklib.utils.shell as shell
 import time
+import json
+import zstacklib.utils.jsonobject as jsonobject
 
 def add_kvm_host(host_option, session_uuid=None):
     action = api_actions.AddKVMHostAction()
@@ -127,3 +129,9 @@ def poweroff_host(host_uuids, admin_password, mn_flag=None, session_uuid=None):
     action.timeout = 1200000
     evt = account_operations.execute_action_with_session(action, session_uuid, mn_flag=mn_flag)
     return evt
+
+def get_host_task(host_uuids, session_uuid = None):
+    action = api_actions.GetHostTaskAction()
+    action.hostUuids = host_uuids
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return json.loads(jsonobject.dumps(evt.results))
