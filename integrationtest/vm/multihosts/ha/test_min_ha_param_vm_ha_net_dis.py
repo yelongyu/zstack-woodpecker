@@ -107,6 +107,8 @@ def test():
     set_quick_ha_properties()
     set_quick_ha_params()
     
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, [], None)[0]
+    test_stub.ensure_bss_connected()
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid

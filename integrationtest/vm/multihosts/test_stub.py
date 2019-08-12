@@ -25,6 +25,7 @@ import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
+import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.vpc_operations as vpc_ops
@@ -1914,6 +1915,22 @@ def wait_until_vm_reachable(vm, timeout=120):
             break
         else:
             time.sleep(interval)
+
+def ensure_bss_connected():
+    for i in range(300):
+        #time.sleep(1)
+        bs_list = res_ops.query_resource(res_ops.BACKUP_STORAGE)
+        for bs in bs_list:
+            bs_ops.reconnect_backup_storage(bs.uuid)
+            cond = res_ops.gen_query_conditions('uuid', '=', bs.uuid)
+            bss = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, cond, None)
+            if not "connected" in bss[0].status.lower():
+                test_util.test_logger("times: %s found not connected ps status: %s" %(str(i), bss[0].status))
+                break
+        else:
+            return
+    else:
+        test_util.test_fail("bs status didn't change to Connected within 300s, therefore, failed")
 
 def ensure_hosts_connected(wait_time):
     for i in range(wait_time):

@@ -19,7 +19,7 @@
 		<case timeout='1200' repeat='1'>migrate/test_migrate_stopped_vm_progress3.py</case>
 		<case timeout='1200' repeat='1'>migrate/test_migrate_stopped_vm_snapshots_progress.py</case>
 		<case timeout='1200' repeat='1'>migrate/test_migrate_vm_with_sp_ops.py</case>
-		<case timeout='600' repeat='1'>migrate/test_migrate_vm_with_deep_sp_chain.py</case>
+		<case timeout='1800' repeat='1'>migrate/test_migrate_vm_with_deep_sp_chain.py</case>
 		<case timeout='600' repeat='1'>migrate/test_sharable_vol_live_migrate.py</case>
 		<case timeout='1200' repeat='1'>migrate/test_expunge_img_vm_migrate.py</case>
 		<case timeout='600' repeat='1'>ps/test_disable_ps_live_migrate.py</case>
@@ -39,7 +39,7 @@
 		<case timeout='900' repeat='1' noparallel='True'>test_imagecache_cleanup2.py</case>
 		<case timeout='900' repeat='1' noparallel='True'>test_imagecache_cleanup3.py</case>
 		<case timeout='600' repeat='1' noparallel='True'>migrate/test_migrate_stopped_vm_imagecache_cleanup.py</case>
-		<case timeout='600' repeat='1' noparallel='True'>migrate/test_migrate_vm_imagecache_cleanup.py</case>
+		<case timeout='1200' repeat='1' noparallel='True'>migrate/test_migrate_vm_imagecache_cleanup.py</case>
 		<case timeout='600' repeat='1' noparallel='True'>migrate/test_detach_vm_net_migrate_attach_vm_net.py</case>
 		<case timeout='1800' repeat='1' noparallel='True'>ha/test_vm_ha_never_stop.py</case>
 		<case timeout='2400' repeat='1' noparallel='True'>ha/test_vm_ha_last_host.py</case>
