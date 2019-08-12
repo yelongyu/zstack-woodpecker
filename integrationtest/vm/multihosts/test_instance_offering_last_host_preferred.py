@@ -6,6 +6,7 @@ New Integration Test for instance offering allocator strategy 'LastHostPreferred
 '''
 import zstackwoodpecker.test_util as test_util
 import os
+import sys
 import time
 import apibinding.inventory as inventory
 import zstackwoodpecker.test_state as test_state
@@ -101,6 +102,8 @@ def test():
             break
         time.sleep(5)
         count += 1
+    reload(sys)
+    sys.setdefaultencoding( "utf-8" )
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
         try:
             vm.start()
