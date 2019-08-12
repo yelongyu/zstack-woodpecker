@@ -40,13 +40,14 @@ def login_by_ldap(uid, password, timeout = 60000):
     session_uuid = login.run().inventory.uuid
     return session_uuid
 
-def logout(session_uuid):
+def logout(session_uuid, mn_flag=None):
+    if mn_flag: return
     logout = api_actions.LogOutAction()
     logout.timeout = 160000
     logout.sessionUuid = session_uuid
     logout.run()
 
-def execute_action_with_session(action, session_uuid):
+def execute_action_with_session(action, session_uuid, mn_flag=None):
     if session_uuid:
         action.sessionUuid = session_uuid
         evt = action.run()
@@ -59,7 +60,7 @@ def execute_action_with_session(action, session_uuid):
             traceback.print_exc(file=sys.stdout)
             raise e
         finally:
-            logout(session_uuid)
+            logout(session_uuid, mn_flag)
 
     return evt
 
