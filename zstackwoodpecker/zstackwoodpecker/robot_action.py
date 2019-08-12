@@ -1107,7 +1107,9 @@ def clone_vm(robot_test_obj, args):
                         robot_test_obj.test_dict.add_volume(new_name, new_volume)
                         new_volume.set_md5sum(volume.get_md5sum())
 
+                        import copy
                         snap_tree = robot_snapshot_header.ZstackSnapshotTree(new_volume)
+                        snap_tree.checking_points = copy.deepcopy(volume.snapshot_tree.checking_points)
                         new_volume.snapshot_tree = snap_tree
                         snap_tree.update()
                         robot_test_obj.test_dict.add_snap_tree(new_name, snap_tree)

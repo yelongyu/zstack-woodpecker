@@ -433,7 +433,7 @@ def change_vm_image(vm_uuid,image_uuid,session_uuid=None):
     test_util.action_logger('Change image [imageUuid:] %s for vm [vmInstanceUuid:] %s' % (image_uuid, vm_uuid))
     evt = account_operations.execute_action_with_session(action,session_uuid)
     return evt.inventory
-   
+
 def get_image_candidates_for_vm_to_change(vm_uuid,session_uuid=None):
     action = api_actions.GetImageCandidatesForVmToChangeAction()
     action.vmInstanceUuid = vm_uuid
@@ -456,6 +456,14 @@ def get_vm_starting_candidate(vm_uuid,systemtag=[],session_uuid=None):
     test_util.action_logger('Get candidate hosts for starting vm [uuid:] %s to migrate' % vm_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.hostInventories
+
+def get_vm_starting_candidate_clusters_hosts(vm_uuid,systemtag=[],session_uuid=None):
+    action = api_actions.GetVmStartingCandidateClustersHostsAction()
+    action.uuid = vm_uuid
+    action.systemtag = systemtag
+    test_util.action_logger('Get candidate hosts for starting vm [uuid:] %s to migrate' % vm_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
 
 def set_vm_boot_order(vm_uuid,boot_order,session_uuid=None):
     action = api_actions.SetVmBootOrderAction()
@@ -562,3 +570,9 @@ def revert_vm_from_backup(group_uuid, bs_uuid, session_uuid=None):
     action.groupUuid = group_uuid
     action.backupStorageUuid = bs_uuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
+
+def get_vm_attachable_data_volume(vmInstanceUuid, session_uuid=None):
+    action = api_actions.GetVmAttachableDataVolumeAction()
+    action.vmInstanceUuid = vmInstanceUuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventories

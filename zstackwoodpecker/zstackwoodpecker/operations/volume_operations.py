@@ -531,3 +531,11 @@ def delete_volume_snapshot_group(uuid, session_uuid=None):
 
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.results
+
+def get_data_volume_attachable_vm(volumeUuid, session_uuid=None):
+    action = api_actions.GetDataVolumeAttachableVmAction()
+    action.volumeUuid = volumeUuid
+    test_util.test_logger("get datavolume [%s] attachable vm" % volumeUuid)
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventories
