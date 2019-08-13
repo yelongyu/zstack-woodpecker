@@ -46,7 +46,7 @@ def test():
     # create_volume on 2 clusters
     ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
     systemtags1 = ["volumeProvisioningStrategy::ThickProvisioning", "capability::virtio-scsi",
-                   "miniStorage::clusterUuid::" + cluster1.uuid]
+                   "miniStorage::clusterUuid::%s" % cluster1.uuid]
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_name("cluster1_volume")
     volume_creation_option.set_primary_storage_uuid(ps.uuid)
@@ -57,7 +57,7 @@ def test():
     volume1.create_from(volume_inv.uuid)
 
     systemtags2 = ["volumeProvisioningStrategy::ThickProvisioning", "capability::virtio-scsi",
-                   "miniStorage::clusterUuid::%s" + cluster2.uuid]
+                   "miniStorage::clusterUuid::%s" % cluster2.uuid]
     volume_creation_option.set_name("cluster2_volume")
     volume_creation_option.set_system_tags(systemtags2)
     volume_inv = vol_ops.create_volume_from_diskSize(volume_creation_option)

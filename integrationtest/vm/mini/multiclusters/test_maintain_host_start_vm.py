@@ -1,17 +1,17 @@
-import zstackwoodpecker.test_util as test_util
-import zstackwoodpecker.test_state as test_state
-import zstackwoodpecker.test_lib as test_lib
+import os
+import time
+
+import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
-import zstackwoodpecker.operations.host_operations as host_ops
+import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
-import time
-import os
-import random
 
 vm = None
 host1_uuid = None
 host2_uuid = None
+
 
 def test():
     global vm, host1_uuid, host2_uuid
@@ -43,7 +43,7 @@ def test():
     vm_creation_option.set_cluster_uuid(cluster1.uuid)
 
     vm_creation_option.set_cpu_num(2)
-    vm_creation_option.set_memory_size(2*1024*1024*1024)
+    vm_creation_option.set_memory_size(2 * 1024 * 1024 * 1024)
 
     vm = test_vm_header.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
@@ -80,26 +80,45 @@ def test():
     except:
         test_util.test_logger("test pass!")
 
-    vm.clean()
     host_ops.change_host_state(host1_uuid, state="enable")
     host_ops.change_host_state(host2_uuid, state="enable")
+
+    # wait host connected
+    wait_hosts_connected(host1_uuid)
+    wait_hosts_connected(host2_uuid)
+
+    vm.clean()
 
 
 def error_cleanup():
     global vm, host1_uuid, host2_uuid
-    if vm:
-        vm.clean()
     if host1_uuid:
         host_ops.change_host_state(host1_uuid, state="enable")
+        wait_hosts_connected(host1_uuid)
     if host2_uuid:
         host_ops.change_host_state(host2_uuid, state="enable")
+        wait_hosts_connected(host2_uuid)
+    if vm:
+        vm.clean()
 
 
 def env_recover():
     global vm, host1_uuid, host2_uuid
-    if vm:
-        vm.clean()
     if host1_uuid:
         host_ops.change_host_state(host1_uuid, state="enable")
+        wait_hosts_connected(host1_uuid)
     if host2_uuid:
         host_ops.change_host_state(host2_uuid, state="enable")
+        wait_hosts_connected(host2_uuid)
+    if vm:
+        vm.clean()
+
+
+def wait_hosts_connected(host_uuid):
+    while True:
+        time.sleep(5)
+        cond = res_ops.gen_query_conditions("uuid", "=", host_uuid)
+        host = res_ops.query_resource(res_ops.HOST, cond)[0]
+        if host.status == "Connected":
+            break
+        time.sleep(5)

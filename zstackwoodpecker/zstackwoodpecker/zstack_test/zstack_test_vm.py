@@ -183,6 +183,8 @@ class ZstackTestVm(vm_header.TestVm):
                 host = test_lib.lib_find_host_by_vm(updated_vm)
                 if not host and self.vm.state != vm_header.STOPPED:
                     self.set_state(vm_header.STOPPED)
+                if host and host.state == "Maintenance":
+                    self.set_state(vm_header.STOPPED)
             else:
                 self.set_state(vm_header.EXPUNGED)
             return self.vm
