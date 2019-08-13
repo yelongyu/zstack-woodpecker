@@ -14,9 +14,9 @@
         <vm name="$vmName1" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword" vmSerial="$vm1SN">
           <l3Networks>
-            <l3Network uuid="$vmL3Uuid">
-            </l3Network>
             <l3Network uuid="$vmL3Uuid2">
+            </l3Network>
+            <l3Network uuid="$vmL3Uuid" default="true">
             </l3Network>
             <l3Network uuid="$vmL3Uuid3">
             </l3Network>
@@ -28,13 +28,14 @@
           <nodeRef>$node1Name</nodeRef>
 	  <hostRef>$hostName</hostRef>
           <mHaHostRef>$hostName</mHaHostRef>
+	  <primaryStorageRef type="mini_ps" offering_uuid="$cephStorageOfferingUuid">$miniPrimaryStorageName</primaryStorageRef>
         </vm>
         <vm name="$vmName2" vmInstranceOfferingUuid="$vmInstranceOfferingUuid2" 
           imageUuid="$imageUuid" imageUsername="$imageUsername" imagePassword="$imagePassword" vmSerial="$vm2SN">
           <l3Networks>
-            <l3Network uuid="$vmL3Uuid">
-            </l3Network>
             <l3Network uuid="$vmL3Uuid2">
+            </l3Network>
+            <l3Network uuid="$vmL3Uuid" default="true">
             </l3Network>
             <l3Network uuid="$vmL3Uuid3">
             </l3Network>
@@ -46,6 +47,7 @@
           <nodeRef>$node2Name</nodeRef>
 	  <hostRef>$hostName2</hostRef>
           <mHaHostRef>$hostName2</mHaHostRef>
+	  <primaryStorageRef type="mini_ps" offering_uuid="$cephStorageOfferingUuid">$miniPrimaryStorageName</primaryStorageRef>
         </vm>
       </vms>
     </host>

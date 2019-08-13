@@ -386,8 +386,6 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
         # device id 3/4 for ens2fX
         if os.getenv('hostType') == 'miniHost-bootstrap':
             if device_id == 0:
-                nic_name = "eth0"
-            elif device_id == 1:
                 nic_name = "eno1"
             elif device_id == 2:
                 nic_name = "eno2"
@@ -395,15 +393,33 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
                 nic_name = "ens2f0"
             elif device_id == 4:
                 nic_name = "ens2f1"
+            elif device_id == 1:
+                nic_name = "eth0"
         else:
             nic_name = "zsn%s" % (nic_id)
-        udev_config = udev_config + r'\\nACTION==\"add\", SUBSYSTEM==\"net\", DRIVERS==\"?*\", ATTR{type}==\"1\", ATTR{address}==\"%s\", NAME=\"%s\"' % (vmnic_mac, nic_name)
-        modify_cfg.append(r"rm -rf /etc/sysconfig/network-scripts/ifcfg-eth%s || True" %(nic_id))
-        modify_cfg.append(r"cp /root/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-%s" %(nic_name))
-        modify_cfg.append(r"sed -i 's:eth0:%s:g' /etc/sysconfig/network-scripts/ifcfg-%s" %(nic_name, nic_name))
+
+        if os.getenv('hostType') == 'miniHost-bootstrap':
+            if nic_name == "eno1":
+                pre_cmd = 'sed -i \'s/ATTR{address}.*eno1"/ATTR{address}=="%s", NAME="eno1"/g\' /etc/udev/rules.d/70-persistent-ipoib.rules' % (vmnic_mac)
+                ssh.execute(pre_cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
+            else:
+                udev_config = udev_config + r'\\nACTION==\"add\", SUBSYSTEM==\"net\", DRIVERS==\"?*\", ATTR{type}==\"1\", ATTR{address}==\"%s\", NAME=\"%s\"' % (vmnic_mac, nic_name)
+                modify_cfg.append(r"rm -rf /etc/sysconfig/network-scripts/ifcfg-eth%s || True" %(nic_id))
+                modify_cfg.append(r"cp /etc/sysconfig/network-scripts/ifcfg-eth0.bak /etc/sysconfig/network-scripts/ifcfg-%s" %(nic_name))
+                modify_cfg.append(r"sed -i 's:eth0:%s:g' /etc/sysconfig/network-scripts/ifcfg-%s" %(nic_name, nic_name))
+        else:
+            udev_config = udev_config + r'\\nACTION==\"add\", SUBSYSTEM==\"net\", DRIVERS==\"?*\", ATTR{type}==\"1\", ATTR{address}==\"%s\", NAME=\"%s\"' % (vmnic_mac, nic_name)
+            modify_cfg.append(r"rm -rf /etc/sysconfig/network-scripts/ifcfg-eth%s || True" %(nic_id))
+            modify_cfg.append(r"cp /root/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-%s" %(nic_name))
+            modify_cfg.append(r"sed -i 's:eth0:%s:g' /etc/sysconfig/network-scripts/ifcfg-%s" %(nic_name, nic_name))
+
         nic_id += 1
 
-    cmd = 'echo -e %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
+    if os.getenv('hostType') == 'miniHost-bootstrap':
+        cmd = 'echo -e %s >> /etc/udev/rules.d/70-persistent-ipoib.rules' % (udev_config)^M
+    else:
+        cmd = 'echo -e %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)^M
+
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     modify_cfg.append(r"sleep 1")
     modify_cfg.append(r"sync")
@@ -1937,6 +1953,7 @@ def create_vm(http_server_ip, vm_create_option):
         create_vm.type = vm_type
 
     create_vm.systemTags = vm_create_option.get_system_tags()
+    create_vm.rootVolumeSystemTags = vm_create_option.get_rootVolume_systemTags()
     create_vm.userTags = vm_create_option.get_user_tags()
     create_vm.timeout = 1200000
 
@@ -2616,7 +2633,11 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     else:
                         l3_uuid_list.append(l3network.uuid_)
                         if not default_l3_uuid:
-                            default_l3_uuid = l3network.uuid_
+                            if os.getenv('hostType') == 'miniHost-bootstrap':
+                                if hasattr(l3network, 'default_') and l3network.default_ == "true":
+                                    default_l3_uuid = l3network.uuid_
+                                else:
+                                    default_l3_uuid = l3network.uuid_
 
                 if len(l3_uuid_list) >=3 and os.getenv('hostType') != 'miniHost-bootstrap':
                     for l3_uuid in l3_uuid_list:
@@ -2628,6 +2649,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
 
                 if os.getenv('hostType') == 'miniHost-bootstrap':
                     vm_creation_option.set_system_tags(['vmSystemSerialNumber::%s' % (vm.vmSerial_)])
+                    vm_creation_option.set_rootVolume_systemTags(['capability::virtio-scsi'])
 
                 vm_creation_option.set_instance_offering_uuid(vm.vmInstranceOfferingUuid_)
                 vm_creation_option.set_l3_uuids(l3_uuid_list)
@@ -2825,6 +2847,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             break
 
                 if xmlobject.has_element(vm, 'primaryStorageRef'):
+                    volume_option = test_util.VolumeOption()
+                    volume_option.set_name(os.environ.get('volumeName'))
                     vm_ip_to_post = setup_primarystorage_vm(vm_inv, vm, deploy_config)
                     for ps_ref in xmlobject.safe_list(vm.primaryStorageRef):
                         if ps_ref.type_ == 'ocfs2smp':
