@@ -21,13 +21,14 @@ def test():
     global test_obj_dict
     global delete_policy
     delete_policy = test_lib.lib_set_delete_policy('vm', 'Delay')
-
+    l3_uuid_list = []
     l3_name = os.environ.get('l3VlanNetworkName1')
-    l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    l3_uuid_list.append(test_lib.lib_get_l3_by_name(l3_name).uuid)
     image_name = os.environ.get('imageName_net')
+    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
     if ps_type != 'MiniStorage':
-        vm = test_stub.create_vm_with_random_offering(l3_name=l3_name, image_name=image_name, vm_name='basic-test-vm')
+        vm = test_stub.create_vm(l3_uuid_list, image_uuid, vm_name='basic-test-vm')
     else:
         vm = test_stub.create_vr_vm(l3_name='l3VlanNetworkName1', image_name=image_name, vm_name='basic-test-vm')
     test_obj_dict.add_vm(vm)
