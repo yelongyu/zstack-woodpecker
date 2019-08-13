@@ -46,7 +46,7 @@ def test():
     vm_password = os.environ['imagePassword']
 
     ssh.scp_file(zstack_300_path, target_file, vm_ip, vm_username, vm_password)
-    test_stub.prepare_test_env(vm_inv, target_file)
+    #test_stub.prepare_test_env(vm_inv, target_file)
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     args = "-r /home/testzstack -I eth0"
     test_stub.execute_install_with_args(ssh_cmd, args, target_file, tmp_file)
@@ -68,7 +68,7 @@ def test():
 
     os.system('rm -f %s' % tmp_file)
     test_stub.destroy_vm_scenario(vm_inv.uuid)
-    test_util.test_pass('ZStack upgrade Test Success')
+    test_util.test_pass('ZStack upgrade master from 2.3.0.301 install -r /home/testzstack and ugrade by repo server Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
