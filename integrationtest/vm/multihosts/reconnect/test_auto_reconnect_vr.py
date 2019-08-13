@@ -73,7 +73,7 @@ def test():
     #    else:
     #        cmd = "service zstack-imagestorebackupstorage stop"
 
-    vr_ip = test_lib.lib_find_vr_pub_ip(vr1)
+    vr_ip = test_lib.lib_find_vr_mgmt_ip(vr1)
     if test_lib.lib_execute_sh_cmd_by_agent(vr_ip, cmd) == False:
         test_util.test_fail("CMD:%s execute failed on %s" %(cmd, vr_ip))
 
