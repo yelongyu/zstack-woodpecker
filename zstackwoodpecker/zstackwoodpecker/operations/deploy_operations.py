@@ -60,7 +60,10 @@ def deploy_selenium_docker():
     remote_registry = os.getenv('REMOTE_REGISTRY')
     with open('/home/mn_node_ip', 'w') as nip_file:
         nip_file.write(zs_node_ip)
-    install_docker_cmd = 'yum --enablerepo=* clean all && yum --disablerepo=* --enablerepo=zstack-mn,qemu-kvm-ev-mn install -y docker'
+    if os.getenv('ZSTACK_SIMULATOR') == 'yes':
+        install_docker_cmd = 'yum --enablerepo=* clean all && yum --disablerepo=* --enablerepo=zstack-local install -y docker'
+    else:
+        install_docker_cmd = 'yum --enablerepo=* clean all && yum --disablerepo=* --enablerepo=zstack-mn,qemu-kvm-ev-mn install -y docker'
     pull_workaround_cmd = '''echo '{ "insecure-registries":["%s:5000"]}' > /etc/docker/daemon.json;
                             systemctl enable docker; systemctl start docker''' % remote_registry
     pull_image_cmd = 'docker pull %s:5000/selenium/%s' % (remote_registry, selenium_standalone)
