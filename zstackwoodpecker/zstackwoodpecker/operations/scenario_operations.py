@@ -416,9 +416,9 @@ def setup_host_vm(zstack_management_ip, vm_inv, vm_config, deploy_config):
         nic_id += 1
 
     if os.getenv('hostType') == 'miniHost-bootstrap':
-        cmd = 'echo -e %s >> /etc/udev/rules.d/70-persistent-ipoib.rules' % (udev_config)^M
+        cmd = 'echo -e %s >> /etc/udev/rules.d/70-persistent-ipoib.rules' % (udev_config)
     else:
-        cmd = 'echo -e %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)^M
+        cmd = 'echo -e %s > /etc/udev/rules.d/70-persistent-net.rules' % (udev_config)
 
     ssh.execute(cmd, vm_ip, vm_config.imageUsername_, vm_config.imagePassword_, True, 22)
     modify_cfg.append(r"sleep 1")
