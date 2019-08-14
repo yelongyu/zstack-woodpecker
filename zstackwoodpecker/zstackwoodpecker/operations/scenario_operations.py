@@ -2636,8 +2636,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             if os.getenv('hostType') == 'miniHost-bootstrap':
                                 if hasattr(l3network, 'default_') and l3network.default_ == "true":
                                     default_l3_uuid = l3network.uuid_
-                                else:
-                                    default_l3_uuid = l3network.uuid_
+                            else:
+                                default_l3_uuid = l3network.uuid_
 
                 if len(l3_uuid_list) >=3 and os.getenv('hostType') != 'miniHost-bootstrap':
                     for l3_uuid in l3_uuid_list:
