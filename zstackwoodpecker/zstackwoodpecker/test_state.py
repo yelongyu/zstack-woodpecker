@@ -14,6 +14,7 @@ import zstackwoodpecker.header.volume as volume_header
 import zstackwoodpecker.header.image as image_header
 import zstackwoodpecker.header.vip as vip_header
 import zstackwoodpecker.header.eip as eip_header
+import zstackwoodpecker.header.host as host_header
 import zstackwoodpecker.header.port_forwarding as pf_header
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
@@ -25,6 +26,8 @@ class TestAction(object):
         Possible test Actions defination.
     '''
     #actions
+    poweroff_only = 'poweroff_only'
+    poweron_only = 'poweron_only'
     change_global_config_sp_depth = 'change_global_config_sp_depth'
     recover_global_config_sp_depth = 'recover_global_config_sp_depth'
     cleanup_imagecache_on_ps = "cleanup_imagecache_on_ps"
@@ -681,6 +684,11 @@ class TestStateDict(object):
             'Deleted': [disk_offering_inv]\
             }"
 
+    host_desc = " host_dict = {\
+            'host_uuid': host_inv, \
+            'PowerOff': [host_inv] \
+            }"
+
     def __init__(self):
         self.vm_dict = {
                 vm_header.RUNNING:[], 
@@ -723,6 +731,7 @@ class TestStateDict(object):
         self.disk_offering_dict = {'Deleted': []}
         self.backup_dict = {}
         self.backup_list = []
+        self.host_dict = {'PowerOff':[]}
     
     def __repr__(self):
         return str({
@@ -735,8 +744,15 @@ class TestStateDict(object):
                 'volume_snapshot_dict': self.volume_snapshot_dict,
                 'utiltiy_vm_dict': self.utility_vm_dict,
                 'accout_dict': self.account_dict,
-                'backup_dict': self.backup_dict
+                'backup_dict': self.backup_dict,
+                'host_dict': self.host_dict
         })
+    def add_host(self, host, state=host_header.CONNECTED):
+        if not hot in self.host_dict[state]:
+            self.host_dict[state].append(host)
+
+    def get_host_list(self, state=host_header.CONNECTED):
+        return self.host_dict[state]
 
     def add_vm(self, vm, state=vm_header.RUNNING, create_snapshots = True):
         def add_vm_volume_snapshot(volume, data = True):

@@ -16,6 +16,8 @@ import zstackwoodpecker.operations.resource_stack as resource_stack_ops
 import zstackwoodpecker.operations.stack_template as stack_template_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
+import zstackwoodpecker.operations.scenario_operations as sce_ops
+import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as ts_header
 import zstackwoodpecker.test_util as test_util
@@ -23,6 +25,8 @@ import zstackwoodpecker.zstack_test.snap as robot_snapshot_header
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_vol_header
+import zstackwoodpecker.zstack_test.zstack_test_kvm_host as zstack_host_header
+import hashlib
 
 debug.install_runtime_tracedumper()
 test_stage = ts_header.TestStage
@@ -44,6 +48,7 @@ class robot_test_dict(object):
         self.image = {}  # {name: image_obj}
         self.snap_tree = {}  # {vol_name: snap_tree}
         self.volume_check = {}  # {name: robot_flag}
+        self.host = {} # {name: host_obj}
 
     def __repr__(self):
         str = 'Dict:: \n'
@@ -59,6 +64,8 @@ class robot_test_dict(object):
                 k, v['backup'].uuid, v['backup'].volumeUuid, v['md5']))
         for k, v in self.image.items():
             str += ('\tName: %s, Uuid: %s\n' % (k, v.image.uuid))
+        for k, v in self.host.items():
+            str += ('\tName: %s, Uuid: %s\n' % (k, v.host.uuid))
         return str
 
     def add_vm(self, name, vm_obj):
@@ -121,6 +128,14 @@ class robot_test_dict(object):
         for k, v in self.snap_tree.items():
             if v == snap_tree:
                 self.snap_tree.pop(k)
+
+    def add_host(self, name, host_obj):
+        self.host[name] = host_obj
+
+    def remove_host(self, host_obj):
+        for k, v in self.host.items():
+            if v == host_obj:
+                self.host.pop(k);
 
     def check(self):
         # vm.check
@@ -251,6 +266,7 @@ class robot(object):
 
         # host
         hosts = res_ops.query_resource(res_ops.HOST)
+        test_util.test_logger("@@DEBUG@@:{}".format(len(hosts)))
         self.robot_resource['host'] = []
         for host in hosts:
             test_util.test_logger("Robot resource:: host: [%s], uuid: [%s}" % (host.name, host.uuid))
@@ -2242,9 +2258,100 @@ def delete_vm_snapshot(robot_test_obj, args):
             snapshot_name_list.append(name)
 
     batch_delete_volume_snapshot(robot_test_obj, [snapshot_name_list], real=False)
+def poweron_only(robot_test_obj, args, auto=None):
+    def wait_host_up(timeout, hosts):
+        timeout_max = timeout
+        while timeout:
+            for host in hosts:
+                try:
+                    _host = test_lib.lib_find_host_by_HostIp(host.managementIp)
+                except:
+                    timeout -= 15
+                    if timeout == 0:
+                        test_util.test_fail('%s is not up in %s seconds after start' % (host.managementIp, timeout_max))
+                    time.sleep(15)
+                    continue
+                if _host[0].status == "Connected":
+                    test_util.test_logger('%s is up and Connected' % (host.managementIp))
+                    hosts.remove(host)
+                    test_util.test_logger('reconnecting host finished')
+                    continue
+                else:
+                    timeout -= 15
+                    if timeout == 0:
+                        test_util.test_fail('%s is not up in %s seconds after start' % (host.managementIp, timeout_max))
+                    time.sleep(15)
+            if not hosts:
+                test_util.test_logger('all the hosts are up and Connected')
+                break
+    zstack_management_ip = os.environ.get('zstackManagementIp')
+    test_util.test_logger('@@DEBUG-zstack-management-ip:{}@@'.format(zstack_management_ip))
+    hosts = []
+    host_names = []
+    timeout = 1200
+    test_util.test_logger("@@DEBUG-name,host\n {}@@".format(robot_test_obj.test_dict.host.items()))
+    if not auto:
+        for cluster_name in args[0]:
+            cond = res_ops.gen_query_conditions('cluster.name', '=', cluster_name)
+            for host in res_ops.query_resource(res_ops.HOST, cond):
+                host_names.append(host.name)
+    if not len(robot_test_obj.test_dict.host.items()):
+        test_util.test_fail("No Host")
+    for name,host in robot_test_obj.test_dict.host.items():
+        if auto or name in host_names and host.host.state == 'PowerOff':
+            test_util.test_logger("@@DEBUG-host-state@@Host{}:{}".format(name, host.host.state))
+            hosts.append(host.host)
+            cond = res_ops.gen_query_conditions('vmNics.ip', '=', host.host.managementIp)
+            vm_uuid = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0].uuid
+            sce_ops.start_vm(zstack_management_ip, vm_uuid)
+    wait_host_up(timeout, hosts)
+    for host in hosts:
+        if host.status == "Connected":
+            host.state = "Enabled"
+        else:
+           test_util.test_fail("Host[{}] status is not 'Connected'".format(host.uuid))
 
+def poweroff_only(robot_test_obj, args):
+    host_uuids = []
+    host_names = []
+    fail_uuids = []
+    admin_password = hashlib.sha512(os.environ.get('hostPassword')).hexdigest()
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    mn_flag = None
+
+    hosts = res_ops.query_resource(res_ops.HOST)
+    for cluster_name in args[0]:
+        cond = res_ops.gen_query_conditions('cluster.name', '=', cluster_name)
+        for host in res_ops.query_resource(res_ops.HOST, cond):
+            host_names.append(host.name)
+    for host in hosts:
+        if host.name in host_names:
+            host_uuids.append(host.uuid)
+            host_off = zstack_host_header.ZstackTestKvmHost()
+            host_off.set_host(host)
+            host_off.host.state = 'PowerOff'
+            robot_test_obj.test_dict.add_host(host.name, host_off)
+            if host.managementIp == mn_ip:
+                mn_flag = 1
+    off_ret = host_ops.poweroff_host(host_uuids, admin_password, mn_flag).results
+    test_util.test_logger("@@DEBUG-off_ret@@:{}".format(off_ret))
+    if len(off_ret):
+        for ret in off_ret:
+            if not ret.success:
+                fail_uuids.append(ret.uuid)
+    test_util.test_logger("@@Fail_uuids:{}@@".format(fail_uuids))
+    if len(fail_uuids):
+        test_util.test_fail("Power off hosts{} failed".format(fail_uuids))
+    test_util.test_logger("@@PowerOffFlowDone@@")
+    time.sleep(180)
+    test_util.test_logger("@@DEBUG@@:updating host state finished, wake up")
+    if mn_flag:
+        test_util.test_logger("@@Auto PowerOn Start@@")
+        poweron_only(robot_test_obj, args, auto=1)
 
 action_dict = {
+    'poweroff_only' : poweroff_only,
+    'poweron_only' : poweron_only,
     'change_global_config_sp_depth': change_global_config_sp_depth,
     'recover_global_config_sp_depth': recover_global_config_sp_depth,
     "cleanup_imagecache_on_ps": cleanup_imagecache_on_ps,
