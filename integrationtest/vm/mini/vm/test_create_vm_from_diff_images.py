@@ -54,8 +54,8 @@ def create_vm(vm_creation_option, image_uuid, image_name):
     vm_creation_option.set_name("vm-%s" % image_name)
     vm.set_creation_option(vm_creation_option)
     vm.create()
-    #vm.destroy()
-    #vm.expunge()
+    vm.destroy()
+    vm.expunge()
     
 def test():
     #add images
