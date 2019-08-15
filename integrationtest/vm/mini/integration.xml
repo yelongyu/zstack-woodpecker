@@ -1,5 +1,5 @@
 <integrationTest>
-	<suite name="mini" setupCase="../mn_ha2/suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
+	<suite name="mini" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
 		<case timeout='1200' noparallel='True'>test_create_think_provision_vm.py</case>
 		<case timeout='1200' noparallel='True'>test_maintain_host.py</case>
 		<case timeout='1200' noparallel='True'>test_reconnect_host.py</case>

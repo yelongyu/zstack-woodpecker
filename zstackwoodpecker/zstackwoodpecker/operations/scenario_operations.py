@@ -2708,8 +2708,8 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                     ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
                     print "Mini Host need install drbd"
                     # Uncomment below 2 lines as a temporary workaround if "http://jira.zstack.io/browse/MINI-904" was reproduced again
-#                     cmd = "yum install kmod-drbd84 ipmitool OpenIPMI-modalias MegaCli lsof drbd84-utils -y;depmod -a && modprobe drbd;systemctl enable drbd;systemctl start drbd"
-#                     ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
+                    cmd = "yum install kmod-drbd84 ipmitool OpenIPMI-modalias MegaCli lsof drbd84-utils -y;depmod -a && modprobe drbd;systemctl enable drbd;systemctl start drbd"
+                    ssh.execute(cmd, vm_ip, 'root', 'password', True, 22)
 
                 if vm.dataDiskOfferingUuid__:
                     volume_option = test_util.VolumeOption()
