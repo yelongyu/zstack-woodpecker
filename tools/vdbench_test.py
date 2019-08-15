@@ -222,7 +222,9 @@ def collect_md5sum(disklist):
     md5sum_list = {}
     mkdir_disk(disklist)
     for i in disklist.keys():
-        _,o,_ = bash_roe("ls -t /%s/| grep md5sum_%s | head -n 1" % ('/'+os.path.basename(i),os.path.basename(i)))
+        #For the cloned VM, it will use the current cloned wwn to match the old data in the disk, so skip the matching
+        #_,o,_ = bash_roe("ls -t /%s/| grep md5sum_%s | head -n 1" % ('/'+os.path.basename(i),os.path.basename(i)))
+        _,o,_ = bash_roe("ls -t /%s/| grep -v dir1 | grep -v checking_point | head -n 1" % ('/'+os.path.basename(i)))
         b,md5,a = bash_roe("md5sum /%s/%s | awk '{print $1}'" % (os.path.basename(i),o.strip())) 
         md5sum_list[i] = md5.strip()
     clear_disk(disklist)
