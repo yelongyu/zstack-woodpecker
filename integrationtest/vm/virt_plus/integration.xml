@@ -118,6 +118,7 @@
                 <case timeout='600' repeat='1' noparallel='True'>test_add_qcow2_image_file_url.py</case>
                 <case timeout='600' repeat='1' noparallel='True'>test_vm_use_old_dhcp_ip.py</case>
                 <case timeout='600' repeat='1' noparallel='True'>test_reconnect_host_with_ebtables_lock.py</case>
+		<case timeout='600' repeat='1' noparallel='True'>test_add_ceph_backupstorage_with_data_net_cdir.py</case>	
         </suite>
 </integrationTest>
 

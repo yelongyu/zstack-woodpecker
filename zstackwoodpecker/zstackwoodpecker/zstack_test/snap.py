@@ -422,7 +422,7 @@ class ZstackSnapshotTree(object):
 
     # when snapshot_tree is the first created and ps_migrate must update snapshot tree
     def update(self, update_utility=False):
-        if (not self.utility_vm) or update_utility:
+        if self.snapshot_list and ((not self.utility_vm) or update_utility):
             self.utility_vm = None
             hostUuid = None
             cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")
