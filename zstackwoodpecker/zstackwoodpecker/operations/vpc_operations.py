@@ -123,6 +123,38 @@ def create_vpc_vrouter(name, virtualrouter_offering_uuid, resource_uuid=None, sy
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def create_vpc_ha_group(name, monitorIps, resource_uuid=None, system_tags=None, use_tags=None, session_uuid=None):
+    action = api_actions.CreateVpcHaGroupAction()
+    action.timeout = 300000
+    action.name = name
+    action.monitorIps = monitorIps
+    action.resourceUuid = resource_uuid
+    action.systemTags = system_tags
+    action.userTags = use_tags
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def delete_vpc_ha_group(uuid, session_uuid=None):
+    action = api_actions.DeleteVpcHaGroupAction()
+    action.timeout = 300000
+    action.uuid = uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def query_vpc_ha_group(session_uuid=None):
+    action = api_actions.QueryVpcHaGroupAction()
+    action.timeout = 300000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventories
+
+def change_vpc_ha_monitor_ips(monitorIps, uuid):
+    action = api_actions.ChangeVpcHaGroupMonitorIpsAction()
+    action.timeout = 300000
+    action.monitorIps = monitorIps
+    action.uuid = uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def remove_all_vpc_vrouter():
     cond = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter')
     vr_vm_list = res_ops.query_resource(res_ops.APPLIANCE_VM, cond)
