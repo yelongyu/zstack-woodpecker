@@ -367,7 +367,7 @@ class ZstackTestVR(vm_header.TestVm):
         super(ZstackTestVR, self).start()
 
     def start_with_tags(self, session_uuid = None, tags=None):
-        self.inv = vm_ops.start_vm_with_user_args(self.inv.uuid, session_uuid, system_tags=[tags])
+        self.inv = vm_ops.start_vm_with_user_args(self.inv.uuid, system_tags=[tags], session_uuid)
         super(ZstackTestVR, self).start()
 
     def reconnect(self, session_uuid = None):

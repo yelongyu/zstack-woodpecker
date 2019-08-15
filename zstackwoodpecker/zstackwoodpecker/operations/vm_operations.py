@@ -143,7 +143,7 @@ def start_vm(vm_uuid, session_uuid=None, timeout=300000):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def start_vm_with_user_args(vm_uuid, session_uuid=None, system_tags=None, timeout=240000):
+def start_vm_with_user_args(vm_uuid, system_tags = None, session_uuid=None, timeout=240000):
     action = api_actions.StartVmInstanceAction()
     action.uuid = vm_uuid
     action.systemTags = system_tags
