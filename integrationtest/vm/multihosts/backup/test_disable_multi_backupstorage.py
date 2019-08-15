@@ -45,7 +45,12 @@ def test():
         hosts = res_ops.query_resource(res_ops.HOST, cond)
         if not hosts:
             test_util.test_fail("No host available for adding imagestore for backup test")
+        cond = res_ops.gen_query_conditions("state", '=', "Enabled")
+        cond = res_ops.gen_query_conditions("status", '=', "Connected")
+        bs = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE, cond)[0]
         host = hosts[0]
+        if host.managementIp == bs.hostname:
+            host = hosts[1]
         bs_option = test_util.ImageStoreBackupStorageOption()
         bs_option.set_name("another_local")
         bs_option.set_url("/home/sftpBackupStorage")
