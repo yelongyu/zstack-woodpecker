@@ -102,7 +102,7 @@ def test():
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     if test_lib.ver_ge_zstack_2_0(mn_ip):
         test_lib.lib_set_allow_live_migration_local_storage('true')
-    test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
+    #test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
     test_lib.ensure_recover_script_l2_correct()
 
     if test_lib.lib_is_storage_network_separate():

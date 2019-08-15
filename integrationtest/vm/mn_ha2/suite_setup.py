@@ -82,7 +82,7 @@ def test():
     for host in testHosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
 
-    test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
+    #test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
     #test_lib.lib_set_reserved_memory('1G')
 
     if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-local-ps.xml"], ["scenario-config-upgrade-3.1.1.xml"]):

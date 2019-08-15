@@ -87,7 +87,7 @@ def test():
         cmd_skip = '''mysql -uroot -pzstack.mysql.password -e "update zstack_mini.kv set value='Initialized' where name='init.status';select * from zstack_mini.kv"'''
         ssh.execute(cmd_skip, mn_ip1, "root", "password", False, 22)
 
-        test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
+        #test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
         #test_lib.lib_set_reserved_memory('1G')
 
         if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-local-ps.xml"], ["scenario-config-upgrade-3.1.1.xml"]):
