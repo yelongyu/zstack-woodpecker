@@ -2647,7 +2647,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
                             if len(l3_uuid_list) < 3:
                                 break
 
-                if os.getenv('hostType') == 'miniHost-bootstrap':
+                if os.getenv('hostType') == 'miniHost-bootstrap' or os.getenv('NOLIC') == 'yes':
                     vm_creation_option.set_system_tags(['vmSystemSerialNumber::%s' % (vm.vmSerial_)])
                     vm_creation_option.set_rootVolume_systemTags(['capability::virtio-scsi'])
 
