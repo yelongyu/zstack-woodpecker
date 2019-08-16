@@ -675,7 +675,7 @@ class ImageStoreBackupStorageOption(BackupStorageOption):
         self.password = None
         self.sshPort = None
         super(ImageStoreBackupStorageOption, self).__init__()
-        self.type = inventory.SFTP_BACKUP_STORAGE_TYPE
+        self.type = inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
 
     def set_hostname(self, ip):
         self.hostname = ip
