@@ -469,7 +469,7 @@ class ZstackSnapshotTree(object):
         if new_snap:
             self.add_snapshot(new_snap.uuid)
 
-        test_util.test_logger("snap_tree [%s] list: %s" % (self.__repr__(), str(self.snapshot_list)))
+        test_util.test_logger("snap_tree %s list: %s" % (self.__repr__(), str(self.snapshot_list)))
 
     def use(self, snapshot, real=True):
         if real:
