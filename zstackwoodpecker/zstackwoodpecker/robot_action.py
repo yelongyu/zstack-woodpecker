@@ -491,6 +491,9 @@ def robot_run_constant_path(robot_test_obj, set_robot=True, checking_step=1, fai
                 test_util.test_logger(e)
                 debug(robot_test_obj)
                 test_util.test_pass("This step will fail. It is a invalid case")
+            else:
+                debug(robot_test_obj)
+                test_util.test_fail("This step must succes, It is not on the faild point")
         finally:
             debug(robot_test_obj)
             if fail_step and STEP == fail_step:
