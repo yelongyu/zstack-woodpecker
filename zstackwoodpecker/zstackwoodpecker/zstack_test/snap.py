@@ -292,7 +292,9 @@ class ZstackSnapshotTree(object):
             return snapshot.get_checking_points()
         return self._get_checking_points()
 
-    def create_snapshot(self, name):
+    # fake = true :: only set_checking_point
+    def create_snapshot(self, name, fake=False):
+        self.update(force=True)
         self.Maxdepth = self._config_sp_depth()
         sp_option = test_util.SnapshotOption()
         sp_option.set_name(name)
@@ -331,7 +333,8 @@ class ZstackSnapshotTree(object):
             snapshot.set_checking_point()
             self.checking_points.append(snapshot.get_checking_point())
 
-        snapshot.snapshot = vol_ops.create_snapshot(sp_option)
+        if not fake:
+            snapshot.snapshot = vol_ops.create_snapshot(sp_option)
 
         self.snapshot_list.append(snapshot)
         self.set_current_snapshot(snapshot)
@@ -344,6 +347,7 @@ class ZstackSnapshotTree(object):
 
     # resize reinit clone  create_image/template will auto create a snapshot
     def add_snapshot(self, snapshot_uuid):
+        self.update(force=True)
         self.Maxdepth = self._config_sp_depth()
         snapshot = ZstackSnapshot()
         snapshot.set_utility_vm(self.utility_vm)
@@ -421,8 +425,9 @@ class ZstackSnapshotTree(object):
         snapshot.remove_children()
 
     # when snapshot_tree is the first created and ps_migrate must update snapshot tree
-    def update(self, update_utility=False):
-        if self.snapshot_list and ((not self.utility_vm) or update_utility):
+    # mini not need utility_vm self.snapshot_list == [] so add force tag
+    def update(self, update_utility=False, force=False):
+        if (self.snapshot_list and update_utility) or force:
             self.utility_vm = None
             hostUuid = None
             cond = res_ops.gen_query_conditions('name', '=', "utility_vm_for_robot_test")

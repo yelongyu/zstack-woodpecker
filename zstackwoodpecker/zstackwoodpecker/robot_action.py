@@ -2186,7 +2186,15 @@ def create_vm_snapshot(robot_test_obj, args):
     vm = robot_test_obj.test_dict.vm[vm_name]
 
     root_volume = robot_test_obj.test_dict.volume[vm_name + "-root"]
+
+    for volume in vm.test_volumes:
+        snapshot_name = volume.get_volume().name + "-" + snapshot_name.split("-")[1]
+        snap_tree = volume.snapshot_tree
+        # set checking point
+        snap_tree.create_snapshot(snapshot_name, fake=True)
+
     group = vol_ops.create_volume_snapshot_group(snapshot_name, root_volume.volume.uuid)
+
     for snap_ref in group.volumeSnapshotRefs:
         cond = res_ops.gen_query_conditions("uuid", "=", snap_ref.volumeSnapshotUuid)
         snapshot = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)[0]
@@ -2195,13 +2203,13 @@ def create_vm_snapshot(robot_test_obj, args):
                 if volume.get_volume().uuid == snapshot.volumeUuid:
                     volume_snap_name = volume.get_volume().name + "-" + snapshot_name.split("-")[1]
                     vol_ops.update_snapshot(snapshot.uuid, volume_snap_name, "change name")
-                    volume.snapshot_tree.add_snapshot(snapshot.uuid)
+                    volume.snapshot_tree.current_snapshot.snapshot = snapshot
                     robot_test_obj.test_dict.add_snapshot(volume_snap_name, volume.snapshot_tree.current_snapshot)
                     volume.snapshot_tree.current_snapshot.set_md5sum(volume.get_md5sum())
                     volume.update()
                     volume.update_volume()
         else:
-            root_volume.snapshot_tree.add_snapshot(snapshot.uuid)
+            root_volume.snapshot_tree.current_snapshot.snapshot = snapshot
             robot_test_obj.test_dict.add_snapshot(snapshot_name, root_volume.snapshot_tree.current_snapshot)
             root_volume.update()
             root_volume.update_volume()

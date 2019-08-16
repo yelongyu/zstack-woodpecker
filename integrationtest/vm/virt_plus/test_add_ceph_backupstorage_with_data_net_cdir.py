@@ -2,6 +2,7 @@ import apibinding.api_actions as api_actions
 import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acct_ops
+import zstackwoodpecker.test_util as test_util
 
 vm = None
 host1_uuid = None
@@ -27,7 +28,11 @@ def test():
 
     # query old ceph_bs
     cond = res_ops.gen_query_conditions("type", "=", "Ceph")
-    ceph_bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0]
+    ceph_bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
+    if not ceph_bss:
+        test_util.test_skip("This env do not have ceph bs .Skip it")
+
+    ceph_bs = ceph_bss[0]
     old_ceph_uuid = ceph_bs.uuid
 
     mon_user = ceph_bs.mons[0].sshUsername
