@@ -2289,7 +2289,7 @@ def load_paths(template_dirname, path_dirname):
                 paths[package_name]['repeat'] = paths_dict[package_name].path()['repeat']
             else:
                 paths[package_name]['repeat'] = 1
-            if paths_dict[package_name].path().has_key('checking_ponit'):
+            if paths_dict[package_name].path().has_key('checking_point'):
                 paths[package_name]['checking_point'] = paths_dict[package_name].path()['checking_point']
             else:
                 paths[package_name]['checking_point'] = 1
