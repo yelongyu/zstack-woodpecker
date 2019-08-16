@@ -135,7 +135,7 @@ class robot_test_dict(object):
     def remove_host(self, host_obj):
         for k, v in self.host.items():
             if v == host_obj:
-                self.host.pop(k);
+                self.host.pop(k)
 
     def check(self):
         # vm.check
@@ -465,7 +465,7 @@ class robot(object):
             yield _path
 
 
-def robot_run_constant_path(robot_test_obj, set_robot=True):
+def robot_run_constant_path(robot_test_obj, set_robot=True, checking_step=1, fail_step=10000):
     test_lib.ROBOT = set_robot
     constant_path = robot_test_obj.get_path_list()
 
@@ -484,13 +484,21 @@ def robot_run_constant_path(robot_test_obj, set_robot=True):
             action = tmpt[0]
             args = tmpt[1:]
             run_action(robot_test_obj, action, args, STEP)
-            STEP += 1
         except StopIteration:
             break
+        except Exception as e:
+            if fail_step and fail_step == STEP:
+                test_util.test_logger(e)
+                debug(robot_test_obj)
+                test_util.test_pass("This step will fail. It is a invalid case")
+        finally:
+            debug(robot_test_obj)
+            if fail_step and STEP == fail_step:
+                test_util.test_fail("This step must fail. It is a invalid case")
+            if set_robot and STEP >= checking_step:
+                robot_test_obj.test_dict.check()
 
-        debug(robot_test_obj)
-        if set_robot:
-            robot_test_obj.test_dict.check()
+            STEP += 1
 
     test_util.test_logger("Robot action run over!")
 
@@ -2188,10 +2196,10 @@ def create_vm_snapshot(robot_test_obj, args):
     root_volume = robot_test_obj.test_dict.volume[vm_name + "-root"]
 
     for volume in vm.test_volumes:
-        snapshot_name = volume.get_volume().name + "-" + snapshot_name.split("-")[1]
+        vol_snapshot_name = volume.get_volume().name + "-" + snapshot_name.split("-")[1]
         snap_tree = volume.snapshot_tree
         # set checking point
-        snap_tree.create_snapshot(snapshot_name, fake=True)
+        snap_tree.create_snapshot(vol_snapshot_name, fake=True)
 
     group = vol_ops.create_volume_snapshot_group(snapshot_name, root_volume.volume.uuid)
 
