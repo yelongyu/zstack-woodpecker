@@ -104,6 +104,17 @@ def create_vpc_ha_group(ha_group_name='test_vpc_ha', monitorIp=['192.168.0.1']):
     vr_ha_inv = vpc_ops.create_vpc_ha_group(name=ha_group_name, monitorIps=monitorIp)
     return vr_ha_inv
 
+# def create_vpc_vrouter_with_tags(vr_name='test_vpc', tags=None):
+    # conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
+    # vr_list = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)
+    # if vr_list:
+        # return ZstackTestVR(vr_list[0])
+    # vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
+    # vr_inv = vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid, system_tags=[tags])
+    # dns_server = os.getenv('DNSServer')
+    # vpcdns_ops.add_dns_to_vpc_router(vr_inv.uuid, dns_server)
+    # return ZstackTestVR(vr_inv)
+
 def create_vpc_vrouter_with_tags(vr_name='test_vpc', tags=None):
     conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
     vr_list = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)
@@ -111,9 +122,11 @@ def create_vpc_vrouter_with_tags(vr_name='test_vpc', tags=None):
         return ZstackTestVR(vr_list[0])
     vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
     vr_inv = vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid, system_tags=[tags])
-    dns_server = os.getenv('DNSServer')
-    vpcdns_ops.add_dns_to_vpc_router(vr_inv.uuid, dns_server)
     return ZstackTestVR(vr_inv)
+
+def add_dns_to_ha_vpc(vr_uuid):
+    dns_server = os.getenv('DNSServer')
+    vpcdns_ops.add_dns_to_vpc_router(vr_uuid, dns_server)
 
 def attach_l3_to_vpc_vr(vpc_vr, l3_system_name_list=L3_SYSTEM_NAME_LIST):
     l3_name_list = [os.environ.get(name) for name in l3_system_name_list]
@@ -367,7 +380,7 @@ class ZstackTestVR(vm_header.TestVm):
         super(ZstackTestVR, self).start()
 
     def start_with_tags(self, session_uuid = None, tags=None):
-        self.inv = vm_ops.start_vm_with_user_args(self.inv.uuid, system_tags=[tags], session_uuid)
+        self.inv = vm_ops.start_vm_with_user_args(self.inv.uuid, system_tags=[tags], session_uuid = None)
         super(ZstackTestVR, self).start()
 
     def reconnect(self, session_uuid = None):
