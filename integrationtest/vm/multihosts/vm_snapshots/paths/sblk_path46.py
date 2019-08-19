@@ -3,7 +3,7 @@ import os
 TestAction = ts_header.TestAction
 def path():
 
-    return dict(initial_formation="template5", path_list=[
+    return dict(initial_formation="template5", checking_point=8, path_list=[
 		[TestAction.create_vm, 'vm1', ],
 		[TestAction.create_volume, 'volume1', 'flag=scsi'],
 		[TestAction.attach_volume, 'vm1', 'volume1'],

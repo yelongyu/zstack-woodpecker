@@ -56,7 +56,7 @@ def test():
         bs_option.set_hostname(host.managementIp)
         bs_option.set_password('password')
         bs_option.set_sshPort(host.sshPort)
-        bs_option.set_username(host.username)
+        bs_option.set_username('root')
         bs_option.set_system_tags(["remotebackup"])
         bs_inv = bs_ops.create_image_store_backup_storage(bs_option)
 
@@ -121,6 +121,8 @@ def test():
     job_group_inv = res_ops.query_resource(res_ops.SCHEDULERJOBGROUP, cond)[0]
     assert len(job_group_inv.triggersUuid) == 1
  
+    cond = res_ops.gen_query_conditions("tag", '=', "allowbackup")
+    allow_backup_tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
     tag_ops.delete_tag(allow_backup_tags[0].uuid) 
     cond = res_ops.gen_query_conditions('uuid', '=', job_group.uuid)
     job_group_inv = res_ops.query_resource(res_ops.SCHEDULERJOBGROUP, cond)[0]
@@ -131,6 +133,7 @@ def test():
     sch_ops.del_scheduler_job(job2.uuid)
     sch_ops.del_scheduler_job_group(job_group.uuid)
     sch_ops.del_scheduler_trigger(trigger1.uuid)
+    bs_ops.delete_backup_storage(remote_uuid)
 
 def error_cleanup():
     global job1,job2,job_group,trigger1,trigger2

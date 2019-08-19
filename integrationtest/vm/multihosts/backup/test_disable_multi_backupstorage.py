@@ -57,7 +57,7 @@ def test():
         bs_option.set_hostname(host.managementIp)
         bs_option.set_password('password')
         bs_option.set_sshPort(host.sshPort)
-        bs_option.set_username(host.username)
+        bs_option.set_username('root')
         bs_option.set_system_tags(["allowbackup"])
         bs_inv = bs_ops.create_image_store_backup_storage(bs_option)
 
@@ -115,7 +115,7 @@ def test():
     assert len(job_group_inv.triggersUuid) == 1
 
     sch_ops.run_scheduler_trigger(trigger1.uuid)
-    time.sleep(15)
+    time.sleep(30)
     cond = res_ops.gen_query_conditions('volumeUuid', '=', vm1.get_vm().rootVolumeUuid)
     backup = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0]
 
@@ -125,7 +125,7 @@ def test():
     bs_ops.change_backup_storage_state(another_uuid, "disable")
    
     sch_ops.run_scheduler_trigger(trigger1.uuid)
-    time.sleep(15)
+    time.sleep(30)
     cond = res_ops.gen_query_conditions('volumeUuid', '=', vm1.get_vm().rootVolumeUuid)
     backup = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0]
     assert backup.backupStorageRefs[0].backupStorageUuid == imagestore.uuid
@@ -135,6 +135,10 @@ def test():
     sch_ops.del_scheduler_job(job1.uuid)
     sch_ops.del_scheduler_job_group(job_group.uuid)
     sch_ops.del_scheduler_trigger(trigger1.uuid)
+    bs_ops.delete_backup_storage(another_uuid)
+    cond = res_ops.gen_query_conditions("tag", '=', "allowbackup")
+    allow_backup_tags = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+    tag_ops.delete_tag(allow_backup_tags[0].uuid)
 
 def error_cleanup():
     global job1,job_group,trigger1,trigger2

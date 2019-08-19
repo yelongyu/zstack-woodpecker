@@ -135,7 +135,7 @@ class robot_test_dict(object):
     def remove_host(self, host_obj):
         for k, v in self.host.items():
             if v == host_obj:
-                self.host.pop(k);
+                self.host.pop(k)
 
     def check(self):
         # vm.check
@@ -465,7 +465,7 @@ class robot(object):
             yield _path
 
 
-def robot_run_constant_path(robot_test_obj, set_robot=True):
+def robot_run_constant_path(robot_test_obj, set_robot=True, checking_step=1, fail_step=10000):
     test_lib.ROBOT = set_robot
     constant_path = robot_test_obj.get_path_list()
 
@@ -484,13 +484,24 @@ def robot_run_constant_path(robot_test_obj, set_robot=True):
             action = tmpt[0]
             args = tmpt[1:]
             run_action(robot_test_obj, action, args, STEP)
-            STEP += 1
         except StopIteration:
             break
+        except Exception as e:
+            if fail_step and fail_step == STEP:
+                test_util.test_logger(e)
+                debug(robot_test_obj)
+                test_util.test_pass("This step will fail. It is a invalid case")
+            else:
+                debug(robot_test_obj)
+                test_util.test_fail("This step must succes, It is not on the faild point")
+        finally:
+            debug(robot_test_obj)
+            if fail_step and STEP == fail_step:
+                test_util.test_fail("This step must fail. It is a invalid case")
+            if set_robot and STEP >= checking_step:
+                robot_test_obj.test_dict.check()
 
-        debug(robot_test_obj)
-        if set_robot:
-            robot_test_obj.test_dict.check()
+            STEP += 1
 
     test_util.test_logger("Robot action run over!")
 
@@ -2186,7 +2197,15 @@ def create_vm_snapshot(robot_test_obj, args):
     vm = robot_test_obj.test_dict.vm[vm_name]
 
     root_volume = robot_test_obj.test_dict.volume[vm_name + "-root"]
+
+    for volume in vm.test_volumes:
+        vol_snapshot_name = volume.get_volume().name + "-" + snapshot_name.split("-")[1]
+        snap_tree = volume.snapshot_tree
+        # set checking point
+        snap_tree.create_snapshot(vol_snapshot_name, fake=True)
+
     group = vol_ops.create_volume_snapshot_group(snapshot_name, root_volume.volume.uuid)
+
     for snap_ref in group.volumeSnapshotRefs:
         cond = res_ops.gen_query_conditions("uuid", "=", snap_ref.volumeSnapshotUuid)
         snapshot = res_ops.query_resource(res_ops.VOLUME_SNAPSHOT, cond)[0]
@@ -2195,13 +2214,13 @@ def create_vm_snapshot(robot_test_obj, args):
                 if volume.get_volume().uuid == snapshot.volumeUuid:
                     volume_snap_name = volume.get_volume().name + "-" + snapshot_name.split("-")[1]
                     vol_ops.update_snapshot(snapshot.uuid, volume_snap_name, "change name")
-                    volume.snapshot_tree.add_snapshot(snapshot.uuid)
+                    volume.snapshot_tree.current_snapshot.snapshot = snapshot
                     robot_test_obj.test_dict.add_snapshot(volume_snap_name, volume.snapshot_tree.current_snapshot)
                     volume.snapshot_tree.current_snapshot.set_md5sum(volume.get_md5sum())
                     volume.update()
                     volume.update_volume()
         else:
-            root_volume.snapshot_tree.add_snapshot(snapshot.uuid)
+            root_volume.snapshot_tree.current_snapshot.snapshot = snapshot
             robot_test_obj.test_dict.add_snapshot(snapshot_name, root_volume.snapshot_tree.current_snapshot)
             root_volume.update()
             root_volume.update_volume()

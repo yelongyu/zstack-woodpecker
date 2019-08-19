@@ -49,7 +49,7 @@ def test():
     ps_ops.change_primary_storage_state(state='maintain', primary_storage_uuid=another_ps.uuid)
     maintenance_ps_list.append(another_ps)
 
-    test_stub.wait_until_vm_reach_state(60, inventory.STOPPED, vm2)
+    test_stub.wait_until_vm_reach_state(120, inventory.STOPPED, vm2)
     vm1.update()
     assert vm1.get_vm().state == inventory.RUNNING
 

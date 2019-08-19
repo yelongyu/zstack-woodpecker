@@ -23,6 +23,9 @@ def test():
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     path_list = flavor['path_list']
     repeat = flavor['repeat']
+    checking_point = flavor['checking_point']
+    faild_point = flavor['faild_point']
+
 
     # Robot.robot_create_utility_vm()
     robot_test_obj = Robot.robot()
@@ -31,7 +34,7 @@ def test():
     while repeat > 0:
         test_util.test_logger("Robot action: Iteration %s" % (repeat))
         test_dict = robot_test_obj.get_test_dict()
-        Robot.robot_run_constant_path(robot_test_obj, set_robot=True)
+        Robot.robot_run_constant_path(robot_test_obj, set_robot=True, checking_step=checking_point, fail_step=faild_point)
 
         repeat -= 1
         test_dict.cleanup()

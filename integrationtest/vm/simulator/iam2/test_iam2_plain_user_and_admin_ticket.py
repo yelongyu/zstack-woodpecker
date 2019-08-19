@@ -26,14 +26,30 @@ import os
 project_uuid = None
 project_admin_uuid = None
 virtual_id_uuid = None
+#res_list: l2, l3, image, disk_offering, instance_offering
+res_list = [res_ops.L2_NETWORK ,\
+            res_ops.L3_NETWORK ,\
+            res_ops.IMAGE ,\
+            res_ops.DISK_OFFERING ,\
+            res_ops.INSTANCE_OFFERING ,\
+        ]
 
 def test():
 	iam2_ops.clean_iam2_enviroment()
 	global project_uuid,project_admin_uuid,virtual_id_uuid
 	#  create project
 	project_name = 'test_project'
-	project_uuid = iam2_ops.create_iam2_project(project_name).uuid
-	
+	project = iam2_ops.create_iam2_project(project_name)
+	project_uuid = project.uuid
+        project_linked_acc_uuid = project.linkedAccountUuid
+        
+        #share resources
+        res_uuid_list = []
+        for res in res_list:
+            for inv in res_ops.query_resource(res):
+                res_uuid_list.append(inv.uuid)
+        acc_ops.share_resources([project_linked_acc_uuid], res_uuid_list)
+
 	#  create plain user
 	plain_user_name = 'username'
 	plain_user_password = 'password'
@@ -42,15 +58,15 @@ def test():
 	#add role
 	statements = [{"effect": "Allow", "actions": ["org.zstack.ticket.**"]}]
 	role_uuid = iam2_ops.create_role('test_role', statements).uuid
+        res_ops.change_recource_owner(project_linked_acc_uuid, role_uuid)
 	action = "org.zstack.ticket.**"
 	statements = [{"effect": "Allow", "actions": [action]}]
 	iam2_ops.add_policy_statements_to_role(role_uuid, statements)
 	statement_uuid = iam2_ops.get_policy_statement_uuid_of_role(role_uuid, action)
-	
-	iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], plain_user_uuid)
-	
+
 	#add virtual id to project
 	iam2_ops.add_iam2_virtual_ids_to_project([plain_user_uuid],project_uuid)
+	iam2_ops.add_roles_to_iam2_virtual_id([role_uuid], plain_user_uuid)
 	
 	#login in project by plain user
 	plain_user_session_uuid = iam2_ops.login_iam2_virtual_id(plain_user_name, plain_user_password)

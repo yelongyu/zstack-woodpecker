@@ -8,11 +8,9 @@ _config_ = {
 }
 
 
-case_flavor = test_util.load_paths(os.path.join(os.path.dirname(__file__), "templates"),
-                                   os.path.join(os.path.dirname(__file__), "paths"))
-
-
 def test():
+    case_flavor = test_util.load_paths(os.path.join(os.path.dirname(__file__), "templates"),
+                                   os.path.join(os.path.dirname(__file__), "paths"))
     test_util.test_dsc('''Will mainly doing random test for all kinds of snapshot operations. VM, Volume and Image operations will also be tested. If reach 1 hour successful running condition, testing will success and quit.  SG actions, and VIP actions are removed in this robot test.
             VM resources: a special Utility vm is required to do volume attach/detach operation. 
             ''')

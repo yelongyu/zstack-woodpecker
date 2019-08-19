@@ -675,7 +675,7 @@ class ImageStoreBackupStorageOption(BackupStorageOption):
         self.password = None
         self.sshPort = None
         super(ImageStoreBackupStorageOption, self).__init__()
-        self.type = inventory.SFTP_BACKUP_STORAGE_TYPE
+        self.type = inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
 
     def set_hostname(self, ip):
         self.hostname = ip
@@ -2289,5 +2289,13 @@ def load_paths(template_dirname, path_dirname):
                 paths[package_name]['repeat'] = paths_dict[package_name].path()['repeat']
             else:
                 paths[package_name]['repeat'] = 1
+            if paths_dict[package_name].path().has_key('checking_point'):
+                paths[package_name]['checking_point'] = paths_dict[package_name].path()['checking_point']
+            else:
+                paths[package_name]['checking_point'] = 1
+            if paths_dict[package_name].path().has_key('faild_point'):
+                paths[package_name]['faild_point'] = paths_dict[package_name].path()['faild_point']
+            else:
+                paths[package_name]['faild_point'] = 100000000
 
     return paths

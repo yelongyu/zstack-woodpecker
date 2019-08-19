@@ -43,6 +43,7 @@ def test():
     test_stub.recover_vlan_in_host(s_vm0.ip_, test_lib.all_scenario_config, test_lib.deploy_config)
     test_stub.recover_vlan_in_host(s_vm1.ip_, test_lib.all_scenario_config, test_lib.deploy_config)
 
+    time.sleep(15)
     vip_s_vm_cfg_lst_new = test_stub.get_s_vm_cfg_lst_vip_bind(test_lib.all_scenario_config, test_lib.scenario_file, 3)
     if len(vip_s_vm_cfg_lst_new) != 1:
         test_util.test_fail('vip has been running on %d host(s)' % len(vip_s_vm_cfg_lst_new))
