@@ -3909,10 +3909,10 @@ def lib_check_vm_ports_in_a_command(src_vm, dst_vm, allowed_ports, denied_ports,
         target_ip = lib_get_vm_nic_by_l3(dst_vm, common_l3).ip
     src_ip = lib_get_vm_nic_by_l3(src_vm, common_l3).ip
     test_util.test_logger("[target vm:] %s [ip:] %s" % (dst_vm.uuid, target_ip))
-    lib_check_ports_in_a_command(src_vm, src_ip, target_ip, allowed_ports, denied_ports, dst_vm, common_l3)
+    lib_check_ports_in_a_command(src_vm, src_ip, target_ip, allowed_ports, denied_ports, dst_vm, common_l3, target_ipv6 = target_ipv6)
 
 def lib_check_ports_in_a_command(src_vm, src_ip, target_ip, allowed_ports, \
-        denied_ports, dst_vm, l3_uuid=None):
+        denied_ports, dst_vm, l3_uuid=None, target_ipv6 = None):
     '''
         Check target_ip ports connectibility from src_ip. 
 
@@ -3965,7 +3965,7 @@ def lib_check_ports_in_a_command(src_vm, src_ip, target_ip, allowed_ports, \
         test_util.test_logger("Do testing to ssh vm: %s, ip: %s, execute cmd: %s" % (src_vm.uuid, src_vm_ip, port_checking_cmd))
         test_result = lib_execute_ssh_cmd(src_vm_ip, username, password, port_checking_cmd, 240)
     else:
-        test_result = lib_execute_command_in_vm(src_vm, port_checking_cmd, l3_uuid)
+        test_result = lib_execute_command_in_vm(src_vm, port_checking_cmd, l3_uuid, target_ipv6 = target_ipv6)
 
     if not test_result:
         test_util.test_fail("check [ip:] %s ports failure. Please check the failure information. " % target_ip)
