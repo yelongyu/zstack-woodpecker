@@ -5,6 +5,7 @@ Create an unified test_stub to share test operations
 @author: fang.sun
 '''
 
+
 import zstackwoodpecker.operations.vpc_operations as vpc_ops
 import zstackwoodpecker.operations.vpcdns_operations as vpcdns_ops
 import zstackwoodpecker.operations.net_operations as net_ops
@@ -114,6 +115,7 @@ def create_vpc_ha_group(ha_group_name='test_vpc_ha', monitorIp=['192.168.0.1']):
     # dns_server = os.getenv('DNSServer')
     # vpcdns_ops.add_dns_to_vpc_router(vr_inv.uuid, dns_server)
     # return ZstackTestVR(vr_inv)
+
 
 def create_vpc_vrouter_with_tags(vr_name='test_vpc', tags=None):
     conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')

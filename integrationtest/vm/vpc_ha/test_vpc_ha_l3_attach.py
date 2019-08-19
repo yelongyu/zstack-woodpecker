@@ -24,6 +24,7 @@ group_vr_list = []
 
 @test_lib.pre_execution_action(test_stub.remove_all_vpc_vrouter)
 @test_lib.pre_execution_action(test_stub.remove_all_vpc_ha_group)
+
 def test():
     test_util.test_dsc("Create a vpc ha group and a vpc vrouter , attach the same l3network to them.")
     for ha_group in ha_group_name_list:

@@ -1,7 +1,6 @@
 '''
 @author: Hengtao.Ran
 '''
-
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
@@ -32,7 +31,6 @@ def test():
         group_vr_list.append(test_stub.create_vpc_vrouter_with_tags(vr_name=vpc_name_list[i]+'-peer',tags='haUuid::{}'.format(ha_group_list[i].uuid)))
         i += 1
         
-
     for vpc_name in vpc_name_list:
         vr_list.append(test_stub.create_vpc_vrouter(vr_name = vpc_name))
     

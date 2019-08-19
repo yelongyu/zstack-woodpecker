@@ -11,7 +11,6 @@ import os
 from itertools import izip
 DefaultFalseDict = test_lib.DefaultFalseDict
 
-
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
@@ -32,6 +31,7 @@ def test():
     vr_list[0].start_with_tags(tags='haUuid::{}'.format(ha_group_list[0].uuid))
     test_stub.create_vpc_vrouter_with_tags(vr_name=vpc_name_list[0]+'-peer',tags='haUuid::{}'.format(ha_group_list[0].uuid))
     test_util.test_logger("=========start_with_tags========")
+
     
     vr_list[0].reboot()
     vr_list[0].check()
