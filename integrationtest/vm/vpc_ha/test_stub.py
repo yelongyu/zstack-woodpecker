@@ -5,7 +5,6 @@ Create an unified test_stub to share test operations
 @author: fang.sun
 '''
 
-
 import zstackwoodpecker.operations.vpc_operations as vpc_ops
 import zstackwoodpecker.operations.vpcdns_operations as vpcdns_ops
 import zstackwoodpecker.operations.net_operations as net_ops
@@ -101,21 +100,8 @@ def create_vpc_vrouter(vr_name='test_vpc'):
     return ZstackTestVR(vr_inv)
 
 def create_vpc_ha_group(ha_group_name='test_vpc_ha', monitorIp=['192.168.0.1']):
-    conf = res_ops.gen_query_conditions('name', '=', 'test_vpc_ha')
     vr_ha_inv = vpc_ops.create_vpc_ha_group(name=ha_group_name, monitorIps=monitorIp)
-    return vr_ha_inv
-
-# def create_vpc_vrouter_with_tags(vr_name='test_vpc', tags=None):
-    # conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
-    # vr_list = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)
-    # if vr_list:
-        # return ZstackTestVR(vr_list[0])
-    # vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
-    # vr_inv = vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid, system_tags=[tags])
-    # dns_server = os.getenv('DNSServer')
-    # vpcdns_ops.add_dns_to_vpc_router(vr_inv.uuid, dns_server)
-    # return ZstackTestVR(vr_inv)
-
+    return vr_ha_inv 
 
 def create_vpc_vrouter_with_tags(vr_name='test_vpc', tags=None):
     conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
@@ -129,6 +115,20 @@ def create_vpc_vrouter_with_tags(vr_name='test_vpc', tags=None):
 def add_dns_to_ha_vpc(vr_uuid):
     dns_server = os.getenv('DNSServer')
     vpcdns_ops.add_dns_to_vpc_router(vr_uuid, dns_server)
+
+def check_ha_status(ha_group_uuid):
+    ha_group = res_ops.get_resource(res_ops.VPC_HA_GROUP, uuid=ha_group_uuid)
+    vr_refs = ha_group[0].vrRefs
+    status = 0
+    for i in range(0,2):
+        vr_uuid = vr_refs[i].uuid
+        vr_inv = res_ops.get_resource(res_ops.APPLIANCE_VM, uuid=vr_uuid)
+        ha_status = vr_inv[0].haStatus
+        if ha_status=='Master':
+            status = 0 | status
+        else:
+            status = 1 | status
+    return status
 
 def attach_l3_to_vpc_vr(vpc_vr, l3_system_name_list=L3_SYSTEM_NAME_LIST):
     l3_name_list = [os.environ.get(name) for name in l3_system_name_list]
