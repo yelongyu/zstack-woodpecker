@@ -68,9 +68,12 @@ def test():
         session_uuid=iam2_ops.login_iam2_virtual_id(username,password)
         session_uuid=iam2_ops.login_iam2_project(project_name,session_uuid).uuid
         cond=res_ops.gen_query_conditions('zoneUuid','=',zone_inv[1].uuid)
-        host_inv=res_ops.query_resource(res_ops.HOST,cond,session_uuid=session_uuid)
-        if host_inv:
-            test_util.test_fail("test Project Related Zone fail")
+        try:
+            host_inv=res_ops.query_resource(res_ops.HOST,cond, session_uuid=session_uuid)
+            if host_inv:
+                test_util.test_fail("test Project Related Zone fail")
+        except Exception:    
+            test_util.test_logger("test Project Related Zone success")
         attribute_uuid=iam2_ops.get_attribute_uuid_of_project(project_uuid,"__ProjectRelatedZone__")
         iam2_ops.delete_iam2_virtual_id(virtual_id_uuid)
         iam2_ops.remove_attributes_from_iam2_project(project_uuid,[attribute_uuid])
