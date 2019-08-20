@@ -26,7 +26,7 @@ LOG4J2_TREE = et.ElementTree(file='/tmp/log4j2.xml')
 LOG_PATH = "/usr/local/zstacktest/apache-tomcat/logs/"
 CLEAN_THRESHOLD_LIST = LOG4J2_TREE.getroot().findall('./Appenders/RollingFile/Policies/SizeBasedTriggeringPolicy')
 mn_threshold = CLEAN_THRESHOLD_LIST[0].attrib['size'].split(' ')
-log_files_size = LOG4J2_TREE.getroot().findall('./Appenders/RollingFile/DefaultRolloverStrategy/Delete/IfFileName/IfAny/IfAny/IfAccumulatedFileSize')[0].attrib['exceeds'].split(' ')
+log_files_size = LOG4J2_TREE.getroot().findall('./Appenders/RollingFile/DefaultRolloverStrategy/Delete/IfFileName/IfAny/IfAccumulatedFileSize')[0].attrib['exceeds'].split(' ')
 test_util.test_logger("@DEBUG-exceeds:%s@" % log_files_size)
 log_files_format = LOG4J2_TREE.getroot().findall('./Appenders/RollingFile/DefaultRolloverStrategy/Delete/IfFileName')[0].attrib['glob'].replace('*', '.*')
 
