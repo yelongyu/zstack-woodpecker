@@ -2,7 +2,8 @@
 	<suite name="mini" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
 		<case timeout='1200' noparallel='True'>test_create_think_provision_vm.py</case>
 		<case timeout='1200' noparallel='True'>test_maintain_host.py</case>
-		<case timeout='1200' noparallel='True'>test_reconnect_host.py</case>
+                <case timeout='1200' noparallel='True'>test_auto_reconnect_host.py::kill_kvmagent</case>
+		<case timeout='1200' noparallel='True'>test_auto_reconnect_host.py::stop_kvmagent</case>
 		<case timeout='1200' noparallel='True'>test_start_stop_host.py</case>
 		<case timeout='1200' noparallel='True'>test_create_thin_provision_vm.py</case>
 		<case timeout='7200' noparallel='True'>test_create_vm_install_iso.py</case>
