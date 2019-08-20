@@ -66,7 +66,7 @@ def test():
         try:
             volume.attach(vm)
         except Exception as e:
-            test_util.test_logger(e)
+            #test_util.test_logger(e)
             test_util.test_pass('Allowed max num of attached vblk is %s' % i)
     test_util.test_fail("Allowed max num of attached vblk may is not %s" % round_num )
 
