@@ -835,11 +835,12 @@ def create_volume(volume_creation_option=None, session_uuid = None):
     volume.create()
     return volume
 
-def create_sg(sg_creation_option=None, session_uuid = None, ipVersion = None):
+def create_sg(sg_creation_option=None, session_uuid = None, ipVersion = None, sg_name = None):
+    sg_name = sg_name
     if not sg_creation_option:
         if ipVersion == 6:
             sg_creation_option = test_util.SecurityGroupOption()
-            sg_creation_option.set_name('test_sg')
+            sg_creation_option.set_name(sg_name)
             sg_creation_option.set_ipVersion('6')
             sg_creation_option.set_description('test sg description')
         else:
