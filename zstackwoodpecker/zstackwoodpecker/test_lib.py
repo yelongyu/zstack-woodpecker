@@ -6066,12 +6066,13 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             img_option.set_name('iso')
             img_option.set_backup_storage_uuid_list([bs_uuid])
             mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-            if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
-                os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
-                img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (mn_ip))
-            else:
-                os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
-                img_option.set_url('http://%s:8080/zstack/static/test.iso' % (mn_ip))
+#            if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
+#                os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
+#                img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (mn_ip))
+#            else:
+#                os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
+#                img_option.set_url('http://%s:8080/zstack/static/test.iso' % (mn_ip))
+            img_option.set_url(os.environ.get('imageServer')+'/iso/CentOS-x86_64-7.2-Minimal.iso')
             image_inv = img_ops.add_iso_template(img_option)
             image = test_image.ZstackTestImage()
             image.set_image(image_inv)
