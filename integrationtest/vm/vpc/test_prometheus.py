@@ -61,7 +61,7 @@ def check_vrouter_prometheus_conf():
     test_util.test_dsc("Check vrouters' prometheus config.")
     vrs = test_lib.lib_get_all_vrs()
     for vr in vrs:
-        vr_ip = test_lib.lib_find_vr_pub_ip(vr)
+        vr_ip = test_lib.lib_find_vr_mgmt_ip(vr)
         vr_hostname = vr_ip.replace('.', '-')
         conditions = res_ops.gen_query_conditions('vmNics.ip', '=', vr_ip)
         vr_uuid  = res_ops.query_resource(res_ops.VIRTUALROUTER_VM, conditions)[0].uuid
