@@ -8,7 +8,8 @@
 		<case timeout='1200' noparallel='True'>test_create_thin_provision_vm.py</case>
 		<case timeout='7200' noparallel='True'>test_create_vm_install_iso.py</case>
 		<case timeout='1200' noparallel='True'>test_migrate_vm.py</case>
-		<case timeout='1200' noparallel='True'>test_migrate_vm_check_progress.py</case>
+		<case timeout='1200' noparallel='True'>test_vm_migrate_progress.py</case>
+		<case timeout='1200' noparallel='True'>test_vm_migrate_progress2.py</case>
 		<case timeout='1200' noparallel='True'>test_resize_vm_root_volume.py</case>
 		<case timeout='1200' noparallel='True'>test_resize_vm_root_volumethin_provision.py</case>
 		<case timeout='1200' noparallel='True'>test_resize_data_volume.py</case>
