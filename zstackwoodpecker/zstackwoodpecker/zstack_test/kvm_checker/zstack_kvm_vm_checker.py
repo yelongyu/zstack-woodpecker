@@ -287,8 +287,11 @@ class zstack_kvm_vm_ssh_no_vr_checker(checker_header.TestChecker):
         host = test_lib.lib_get_vm_host(vm)
         test_lib.lib_install_testagent_to_host(host)
         test_lib.lib_set_vm_host_l2_ip(vm)
-        nic = vm.vmNics[0]
+#        nic = vm.vmNics[0]
+        l3_uuid = vm.defaultL3NetworkUuid
+        nic = test_lib.lib_get_vm_nic_by_l3(vm, l3_uuid)
         ip = nic.ip
+        
 
         shell_command = 'exit 0'
         vm_cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), shell_command, self.exp_result)

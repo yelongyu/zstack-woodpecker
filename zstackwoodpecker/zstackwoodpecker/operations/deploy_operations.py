@@ -68,8 +68,9 @@ def deploy_selenium_docker():
                             systemctl enable docker; systemctl start docker''' % remote_registry
     pull_image_cmd = 'docker pull %s:5000/selenium/%s' % (remote_registry, selenium_standalone)
 #     selenium_hub_run_cmd = 'docker run -d -p 4444:4444 --name selenium-hub selenium/hub'
-    selenium_docker_run_cmd = 'docker run -d -p 4444:4444 -p 5900:5900 -v /dev/shm:/dev/shm -e SCREEN_WIDTH=1920 \
-                               -e SCREEN_HEIGHT=1080 -e SCREEN_DEPTH=24 selenium/%s' % selenium_standalone
+#     selenium_docker_run_cmd = 'docker run -d -p 4444:4444 -p 5900:5900 -v /dev/shm:/dev/shm -e SCREEN_WIDTH=1920 \
+#                                -e SCREEN_HEIGHT=1080 -e SCREEN_DEPTH=24 selenium/%s' % selenium_standalone
+    selenium_docker_run_cmd = 'docker run -d -p 4444:4444 -p 5900:5900 -v /dev/shm:/dev/shm -e SCREEN_WIDTH=1920 -e SCREEN_HEIGHT=1080 -e SCREEN_DEPTH=24 `docker images -q`'
     for cmd in [install_docker_cmd, pull_workaround_cmd, pull_image_cmd, selenium_docker_run_cmd]:
         ssh.execute(cmd, zs_node_ip, 'root', 'password')
 

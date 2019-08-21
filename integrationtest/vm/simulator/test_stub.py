@@ -1310,13 +1310,14 @@ def create_vm_with_iso(vm_creation_option=None, session_uuid=None):
     bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [],
                                             session_uuid)[0].uuid
     img_option.set_backup_storage_uuid_list([bs_uuid])
-    if os.path.exists("%s/apache-tomcat/webapps/zstack/static/zstack-repo/" % (os.environ.get('zstackInstallPath'))):
-        os.system("genisoimage -o %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso /tmp/" % (os.environ.get('zstackInstallPath')))
-        img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (os.environ.get('node1Ip')))
-    else:
-        os.system("genisoimage -o %s/apache-tomcat/webapps/zstack/static/test.iso /tmp/" % (os.environ.get('zstackInstallPath')))
-        img_option.set_url('http://%s:8080/zstack/static/test.iso' % (os.environ.get('node1Ip')))
+#    if os.path.exists("%s/apache-tomcat/webapps/zstack/static/zstack-repo/" % (os.environ.get('zstackInstallPath'))):
+#        os.system("genisoimage -o %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso /tmp/" % (os.environ.get('zstackInstallPath')))
+#        img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (os.environ.get('node1Ip')))
+#    else:
+#        os.system("genisoimage -o %s/apache-tomcat/webapps/zstack/static/test.iso /tmp/" % (os.environ.get('zstackInstallPath')))
+#        img_option.set_url('http://%s:8080/zstack/static/test.iso' % (os.environ.get('node1Ip')))
 
+    img_option.set_url(os.environ.get('imageServer')+'/iso/CentOS-x86_64-7.2-Minimal.iso')
     image_uuid = img_ops.add_iso_template(img_option).uuid
 
     return create_vm(vm_creation_option, None, root_disk_uuid, image_uuid,

@@ -68,7 +68,7 @@ def test():
         try:
             volume.attach(vm)
         except Exception as e:
-            test_util.test_logger(e)
+            #test_util.test_logger(e)
             test_util.test_pass('Allowed max num of attached vscsi is %s' % i)
     test_util.test_fail("Allowed max num of attached vscsi may is not %s" % round_num )
 

@@ -15,20 +15,20 @@ import random
 import time
 import os
 
-#get mn_log delete threshold & AccumulatedFileSize from log4j2.xml
-MN_IP = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-cmd = "sshpass -p password scp root@{}:/usr/local/zstacktest/apache-tomcat/webapps/zstack/WEB-INF/classes/log4j2.xml /tmp/".format(MN_IP)
-os.system(cmd)
-LOG4J2_TREE = et.ElementTree(file='/tmp/log4j2.xml')
-LOG_PATH = "/usr/local/zstacktest/apache-tomcat/logs/"
-log_files_size = LOG4J2_TREE.getroot().findall('./Appenders/RollingFile/DefaultRolloverStrategy/Delete/IfFileName/IfAny/IfAny/IfAccumulatedFileSize')[0].attrib['exceeds'].split(' ')
-test_util.test_logger("@DEBUG-exceeds:%s@" % log_files_size)
-log_files_format = LOG4J2_TREE.getroot().findall('./Appenders/RollingFile/DefaultRolloverStrategy/Delete/IfFileName')[0].attrib['glob'].replace('*', '.*')
-
 def unit_to_int(unit):
     return 1024*1024 if unit=='MB' else 1024*1024*1024
 
 def test():
+    #get mn_log delete threshold & AccumulatedFileSize from log4j2.xml
+    MN_IP = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    cmd = "sshpass -p password scp root@{}:/usr/local/zstacktest/apache-tomcat/webapps/zstack/WEB-INF/classes/log4j2.xml /tmp/".format(MN_IP)
+    os.system(cmd)
+    LOG4J2_TREE = et.ElementTree(file='/tmp/log4j2.xml')
+    LOG_PATH = "/usr/local/zstacktest/apache-tomcat/logs/"
+    log_files_size = LOG4J2_TREE.getroot().findall('./Appenders/RollingFile/DefaultRolloverStrategy/Delete/IfFileName/IfAny/IfAccumulatedFileSize')[0].attrib['exceeds'].split(' ')
+    test_util.test_logger("@DEBUG-exceeds:%s@" % log_files_size)
+    log_files_format = LOG4J2_TREE.getroot().findall('./Appenders/RollingFile/DefaultRolloverStrategy/Delete/IfFileName')[0].attrib['glob'].replace('*', '.*')
+    
     #1.get global config default value(unit==GB) & check
     gc_conf_default_size = int(conf_ops.get_global_config_default_value("managementServer","log.delete.accumulatedFileSize")) * 1024 * 1024 * 1024
     gc_conf_size = int(conf_ops.get_global_config_value("managementServer","log.delete.accumulatedFileSize")) * 1024 * 1024 * 1024

@@ -3909,10 +3909,10 @@ def lib_check_vm_ports_in_a_command(src_vm, dst_vm, allowed_ports, denied_ports,
         target_ip = lib_get_vm_nic_by_l3(dst_vm, common_l3).ip
     src_ip = lib_get_vm_nic_by_l3(src_vm, common_l3).ip
     test_util.test_logger("[target vm:] %s [ip:] %s" % (dst_vm.uuid, target_ip))
-    lib_check_ports_in_a_command(src_vm, src_ip, target_ip, allowed_ports, denied_ports, dst_vm, common_l3)
+    lib_check_ports_in_a_command(src_vm, src_ip, target_ip, allowed_ports, denied_ports, dst_vm, common_l3, target_ipv6 = target_ipv6)
 
 def lib_check_ports_in_a_command(src_vm, src_ip, target_ip, allowed_ports, \
-        denied_ports, dst_vm, l3_uuid=None):
+        denied_ports, dst_vm, l3_uuid=None, target_ipv6 = None):
     '''
         Check target_ip ports connectibility from src_ip. 
 
@@ -3965,7 +3965,7 @@ def lib_check_ports_in_a_command(src_vm, src_ip, target_ip, allowed_ports, \
         test_util.test_logger("Do testing to ssh vm: %s, ip: %s, execute cmd: %s" % (src_vm.uuid, src_vm_ip, port_checking_cmd))
         test_result = lib_execute_ssh_cmd(src_vm_ip, username, password, port_checking_cmd, 240)
     else:
-        test_result = lib_execute_command_in_vm(src_vm, port_checking_cmd, l3_uuid)
+        test_result = lib_execute_command_in_vm(src_vm, port_checking_cmd, l3_uuid, ipv6 = target_ipv6)
 
     if not test_result:
         test_util.test_fail("check [ip:] %s ports failure. Please check the failure information. " % target_ip)
@@ -6066,12 +6066,13 @@ def lib_robot_constant_path_operation(robot_test_obj, set_robot=True):
             img_option.set_name('iso')
             img_option.set_backup_storage_uuid_list([bs_uuid])
             mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-            if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
-                os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
-                img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (mn_ip))
-            else:
-                os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
-                img_option.set_url('http://%s:8080/zstack/static/test.iso' % (mn_ip))
+#            if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
+#                os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
+#                img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (mn_ip))
+#            else:
+#                os.system("sshpass -p password ssh %s 'echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso'" % (mn_ip, os.environ.get('zstackInstallPath')))
+#                img_option.set_url('http://%s:8080/zstack/static/test.iso' % (mn_ip))
+            img_option.set_url(os.environ.get('imageServer')+'/iso/CentOS-x86_64-7.2-Minimal.iso')
             image_inv = img_ops.add_iso_template(img_option)
             image = test_image.ZstackTestImage()
             image.set_image(image_inv)

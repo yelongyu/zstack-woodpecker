@@ -68,9 +68,9 @@ def test():
     print "retcode1 is: %s; output1 is : %s.; erroutput1 is: %s" %(retcode1, output1 , erroutput1)
 
     test_util.test_dsc("Create security groups.")
-    sg1 = test_stub.create_sg(ipVersion = 6)
+    sg1 = test_stub.create_sg(ipVersion = 6,sg_name = 'sg1')
     test_obj_dict.add_sg(sg1.security_group.uuid)
-    sg2 = test_stub.create_sg(ipVersion = 6)
+    sg2 = test_stub.create_sg(ipVersion = 6, sg_name = 'sg2')
     test_obj_dict.add_sg(sg2.security_group.uuid)
     sg_vm = test_sg_vm_header.ZstackTestSgVm()
 
