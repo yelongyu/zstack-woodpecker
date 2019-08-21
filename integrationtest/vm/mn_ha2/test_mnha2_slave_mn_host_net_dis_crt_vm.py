@@ -32,10 +32,7 @@ def test():
     non_vip_s_vm_cfg_lst = test_stub.get_s_vm_cfg_lst_vip_not_bind(test_lib.all_scenario_config, test_lib.scenario_file)
     ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
     if ps_type == 'MiniStorage':
-        cluster_num = len(res_ops.query_resource(res_ops.CLUSTER))
-        if cluster_num == 1:
-            test_util.test_skip('Skip for 1 mini-cluster')
-        elif len(non_vip_s_vm_cfg_lst) != 3:
+        if len(non_vip_s_vm_cfg_lst) != 3:
             test_util.test_fail('find %d non vip mn hosts.' % len(non_vip_s_vm_cfg_lst))
     else:
         if len(non_vip_s_vm_cfg_lst) != 1:
