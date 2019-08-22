@@ -164,3 +164,31 @@ def remove_all_vpc_vrouter():
             for nic_uuid in nic_uuid_list:
                 net_ops.detach_l3(nic_uuid)
             vm_ops.destroy_vm(vr_vm.uuid)
+
+def create_flowmeter(version = None, type = None, generateInterval = None, sample = None, name = None, description = None, server = None, port = None, resourceUuid = None, session = None,timeout = None, systemTags = [], userTags = [], session_uuid = None):
+    action = api_actions.CreateFlowMeterAction()
+    action.timeout = 300000
+    action.version = version
+    action.type = type
+    action.generateInterval = generateInterval
+    action.sample = sample
+    action.name = name
+    action.description = description
+    action.server = server
+    action.port = port
+    action.resourceUuid = resourceUuid
+    action.session = session
+    action.systemTags = systemTags
+    action.userTags = userTags
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def add_vpc_to_netflow(flowMeterUuid, vRouterUuid, l3NetworkUuids, session_uuid = None):
+    action = api_actions.AddVRouterNetworksToFlowMeterAction()
+    action.timeout = 300000
+    action.flowMeterUuid = flowMeterUuid
+    action.vRouterUuid = vRouterUuid
+    action.l3NetworkUuids = l3NetworkUuids
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
