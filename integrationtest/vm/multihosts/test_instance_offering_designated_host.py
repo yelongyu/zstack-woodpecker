@@ -22,6 +22,10 @@ test_obj_dict = test_state.TestStateDict()
 def test():
     global vm
 
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0]
+    if ps.type != inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_skip('Skip test on non-localstorage')
+
     test_util.test_dsc('create instance offering')
     instance_offering_option = test_util.InstanceOfferingOption()
     instance_offering_option.set_cpuNum(1)
@@ -37,7 +41,7 @@ def test():
     vm = test_stub.create_vm_with_instance_offering('test-vm',image_name,l3_name, new_offering)
     test_obj_dict.add_vm(vm)
 #    vm.check()
-    for i in (0, 15):
+    for i in range(0, 15):
         host_ip1 = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
         vm.stop()
         vm.start() 

@@ -2595,6 +2595,7 @@ def deploy_scenario(scenario_config, scenario_file, deploy_config):
             shell.call("zs-network-setting -i eth0 %s %s|exit 0" %(ip_addr, last_ip_netmask) )
 
         shell.call("if [ `ps -ef|grep dhclient|grep -v 'grep'|wc -l` -ne 0 ]; then pkill -9 dhclient;fi") #kill dhclient process if exist
+        time.sleep(10)
         shell.call('dhclient eth0')
         shell.call('ip route del default || true')
         shell.call('ip route add default via %s dev eth0' % last_ip_gateway)
