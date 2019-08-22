@@ -274,10 +274,11 @@ def create_vm_with_fake_iso(vm_name, l3_name, session_uuid = None):
             session_uuid)[0].uuid
     img_option.set_backup_storage_uuid_list([bs_uuid])
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-    if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
-        img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
-    else:
-        img_option.set_url('http://%s:8080/zstack/static/zstack-dvd/ks.cfg' % (mn_ip))
+#    if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
+#        img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
+#    else:
+#        img_option.set_url('http://%s:8080/zstack/static/zstack-dvd/ks.cfg' % (mn_ip))
+    img_option.set_url(os.environ.get('imageServer')+'/iso/CentOS-x86_64-7.2-Minimal.iso')
     image_uuid = img_ops.add_iso_template(img_option).uuid
 
     vm_creation_option = test_util.VmOption()
@@ -312,10 +313,11 @@ def create_iso_vm_with_random_offering(vm_name, l3_name=None, session_uuid=None,
 
     img_option.set_backup_storage_uuid_list([bs_uuid])
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-    if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
-        img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
-    else:
-        img_option.set_url('http://%s:8080/zstack/static/zstack-dvd/ks.cfg' % (mn_ip))
+#    if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
+#        img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
+#    else:
+#        img_option.set_url('http://%s:8080/zstack/static/zstack-dvd/ks.cfg' % (mn_ip))
+    img_option.set_url(os.environ.get('imageServer')+'/iso/CentOS-x86_64-7.2-Minimal.iso')
     image_uuid = img_ops.add_iso_template(img_option).uuid
 
     if l3_name:
@@ -1979,10 +1981,11 @@ class MultiSharedPS(object):
             imagestore = res_ops.query_resource(res_ops.IMAGE_STORE_BACKUP_STORAGE)[0]
             img_option.set_backup_storage_uuid_list([imagestore.uuid])
             mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-            if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
-                img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
-            else:
-                img_option.set_url('http://%s:8080/zstack/static/zstack-dvd/ks.cfg' % (mn_ip))
+#            if os.system("sshpass -p password ssh %s 'ls  %s/apache-tomcat/webapps/zstack/static/zstack-repo/'" % (mn_ip, os.environ.get('zstackInstallPath'))) == 0:
+#                img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/ks.cfg' % (mn_ip))
+#            else:
+#                img_option.set_url('http://%s:8080/zstack/static/zstack-dvd/ks.cfg' % (mn_ip))
+            img_option.set_url(os.environ.get('imageServer')+'/iso/CentOS-x86_64-7.2-Minimal.iso')
             image_uuid = img_ops.add_iso_template(img_option).uuid
         else:
             if ceph_image:
