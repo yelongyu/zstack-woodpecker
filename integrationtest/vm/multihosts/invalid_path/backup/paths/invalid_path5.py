@@ -3,7 +3,7 @@ import os
 TestAction = ts_header.TestAction
 def path():
 
-    return dict(initial_formation="template5", path_list=[
+    return dict(initial_formation="template5", checking_point=8, faild_point=13, path_list=[
 		[TestAction.create_vm, 'vm1', ],
 		[TestAction.create_volume, 'volume1', 'flag=scsi'],
 		[TestAction.attach_volume, 'vm1', 'volume1'],
@@ -14,9 +14,9 @@ def path():
 		[TestAction.create_vm_snapshot, 'vm1', 'vm1-snapshot1'],
 		[TestAction.create_vm_backup, 'vm1', 'vm1-backup1'],
 		[TestAction.create_vm, 'vm2', ],
-		[TestAction.detach_volume, 'volume1'],
+		[TestAction.detach_volume, 'volume2'],
 		[TestAction.stop_vm, 'vm1'],
-		[TestAction.create_vm_from_backup, 'volume3-backup1'],
+		[TestAction.create_vm_from_vmbackup, 'vm1-backup1'],
 ])
 
 
@@ -26,9 +26,9 @@ def path():
 The final status:
 Running:['vm2', 'vm1-from-backup1']
 Stopped:['vm1']
-Enadbled:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1', 'volume3-backup1', 'volume2-backup1', 'volume1-backup1', 'vm1-backup1']
-attached:['volume2', 'volume3', 'volume1-from-backup1', 'volume2-from-backup1', 'volume3-from-backup1']
-Detached:['volume1']
+Enadbled:['vm1-snapshot1', 'volume1-snapshot1', 'volume2-snapshot1', 'volume3-snapshot1', 'vm1-backup1', 'volume1-backup1', 'volume2-backup1', 'volume3-backup1']
+attached:['volume1', 'volume3', 'volume1-from-backup1', 'volume2-from-backup1', 'volume3-from-backup1']
+Detached:['volume2']
 Deleted:[]
 Expunged:[]
 Ha:[]

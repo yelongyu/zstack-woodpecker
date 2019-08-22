@@ -25,7 +25,7 @@ def test():
 
 
     robot_test_obj.initial(path_list, initial_formation)
-    Robot.robot_run_constant_path(robot_test_obj, set_robot=True)
+    Robot.robot_run_constant_path(robot_test_obj, set_robot=False)
 
 def error_cleanup():
     pass

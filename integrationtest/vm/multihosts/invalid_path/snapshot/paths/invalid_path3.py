@@ -3,7 +3,7 @@ import os
 TestAction = ts_header.TestAction
 def path():
 
-    return dict(initial_formation="template5", path_list=[
+    return dict(initial_formation="template5", checking_point=8, faild_point=18, path_list=[
 		[TestAction.create_vm, 'vm1', ],
 		[TestAction.create_volume, 'volume1', 'flag=scsi'],
 		[TestAction.attach_volume, 'vm1', 'volume1'],
@@ -20,7 +20,7 @@ def path():
 		[TestAction.attach_volume, 'vm2', 'volume2'],
 		[TestAction.detach_volume, 'volume3'],
 		[TestAction.attach_volume, 'vm2', 'volume3'],
-		[TestAction.stop_vm, 'vm2'],
+		[TestAction.stop_vm, 'vm1'],
 		[TestAction.delete_vm_snapshot, 'vm1-snapshot1'],
 ])
 
@@ -29,8 +29,8 @@ def path():
 
 '''
 The final status:
-Running:['vm1']
-Stopped:['vm2']
+Running:['vm2']
+Stopped:['vm1']
 Enadbled:['vm1-backup1', 'volume1-backup1', 'volume2-backup1', 'volume3-backup1']
 attached:['volume1', 'volume2', 'volume3']
 Detached:[]
