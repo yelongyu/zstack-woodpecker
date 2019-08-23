@@ -4,6 +4,7 @@ import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.operations.scenario_operations as sce_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstacklib.utils.jsonobject as jsonobject
 import zstacklib.utils.xmlobject as xmlobject
 import zstackwoodpecker.test_util as test_util
@@ -96,6 +97,13 @@ def create_vm_multi_l3(l3_uuid_list, default_l3_uuid, vm_name = None, image_name
     if not image_name:
         image_name = os.environ.get('imageName_s')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    root_disk_size = 10737418240
+    disk_offering_option = test_util.DiskOfferingOption()
+    disk_offering_option.set_name('root-disk-iso')
+    disk_offering_option.set_diskSize(root_disk_size)
+    root_disk_offering = vol_ops.create_volume_offering(disk_offering_option)
+    root_disk_uuid = root_disk_offering.uuid
+    vm_creation_option.set_root_disk_uuid(root_disk_uuid)
     if not vm_name:
         vm_creation_option.set_name('vm-for-baremetal')
 
