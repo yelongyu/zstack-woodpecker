@@ -55,7 +55,7 @@ def test():
 
 #create netflow
     test_util.test_dsc("Create netflow")
-    netflow = vpc_ops.create_flowmeter(type ='NetFlow', name='netflow', version = 'V9', port = 2000, description ='test netflow', server = vm_colloctor_ip)
+    netflow = vpc_ops.create_flowmeter(type ='NetFlow', name='netflow', description ='test netflow', server = vm_colloctor_ip)
     netflow_uuid = netflow.uuid
     print 'debug netflow_uuid ; %s' % netflow_uuid
     print 'debug vm_colloctor_ip: %s' % vm_colloctor_ip
@@ -80,11 +80,46 @@ def test():
     test_stub.run_command_in_vm(vm_sender.get_vm(), 'pkill iperf; iperf -c %s -i 1 -t 30 -P10 &' % vm_colloctor_ip)
 
 #stop test after 500 seconds
+    cmd = 'tshark -f "udp port 2055 and ip src %s " -i eth0 -V -c 1 -a duration:500' % vr_pub_ip
+    print 'debug begin do netflow test cmd : %s' % cmd
+    (retcode, output, erroutput) = ssh.execute(cmd , vm_colloctor_ip, 'root', 'password')
+    print 'debug output is: %s' %output
+    if vm_colloctor_ip in output and vr_pub_ip in output and "Cisco NetFlow" in output:
+        test_util.test_dsc("Successfull capture the Cisco flow, test pass")
+    else:
+        test_util.test_fail("Failed capture the Cisco flow, test failed")
+#update netflow version to V9
+    vpc_ops.update_netflow(netflow_uuid, name='netflow_new', description = 'update netflow', expireInterval = 30, version = 'V9')
+
+#begin do test
+    #test_stub.run_command_in_vm(vm_colloctor.get_vm(), 'iperf -s -D')
+    print 'debug begin do netflow test'
+    test_stub.run_command_in_vm(vm_sender.get_vm(), 'pkill iperf; iperf -c %s -i 1 -t 30 -P10 &' % vm_colloctor_ip)
+
+#stop test after 500 seconds
     cmd = 'tshark -f "udp port 2000 and ip src %s " -i eth0 -V -c 1 -a duration:500' % vr_pub_ip
     print 'debug begin do netflow test cmd : %s' % cmd
     (retcode, output, erroutput) = ssh.execute(cmd , vm_colloctor_ip, 'root', 'password')
     print 'debug output is: %s' %output
-    if vm_colloctor_ip in output and vr_pub_ip in output:
+    if vm_colloctor_ip in output and vr_pub_ip in output and 'cisco-sccp' in output:
+        test_util.test_dsc("Successfull capture the Cisco flow, test pass")
+    else:
+        test_util.test_fail("Failed capture the Cisco flow, test failed")
+
+#update netflow version to V5
+    vpc_ops.update_netflow(netflow_uuid, name='netflow_new', description = 'update netflow', expireInterval = 30, version = 'V9')
+
+#begin do test
+    #test_stub.run_command_in_vm(vm_colloctor.get_vm(), 'iperf -s -D')
+    print 'debug begin do netflow test'
+    test_stub.run_command_in_vm(vm_sender.get_vm(), 'pkill iperf; iperf -c %s -i 1 -t 30 -P10 &' % vm_colloctor_ip)
+
+#stop test after 500 seconds
+    cmd = 'tshark -f "udp port 2055 and ip src %s " -i eth0 -V -c 1 -a duration:500' % vr_pub_ip
+    print 'debug begin do netflow test cmd : %s' % cmd
+    (retcode, output, erroutput) = ssh.execute(cmd , vm_colloctor_ip, 'root', 'password')
+    print 'debug output is: %s' %output
+    if vm_colloctor_ip in output and vr_pub_ip in output and "Cisco NetFlow" in output:
         test_util.test_dsc("Successfull capture the Cisco flow, test pass")
     else:
         test_util.test_fail("Failed capture the Cisco flow, test failed")
