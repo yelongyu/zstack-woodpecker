@@ -28,7 +28,8 @@ def test():
     #iso_21_path = os.environ.get('iso_21_path')
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
-    vm_name = os.environ.get('vmName') + image_name
+    vm_name = os.environ.get('vmName')
+# + image_name
     upgrade_script_path = os.environ.get('upgradeScript')
 
     vm_inv = test_stub.create_vm_scenario(image_name, vm_name)
