@@ -11,6 +11,8 @@ import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import zstackwoodpecker.operations.backupstorage_operations as bs_ops
+import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.resource_stack as resource_stack_ops
 import zstackwoodpecker.operations.stack_template as stack_template_ops
@@ -222,9 +224,10 @@ class robot(object):
         # bs
         cond = res_ops.gen_query_conditions('type', '=', 'ImageStoreBackupStorage')
         bss = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)
-        self.robot_resource['bs'] = []
         if not bss:
-            test_util.test_fail("Robot test must have imagestore bs")
+            bs = self.add_backup_storage()
+            bss = [bs]
+        self.robot_resource['bs'] = []
         for bs in bss:
             test_util.test_logger("Robot resource:: bs: [%s], uuid: [%s}" % (bs.name, bs.uuid))
             self.robot_resource['bs'].append(bs.uuid)
@@ -453,6 +456,23 @@ class robot(object):
 
     # Todo:run_actions and check
 
+    def add_backup_storage(self):
+        host = res_ops.query_resource(res_ops.HOST)[0]
+        bs_option = test_util.ImageStoreBackupStorageOption()
+        bs_option.set_name("imagestore")
+        bs_option.set_url("/home/sftpBackupStorage")
+        bs_option.set_hostname(host.managementIp)
+        bs_option.set_password('password')
+        bs_option.set_sshPort(host.sshPort)
+        bs_option.set_username(host.username)
+        bs_option.set_system_tags(["allowbackup"])
+        bs = bs_ops.create_image_store_backup_storage(bs_option)
+        bs_ops.attach_backup_storage(bs.uuid, host.zoneUuid)
+
+        #tag_ops.create_system_tag(resourceType="ImageStoreBackupStorageVO", resourceUuid=bs.uuid, tag="allowbackup")
+
+        return bs
+
     def initial(self, path_list, resource_stack=None):
         self.set_path_list(path_list)
         self.initial_resource()
@@ -465,7 +485,7 @@ class robot(object):
             yield _path
 
 
-def robot_run_constant_path(robot_test_obj, set_robot=True, checking_step=1, fail_step=10000):
+def robot_run_constant_path(robot_test_obj, set_robot=True, checking_step=1, faild_step=10000):
     test_lib.ROBOT = set_robot
     constant_path = robot_test_obj.get_path_list()
 
@@ -487,21 +507,24 @@ def robot_run_constant_path(robot_test_obj, set_robot=True, checking_step=1, fai
         except StopIteration:
             break
         except Exception as e:
-            if fail_step and fail_step == STEP:
-                test_util.test_logger(e)
+            test_util.test_logger(e)
+            if faild_step == STEP:
                 debug(robot_test_obj)
-                test_util.test_pass("This step will fail. It is a invalid case")
+                test_util.test_pass("This step will fail. It's an invalid case")
             else:
                 debug(robot_test_obj)
-                test_util.test_fail("This step must succes, It is not on the faild point")
-        finally:
-            debug(robot_test_obj)
-            if fail_step and STEP == fail_step:
-                test_util.test_fail("This step must fail. It is a invalid case")
-            if set_robot and STEP >= checking_step:
-                robot_test_obj.test_dict.check()
+                test_util.test_fail("This step must succes, It's not on the faild point")
+            break
 
-            STEP += 1
+        debug(robot_test_obj)
+
+        if faild_step == STEP:
+            test_util.test_fail("This step must fail. It's an invalid case")
+
+        if set_robot and STEP >= checking_step:
+            robot_test_obj.test_dict.check()
+
+        STEP += 1
 
     test_util.test_logger("Robot action run over!")
 
@@ -1193,6 +1216,7 @@ def create_vm_backup(robot_test_obj, args):
 
     zone_inv = res_ops.query_resource(res_ops.ZONE)[0]
     cond = res_ops.gen_query_conditions("attachedZoneUuids", "=", zone_inv.uuid)
+    cond = res_ops.gen_query_conditions("type", "=", "ImageStoreBackupStorage", cond)
     bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
 
     backup_option = test_util.BackupOption()
@@ -1303,7 +1327,8 @@ def create_volume_backup(robot_test_obj, args):
     backup_name = args[1]
 
     zone_inv = res_ops.query_resource(res_ops.ZONE)[0]
-    cond = res_ops.gen_query_conditions("attachedZoneUuids", "=", zone_inv.uuid)
+    cond = res_ops.gen_query_conditions("type", "=", "ImageStoreBackupStorage")
+    cond = res_ops.gen_query_conditions("attachedZoneUuids", "=", zone_inv.uuid, cond)
     bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE, cond)[0].uuid
 
     backup_option = test_util.BackupOption()
