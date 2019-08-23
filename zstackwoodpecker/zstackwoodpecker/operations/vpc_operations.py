@@ -192,3 +192,30 @@ def add_vpc_to_netflow(flowMeterUuid, vRouterUuid, l3NetworkUuids, session_uuid 
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def update_netflow(uuid, name = None, description = None, expireInterval =None, version = None,session_uuid = None):
+    action = api_actions.UpdateFlowMeterAction()
+    action.timeout = 300000
+    action.version = version
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    action.expireInterval = expireInterval
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def update_collector(uuid, name = None, description = None, expireInterval =None, version = None,session_uuid = None):
+    action = api_actions.UpdateFlowCollectorAction()
+    action.timeout = 300000
+    action.port = port
+    action.uuid = uuid
+    action.server = server
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def delete_netflow(uuid, deleteMode, session_uuid = None):
+    action = api_actions.DeleteFlowMeterAction()
+    action.timeout = 300000
+    action.uuid = uuid
+    action.deleteMode = deleteMode
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
