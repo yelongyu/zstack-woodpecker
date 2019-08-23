@@ -24,24 +24,25 @@ ha_group_list = []
 def test():
     test_util.test_dsc("Create a vpc ha group and a vpc vrouter , attach the same l3network to them.")
     ha_group_list.append(test_stub.create_vpc_ha_group(ha_group_name = ha_group_name_list[0]))
-        
     vr_list.append(test_stub.create_vpc_vrouter(vr_name = vpc_name_list[0]))
      
+    test_util.test_logger("add vr into vpc ha group")
     vr_list[0].stop()
     vr_list[0].start_with_tags(tags='haUuid::{}'.format(ha_group_list[0].uuid))
     test_stub.create_vpc_vrouter_with_tags(vr_name=vpc_name_list[0]+'-peer',tags='haUuid::{}'.format(ha_group_list[0].uuid))
-    test_util.test_logger("=========start_with_tags========")
+    test_stub.check_ha_status(ha_group_list[0].uuid)
 
     
+    test_util.test_logger("reboot")
     vr_list[0].reboot()
     vr_list[0].check()
-    test_util.test_logger("=========reboot========")
 
+    test_util.test_logger("destroy one vr")
     vr_list[0].destroy()
     vr_list[0].check()
     
+    test_util.test_logger("add vr again")
     vr_list.append(test_stub.create_vpc_vrouter_with_tags(vr_name=vpc_name_list[1],tags='haUuid::{}'.format(ha_group_list[0].uuid)))
-    test_util.test_logger("=========add vr again.========")
 
     test_lib.lib_error_cleanup(test_obj_dict)
     # test_stub.remove_all_vpc_vrouter()

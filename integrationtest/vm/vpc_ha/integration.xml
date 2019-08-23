@@ -65,5 +65,8 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_nssa_auth_md5.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_change_router_id.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vps_ospf_update_area.py::vm1_l3_vlan_vm2_l3_vlan</case>
+	<case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_add_another_vpc_router.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_add_vr_reboot.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_l3_attach.py</case>
     </suite>
 </integrationTest>

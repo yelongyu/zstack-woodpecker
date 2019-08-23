@@ -27,14 +27,14 @@ group_vr_list = []
 
 def test():
     test_util.test_dsc("Create a vpc ha group and a vpc vrouter , attach the same l3network to them.")
-    for ha_group in ha_group_name_list:
-        ha_group_list.append(test_stub.create_vpc_ha_group(ha_group_name = ha_group))
-        # test_util.test_logger(ha_group_list[i].uuid)
-        group_vr_list.append(test_stub.create_vpc_vrouter_with_tags(vr_name=vpc_name_list[0],tags='haUuid::{}'.format(ha_group_list[0].uuid)))
-        vr_list.append(test_stub.create_vpc_vrouter_with_tags(vr_name=vpc_name_list[0]+'-peer',tags='haUuid::{}'.format(ha_group_list[0].uuid)))
 
-    for vpc_name in vpc_name_list:
-        vr_list.append(test_stub.create_vpc_vrouter(vr_name = vpc_name))
+    ha_group_list.append(test_stub.create_vpc_ha_group(ha_group_name = ha_group_name_list[0]))
+    # test_util.test_logger(ha_group_list[i].uuid)
+    group_vr_list.append(test_stub.create_vpc_vrouter_with_tags(vr_name=vpc_name_list[0],tags='haUuid::{}'.format(ha_group_list[0].uuid)))
+    vr_list.append(test_stub.create_vpc_vrouter_with_tags(vr_name=vpc_name_list[0]+'-peer',tags='haUuid::{}'.format(ha_group_list[0].uuid)))
+    test_stub.check_ha_status(ha_group_list[0].uuid)
+
+    vr_list.append(test_stub.create_vpc_vrouter(vr_name = vpc_name_list[0]))
      
     l3_uuid = test_lib.lib_get_l3_by_name('l3VlanNetwork10').uuid
 
@@ -59,15 +59,15 @@ def test():
         raise
     
     test_lib.lib_error_cleanup(test_obj_dict)
-    # test_stub.remove_all_vpc_vrouter()
-    for vm in vr_list:
-        vm.destroy()
+    # for vm in vr_list:
+        # vm.destroy()
     test_stub.remove_all_vpc_ha_group()
+    test_stub.remove_all_vpc_vrouter()
     
 
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
-    # test_stub.remove_all_vpc_vrouter()
-    for vm in vr_list:
-        vm.destroy()
+    # for vm in vr_list:
+        # vm.destroy()
     test_stub.remove_all_vpc_ha_group()
+    test_stub.remove_all_vpc_vrouter()
