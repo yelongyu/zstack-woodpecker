@@ -297,7 +297,7 @@ def sync_vm_backup(imagestore_uuid, session_uuid=None):
     action.imageStoreUuid = imagestore_uuid
     action.timeout = 1800000
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    est_util.test_logger('Sync Vm Backup')
+    test_util.test_logger('Sync Vm Backup')
     return evt
 
 def sync_volume_backup(imagestore_uuid, session_uuid=None):
@@ -305,7 +305,7 @@ def sync_volume_backup(imagestore_uuid, session_uuid=None):
     action.imageStoreUuid = imagestore_uuid
     action.timeout = 1800000
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    est_util.test_logger('Sync Volume Backup')
+    test_util.test_logger('Sync Volume Backup')
     return evt
 
 def sync_database_backup(imagestore_uuid, session_uuid=None):
@@ -313,7 +313,7 @@ def sync_database_backup(imagestore_uuid, session_uuid=None):
     action.imageStoreUuid = imagestore_uuid
     action.timeout = 1800000
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    est_util.test_logger('Sync Database Backup')
+    test_util.test_logger('Sync Database Backup')
     return evt
 
 def sync_vm_backup_to_remote(group_uuid, src, dst, session_uuid=None):

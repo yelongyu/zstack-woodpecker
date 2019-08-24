@@ -15,8 +15,11 @@ import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 import zstackwoodpecker.zstack_test.zstack_test_snapshot as zstack_sp_header
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_volume_header
 import zstackwoodpecker.operations.scenario_operations as sce_ops
+import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.header.host as host_header
+import time
 
+test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def create_vm_backup(vm_obj):
@@ -32,7 +35,7 @@ def create_volume_backup(vm_obj):
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
     backup_option = test_util.BackupOption()
     backup_option.set_name("volume_backup")
-    backup_option.set_volume_uuid(test_lib.lib_get_root_volume(test_lib.lib_get_data_volumes(vm_obj.get_vm())[0].uuid)
+    backup_option.set_volume_uuid(test_lib.lib_get_data_volumes(vm_obj.get_vm())[0].uuid)
     backup_option.set_backupStorage_uuid(bs.uuid)
     backup = vol_ops.create_backup(backup_option)
     return backup
@@ -44,6 +47,7 @@ def create_database_backup():
     return backup
 
 def test():
+    global test_obj_dict
     vm_name = "test_vm"
     bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
     cond = res_ops.gen_query_conditions("system", '=', "false")
@@ -68,7 +72,7 @@ def test():
     vol_ops.sync_vm_backup(bs.uuid)
     vol_ops.sync_database_backup(bs.uuid)
    
-    cond = res_ops.gen_query_conditions('volumeUuid', '=', volume.uuid)
+    cond = res_ops.gen_query_conditions('volumeUuid', '=', volume.get_volume().uuid)
     vol_backup = res_ops.query_resource(res_ops.VOLUME_BACKUP, cond)[0]
     assert volume_backup.uuid == vol_backup.uuid
 
@@ -85,34 +89,42 @@ def test():
         if data.groupUuid:
             data_backup = data
     for b in vm_backup:
-        if b.volumeUuid == vm1.get_vm().rootVolumeUuid
+        if b.volumeUuid == vm1.get_vm().rootVolumeUuid:
             assert root_backup.uuid == b.uuid
         else:
             assert data_backup.uuid == b.uuid
 
     #disconnect BS
-    command = 'systemctl stop zstack-imagestorebackupstorage.service'
+    command = 'pkill -9 zstore'
     import zstacklib.utils.ssh as ssh
-    ssh.execute(command, bs.hostname, bs.username, bs.password)
+    (ret, out, eout) = ssh.execute(command, bs.hostname, bs.username, bs.password)
+    
     while True:
         bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
         if bs.status == "Disconnected":
             break
+        time.sleep(10)
+    time.sleep(5)
     backups = res_ops.query_resource(res_ops.VOLUME_BACKUP)
     for bk in backups:
-        vol_ops.delete_volume_backup(bs.uuid, bk.uuid)
-
+        vol_ops.delete_volume_backup([bs.uuid], bk.uuid)
     #reconnect BS
-    command = 'systemctl start zstack-imagestorebackupstorage.service'
-    ssh.execute(command, bs.hostname, bs.username, bs.password)
+    time.sleep(20)
+    bs_ops.reconnect_backup_storage(bs.uuid)
     while True:
         bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0]
         if bs.status == "Connected":
             break
+        time.sleep(10)
+    vol_ops.sync_volume_backup(bs.uuid)
+    vol_ops.sync_vm_backup(bs.uuid)
+    vol_ops.sync_database_backup(bs.uuid)
+    
     backups = res_ops.query_resource(res_ops.VOLUME_BACKUP)
-    assert len(bakcups) == 3
+    assert len(backups) == 3
 
     test_lib.lib_robot_cleanup(test_obj_dict)
 
 def error_cleanup():
+    global test_obj_dict
     test_lib.lib_robot_cleanup(test_obj_dict)
