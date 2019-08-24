@@ -233,6 +233,14 @@ def create_vm_backup(backup_option, session_uuid=None):
     backup = evt.inventories
     return backup
 
+def create_database_backup(name, bs_uuid, session_uuid=None):
+    action = api_actions.CreateDatabaseBackupAction()
+    action.name = name
+    action.backupStorageUuid = bs_uuid
+    action.timeout = 240000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def delete_vm_backup(bs_uuids=None, group_uuid=None, session_uuid=None):
     action = api_actions.DeleteVmBackupAction()
     action.groupUuid = group_uuid
@@ -283,6 +291,30 @@ def recover_volume_backup_from_remote(backup_uuid, src, dst, session_uuid=None):
     action.timeout = 1800000
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def sync_vm_backup(imagestore_uuid, session_uuid=None):
+    action = api_actions.SyncVmBackupAction()
+    action.imageStoreUuid = imagestore_uuid
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    est_util.test_logger('Sync Vm Backup')
+    return evt
+
+def sync_volume_backup(imagestore_uuid, session_uuid=None):
+    action = api_actions.SyncVolumeBackupAction()
+    action.imageStoreUuid = imagestore_uuid
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    est_util.test_logger('Sync Volume Backup')
+    return evt
+
+def sync_database_backup(imagestore_uuid, session_uuid=None):
+    action = api_actions.SyncDatabaseBackupAction()
+    action.imageStoreUuid = imagestore_uuid
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    est_util.test_logger('Sync Database Backup')
+    return evt
 
 def sync_vm_backup_to_remote(group_uuid, src, dst, session_uuid=None):
     action = api_actions.SyncVmBackupFromImageStoreBackupStorageAction()
