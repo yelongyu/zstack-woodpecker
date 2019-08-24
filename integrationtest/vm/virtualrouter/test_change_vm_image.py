@@ -59,14 +59,14 @@ def test():
    image2_uuid = image2.uuid
    vm_ops.change_vm_image(vm_uuid,image2_uuid)
    #check whether vr's status is running
-   if vr.applianceVmType == 'vrouter':
-      if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',240):
-         test_util.test_fail('vm:%s is not startup in 240 seconds.Fail to reboot it.' % vr.uuid)
-      time.sleep(20)
+#   if vr.applianceVmType == 'vrouter':
+   if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',240):
+     test_util.test_fail('vm:%s is not startup in 240 seconds.Fail to reboot it.' % vr.uuid)
+   time.sleep(20)
    #if vr.state == 'Stopped':
-   else:
-      vm_ops.start_vm(vr.uuid)
-      vm_ops.reconnect_vr(vr.uuid)
+#   else:
+#      vm_ops.start_vm(vr.uuid)
+#      vm_ops.reconnect_vr(vr.uuid)
    vm_ops.start_vm(vm_uuid)
    vm.update()
    #check whether the vm is running successfully
@@ -105,14 +105,14 @@ def test():
 #   image_tiny_uuid = test_lib.lib_get_image_by_name("ttylinux").uuid
    vm_ops.change_vm_image(vm_uuid,image1_uuid)
    #check whether vr's status is running
-   if vr.applianceVmType == 'vrouter':
-      if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',240):
-         test_util.test_fail('vm:%s is not startup in 240 seconds.Fail to reboot it.' % vr.uuid)
-      time.sleep(20)
+#   if vr.applianceVmType == 'vrouter':
+   if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',240):
+     test_util.test_fail('vm:%s is not startup in 240 seconds.Fail to reboot it.' % vr.uuid)
+   time.sleep(20)
    #if vr.state == 'Stopped':
-   else:
-      vm_ops.start_vm(vr.uuid)
-      vm_ops.reconnect_vr(vr.uuid)
+   #else:
+   #   vm_ops.start_vm(vr.uuid)
+   #   vm_ops.reconnect_vr(vr.uuid)
    vm_ops.start_vm(vm_uuid)
    vm.update()
    #check whether the vm is running successfully

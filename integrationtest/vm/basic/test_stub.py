@@ -18,6 +18,7 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
 import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
+import time
 import re
 
 
@@ -251,6 +252,18 @@ def create_vnc_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=Non
     vm.create()
     return vm
 
+def ensure_hosts_connected(wait_time):
+    for i in range(wait_time):
+        time.sleep(1)
+        host_list = res_ops.query_resource(res_ops.HOST)
+        for host in host_list:
+            if not "connected" in host.status.lower():
+                test_util.test_logger("found not connected ps status: %s" %(host.status))
+                break
+        else:
+            return
+    else:
+        test_util.test_fail("host status didn't change to Connected within %s, therefore, failed" % (wait_time))
 
 def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=None):
     if not vip_name:

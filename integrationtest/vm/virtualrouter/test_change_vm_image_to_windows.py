@@ -52,13 +52,13 @@ def test():
    image_uuid = test_lib.lib_get_image_by_name("windows").uuid
    vm_ops.change_vm_image(vm_uuid,image_uuid)
    #check whether vr's status is running
-   if vr.applianceVmType == 'vrouter':
-      if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',240):
-         test_util.test_fail('vm:%s is not startup in 240 seconds.Fail to reboot it.' % vr.uuid)
-      time.sleep(20)
-   else:
-      vm_ops.start_vm(vr.uuid)
-      vm_ops.reconnect_vr(vr.uuid)
+   #if vr.applianceVmType == 'vrouter':
+   if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',240):
+     test_util.test_fail('vm:%s is not startup in 240 seconds.Fail to reboot it.' % vr.uuid)
+   time.sleep(20)
+   #else:
+   #   vm_ops.start_vm(vr.uuid)
+   #   vm_ops.reconnect_vr(vr.uuid)
    vm_ops.start_vm(vm_uuid)
    vm.update()
    #check whether the windows vm is running successfully
@@ -88,13 +88,13 @@ def test():
    image_uuid = test_lib.lib_get_image_by_name("image_for_sg_test").uuid
    vm_ops.change_vm_image(vm_uuid,image_uuid)
    #check whether vr's status is running
-   if vr.applianceVmType == 'vrouter':
-      if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',240):
-         test_util.test_fail('vm:%s is not startup in 240 seconds.Fail to reboot it.' % vr.uuid)
-      time.sleep(20)
-   else:
-      vm_ops.start_vm(vr.uuid)
-      vm_ops.reconnect_vr(vr.uuid)
+   #if vr.applianceVmType == 'vrouter':
+   if not test_lib.lib_wait_target_up(vr_mgmt_ip,'7272',240):
+     test_util.test_fail('vm:%s is not startup in 240 seconds.Fail to reboot it.' % vr.uuid)
+   time.sleep(20)
+   #else:
+   #   vm_ops.start_vm(vr.uuid)
+   #   vm_ops.reconnect_vr(vr.uuid)
    vm_ops.start_vm(vm_uuid)
 
    if not test_lib.lib_wait_target_up(vm_ip,'22',180):

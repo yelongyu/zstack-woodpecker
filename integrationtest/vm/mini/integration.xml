@@ -2,8 +2,7 @@
 	<suite name="mini" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
 		<case timeout='1200' noparallel='True'>test_create_think_provision_vm.py</case>
 		<case timeout='1200' noparallel='True'>test_maintain_host.py</case>
-                <case timeout='1200' noparallel='True'>test_auto_reconnect_host.py::kill_kvmagent</case>
-		<case timeout='1200' noparallel='True'>test_auto_reconnect_host.py::stop_kvmagent</case>
+		<case timeout='1200' noparallel='True'>test_reconnect_host.py</case>
 		<case timeout='1200' noparallel='True'>test_start_stop_host.py</case>
 		<case timeout='1200' noparallel='True'>test_create_thin_provision_vm.py</case>
 		<case timeout='7200' noparallel='True'>test_create_vm_install_iso.py</case>
@@ -152,7 +151,8 @@
 		<case timeout='1800' noparallel='True'>multihosts/migrate/test_migrate_vm.py</case>
 		<case timeout='1800' noparallel='True'>multihosts/migrate/test_migrate_vm_with_iso2.py</case>
 		<case timeout='1800' noparallel='True'>multihosts/migrate/test_migrate_vm_with_iso.py</case>
-		<case timeout='1800' noparallel='True'>multihosts/reconnect/test_auto_reconnect_host.py</case>
+		<case timeout='1800' noparallel='True'>multihosts/reconnect/test_auto_reconnect_host.py::kill_kvmagent</case>
+                <case timeout='1800' noparallel='True'>multihosts/reconnect/test_auto_reconnect_host.py::stop_kvmagent</case>
 		<case timeout='1800' noparallel='True'>virt_plus/test_delete_vm_l3_check_vm_ops.py</case>
 		<case timeout='1800' noparallel='True'>virt_plus/test_detach_vm_net_check_vm_ops.py</case>
 		<case timeout='1800' noparallel='True'>virt_plus/eip/test_create_eip_reconnect_host.py</case>

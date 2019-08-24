@@ -51,6 +51,7 @@ def test():
     cond = res_ops.gen_query_conditions('tag', '=', 'pageTableExtensionDisabled')
     cond = res_ops.gen_query_conditions('resourceUuid', '=', host_uuid, cond)
     tag = res_ops.query_resource(res_ops.SYSTEM_TAG, cond)
+    test_stub.ensure_hosts_connected(300)
     if tag != []:
         if host_state != "Maintenance":
             host_ops.change_host_state(host_uuid, "maintain")
