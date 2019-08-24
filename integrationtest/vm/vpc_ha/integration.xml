@@ -67,6 +67,7 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_l3_attach.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_netflow_v5.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_netflow_v9.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_update_netflow_version.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_only</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_attach_l3</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_attach_l3_has_vm</case>
