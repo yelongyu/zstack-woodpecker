@@ -29,11 +29,10 @@ def test():
     test_util.test_logger("@DEBUG-exceeds:%s@" % log_files_size)
     log_files_format = LOG4J2_TREE.getroot().findall('./Appenders/RollingFile/DefaultRolloverStrategy/Delete/IfFileName')[0].attrib['glob'].replace('*', '.*')
     
-    #1.get global config default value(unit==GB) & check
-    gc_conf_default_size = int(conf_ops.get_global_config_default_value("managementServer","log.delete.accumulatedFileSize")) * 1024 * 1024 * 1024
+    #1.get global config value(unit==GB) & check
     gc_conf_size = int(conf_ops.get_global_config_value("managementServer","log.delete.accumulatedFileSize")) * 1024 * 1024 * 1024
-    if gc_conf_default_size <= 0:
-        test_util.test_fail("Global config default value check Failed!\n default_value:%s" % gc_conf_default_size)
+    if gc_conf_size <= 0:
+        test_util.test_fail("Global config default value check Failed!\n default_value:%s" % gc_conf_size)
     #2.get threshold from log4j2.xml & check 
     mn_log_size_exceeds = int(log_files_size[0])* unit_to_int(log_files_size[1]) 
     if gc_conf_size <= mn_log_size_exceeds:
