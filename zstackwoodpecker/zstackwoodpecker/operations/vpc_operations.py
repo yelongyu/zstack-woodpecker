@@ -203,12 +203,19 @@ def update_netflow(uuid, name = None, description = None, expireInterval =None, 
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def update_collector(uuid, name = None, description = None, expireInterval =None, version = None,session_uuid = None):
+def update_collector(uuid, port = None, server = None, session_uuid = None):
     action = api_actions.UpdateFlowCollectorAction()
     action.timeout = 300000
     action.port = port
     action.uuid = uuid
     action.server = server
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def query_netflow_collector(conditions, session_uuid = None):
+    action = api_actions.QueryFlowCollectorAction()
+    action.timeout = 300000
+    action.conditions = conditions
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 

@@ -89,12 +89,15 @@ def test():
     else:
         test_util.test_fail("Failed capture the Cisco flow, test failed")
 #update netflow version to V9
-    vpc_ops.update_netflow(netflow_uuid, name='netflow_new', description = 'update netflow', expireInterval = 30, version = 'V9')
+    vpc_ops.update_netflow(netflow_uuid, name='netflow_new_v9_port2000', description = 'update netflow', expireInterval = 30, version = 'V9')
+    conf = res_ops.gen_query_conditions('flowMeterUuid', '=', netflow_uuid)
+    flow_collector_uuid = res_ops.query_resource(res_ops.NETFLOW_COLLECTOR, conf)[0].uuid
+    vpc_ops.update_collector(flow_collector_uuid, port = 2000)
 
 #begin do test
     #test_stub.run_command_in_vm(vm_colloctor.get_vm(), 'iperf -s -D')
     print 'debug begin do netflow test'
-    test_stub.run_command_in_vm(vm_sender.get_vm(), 'pkill iperf; iperf -c %s -i 1 -t 30 -P10 &' % vm_colloctor_ip)
+    test_stub.run_command_in_vm(vm_sender.get_vm(), 'pkill iperf; iperf -c %s -i 1 -t 15 -P10 &' % vm_colloctor_ip)
 
 #stop test after 500 seconds
     cmd = 'tshark -f "udp port 2000 and ip src %s " -i eth0 -V -c 1 -a duration:500' % vr_pub_ip
@@ -107,7 +110,10 @@ def test():
         test_util.test_fail("Failed capture the Cisco flow, test failed")
 
 #update netflow version to V5
-    vpc_ops.update_netflow(netflow_uuid, name='netflow_new', description = 'update netflow', expireInterval = 30, version = 'V9')
+    vpc_ops.update_netflow(netflow_uuid, name='netflow_new_2055_v5', description = 'update netflow port = 2055 , version = V5', expireInterval = 20, version = 'V5')
+    conf = res_ops.gen_query_conditions('flowMeterUuid', '=', netflow_uuid)
+    flow_collector_uuid = res_ops.query_resource(res_ops.NETFLOW_COLLECTOR, conf)[0].uuid
+    vpc_ops.update_collector(flow_collector_uuid, port = 2055)
 
 #begin do test
     #test_stub.run_command_in_vm(vm_colloctor.get_vm(), 'iperf -s -D')
