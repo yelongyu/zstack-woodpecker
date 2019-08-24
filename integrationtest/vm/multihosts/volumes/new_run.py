@@ -7,8 +7,10 @@ _config_ = {
     'noparallel': True
 }
 
+test_dict = None
 
 def test():
+    global test_dict
     case_flavor = test_util.load_paths(os.path.join(os.path.dirname(__file__), "templates"),
                                    os.path.join(os.path.dirname(__file__), "paths"))
     test_util.test_dsc('''Will mainly doing random test for all kinds of snapshot operations. VM, Volume and Image operations will also be tested. If reach 1 hour successful running condition, testing will success and quit.  SG actions, and VIP actions are removed in this robot test.
@@ -16,16 +18,30 @@ def test():
             ''')
     test_util.test_dsc('Constant Path Test Begin.')
 
-    Robot.robot_create_utility_vm()
+    # Robot.robot_create_utility_vm()
 
     robot_test_obj = Robot.robot()
     flavor = case_flavor[os.environ.get('CASE_FLAVOR')]
     initial_formation = flavor['initial_formation']
     path_list = flavor['path_list']
+    checking_point = flavor['checking_point']
+    faild_point = flavor['faild_point']
 
+    test_dict = robot_test_obj.get_test_dict()
 
     robot_test_obj.initial(path_list, initial_formation)
-    Robot.robot_run_constant_path(robot_test_obj, set_robot=False)
+    Robot.robot_run_constant_path(robot_test_obj, set_robot=False, checking_step=checking_point, faild_step=faild_point)
+
+
+def env_recover():
+    global test_dict
+    if test_dict:
+        test_dict.cleanup()
+
 
 def error_cleanup():
-    pass
+    global test_dict
+    if test_dict:
+        # test_dict.cleanup()
+        pass
+

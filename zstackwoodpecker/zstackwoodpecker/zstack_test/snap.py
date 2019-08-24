@@ -347,7 +347,6 @@ class ZstackSnapshotTree(object):
 
     # resize reinit clone  create_image/template will auto create a snapshot
     def add_snapshot(self, snapshot_uuid):
-        self.update(force=True)
         self.Maxdepth = self._config_sp_depth()
         snapshot = ZstackSnapshot()
         snapshot.set_utility_vm(self.utility_vm)
@@ -388,6 +387,8 @@ class ZstackSnapshotTree(object):
         snapshot.set_depth(next_depth)
 
         self.Newhead = False
+
+        self.update(force=True)
 
     def delete(self, snapshot):
         cond = res_ops.gen_query_conditions('uuid', '=', snapshot.get_snapshot().uuid)

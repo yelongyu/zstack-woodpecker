@@ -507,7 +507,7 @@ def robot_run_constant_path(robot_test_obj, set_robot=True, checking_step=1, fai
         except StopIteration:
             break
         except Exception as e:
-            test_util.test_logger(e)
+            # test_util.test_logger(e)
             if faild_step == STEP:
                 debug(robot_test_obj)
                 test_util.test_pass("This step will fail. It's an invalid case")
@@ -1821,7 +1821,7 @@ def ps_migrate_volume(robot_test_obj, args):
     if len(args) != 1:
         test_util.test_fail("no resource available for next action: ps_migrate volume")
     target_volume = robot_test_obj.get_test_dict().volume[args[0]]
-    old_ps_uuid = target_volume.primaryStorageUuid
+    old_ps_uuid = target_volume.get_volume().primaryStorageUuid
 
     target_pss = datamigr_ops.get_ps_candidate_for_vol_migration(target_volume.get_volume().uuid)
 
