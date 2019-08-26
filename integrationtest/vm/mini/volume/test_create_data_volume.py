@@ -28,7 +28,6 @@ def test():
     volume_creation_option = test_util.VolumeOption()
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     volume_creation_option.set_primary_storage_uuid(ps_uuid)
-    
     #create thin/thick data volume with random disksize and random provision type
     for i in range(round_num):
         volume_name = "volume_%s" % i

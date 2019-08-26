@@ -73,12 +73,14 @@ def test():
     vm.create()
     vm.check()     
     test_obj_dict.add_vm(vm)
+    vm_cluster_uuid = vm.get_vm().clusterUuid
     #2.create thin/thick volume & check scsi
     volume_creation_option = test_util.VolumeOption()
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     volume_creation_option.set_primary_storage_uuid(ps_uuid)
+    mini_cluster = "miniStorage::clusterUuid::%s" % vm_cluster_uuid
     #thin & scsi
-    volume = vol_create('vol_thin_scsi', volume_creation_option, [PROVISION[0], VIRTIOSCSI])
+    volume = vol_create('vol_thin_scsi', volume_creation_option, [PROVISION[0], VIRTIOSCSI, mini_cluster])
     volume.check() 
     volume.attach(vm)
     scsi_check('vol_thin_scsi', vm)
@@ -87,7 +89,7 @@ def test():
     volume.delete()
     volume.expunge()
     #thick & scsi
-    volume = vol_create('vol_thick_scsi', volume_creation_option, [PROVISION[1], VIRTIOSCSI]) 
+    volume = vol_create('vol_thick_scsi', volume_creation_option, [PROVISION[1], VIRTIOSCSI, mini_cluster]) 
     volume.check() 
     volume.attach(vm)
     scsi_check('vol_thick_scsi', vm)
@@ -96,7 +98,7 @@ def test():
     volume.delete()
     volume.expunge()
     #thin & vblk
-    volume = vol_create('vol_thin_vblk', volume_creation_option, [PROVISION[0]]) 
+    volume = vol_create('vol_thin_vblk', volume_creation_option, [PROVISION[0], mini_cluster]) 
     volume.check() 
     volume.attach(vm)
     scsi_check('vol_thin_vblk', vm, scsi=False)
@@ -105,7 +107,7 @@ def test():
     volume.delete()
     volume.expunge()
     #thick & vblk 
-    volume = vol_create('vol_thick_vblk', volume_creation_option, [PROVISION[1]]) 
+    volume = vol_create('vol_thick_vblk', volume_creation_option, [PROVISION[1], mini_cluster]) 
     volume.check() 
     volume.attach(vm)
     scsi_check('vol_thick_vblk', vm, scsi=False)

@@ -40,26 +40,28 @@ def test():
     vm.create()
     vm.check()
     test_obj_dict.add_vm(vm)
-
+    vm_cluster_uuid = vm.get_vm().clusterUuid
     #2.create thin/thick data volume & attach to vm
     volume_creation_option = test_util.VolumeOption()
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     volume_creation_option.set_primary_storage_uuid(ps_uuid)
     max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1048576)/(20 * 512)
     disk_size = random.randint(2048, max_size) * 512
+    mini_cluster = "miniStorage::clusterUuid::%s" % vm_cluster_uuid
     #disk_size = 107374182400 #100GB
     volume_creation_option.set_diskSize(disk_size)
     volume_name_thick = "mini_data_volume_thick"
     volume_name_thin = "mini_data_volume_thin"
     #thick
     volume_creation_option.set_name(volume_name_thick)
+    volume_creation_option.set_system_tags([mini_cluster])
     volume_thick = test_volume_header.ZstackTestVolume()
     volume_thick.set_volume(vol_ops.create_volume_from_diskSize(volume_creation_option))
     volume_thick.attach(vm)
     volume_thick_uuid = volume_thick.volume.uuid
     #thin
     volume_creation_option.set_name(volume_name_thin)
-    volume_creation_option.set_system_tags(["volumeProvisioningStrategy::ThinProvisioning"])
+    volume_creation_option.set_system_tags(["volumeProvisioningStrategy::ThinProvisioning", mini_cluster])
     volume_thin = test_volume_header.ZstackTestVolume()
     volume_thin.set_volume(vol_ops.create_volume_from_diskSize(volume_creation_option))
     volume_thin.attach(vm)

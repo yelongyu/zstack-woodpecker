@@ -50,6 +50,8 @@ def test():
     vm.check()
     test_obj_dict.add_vm(vm)
     vm_uuid = vm.get_vm().uuid
+    vm_cluster_uuid = vm.get_vm().clusterUuid
+    mini_cluster = "miniStorage::clusterUuid::%s" % vm_cluster_uuid
     #create thin/thick data volume with random disksize and random provision type
     #and attach to vm
     for i in range(round_num):
@@ -58,7 +60,7 @@ def test():
         max_size = (res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].availableCapacity - 1048576)/(20 * 512) 
         disk_size = random.randint(2048, max_size) * 512
         volume_creation_option.set_diskSize(disk_size)
-        volume_creation_option.set_system_tags([random.choice(PROVISION)])
+        volume_creation_option.set_system_tags([random.choice(PROVISION), mini_cluster])
         volume = test_volume_header.ZstackTestVolume()
         volume.set_volume(vol_ops.create_volume_from_diskSize(volume_creation_option))
         volume.check() 

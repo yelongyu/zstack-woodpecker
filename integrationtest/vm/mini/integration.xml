@@ -85,6 +85,7 @@
 		<case timeout='1800' noparallel='True'>test_iso_create_vm_root_size_not_512_multiple.py</case>
 		<case timeout='1800' noparallel='True'>log/test_mini_log_gc_check.py</case>
 		<case timeout='1800' noparallel='True'>log/test_api_log_delete.py</case>
+		<case timeout='7200' noparallel='True'>poweroff/test_poweroff_host.py</case>
 		
 		<!--<case timeout='1200' noparallel='True'>ha/test_minips_vm_ha_force_stop.py</case>
 		<case timeout='1200' noparallel='True'>ha/test_minips_both_mns_force_stop_recover.py</case>
