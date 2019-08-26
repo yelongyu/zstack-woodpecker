@@ -1,5 +1,5 @@
 <integrationTest>
-    <suite name="vpc" setupCase="suite_setup.py" teardownCase="" repeat="1" parallel="1">
+    <suite name="vpc_ha" setupCase="suite_setup.py" teardownCase="" repeat="1" parallel="1">
 <!--        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_dr_overvxlan.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_vm_connection.py::vm1_vm2_one_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_two_vm_connection.py::vm1_vm2_one_l3_vxlan</case>
