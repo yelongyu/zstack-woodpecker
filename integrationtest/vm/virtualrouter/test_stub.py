@@ -1244,16 +1244,22 @@ class Longjob(object):
         self.cond_name = "res_ops.gen_query_conditions('name', '=', 'name_to_replace')"
         self.test_obj_dict = test_state.TestStateDict()
         self.image = None
+        self.target_bs = None
+        self.vol_list = []
 
     def create_vm(self):
         self.vm = create_basic_vm()
 
-    def create_data_volume(self, ceph_pool=None):
+    def create_data_volume(self, ceph_pool=None, scsi=False):
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.getenv('rootDiskOfferingName'))
+        if not disk_offering:
+            disk_offering = test_lib.lib_get_disk_offering_by_name(os.getenv('largeDiskOfferingName'))
         ps_uuid = self.vm.vm.allVolumes[0].primaryStorageUuid
         volume_option = test_util.VolumeOption()
         volume_option.set_disk_offering_uuid(disk_offering.uuid)
-        volume_option.set_name('data-volume-for-crt-image-test')
+        volume_option.set_name('data-volume-for-longjob-test')
+        if scsi:
+            volume_option.set_system_tags(['capability::virtio-scsi'])
         if ceph_pool:
             volume_option.set_system_tags(["ceph::pool::%s" % ceph_pool])
             volume_option.set_primary_storage_uuid(ps_uuid)
@@ -1261,6 +1267,7 @@ class Longjob(object):
         self.set_ceph_mon_env(ps_uuid)
         self.data_volume.attach(self.vm)
         self.data_volume.check()
+        self.vol_list.append(self.data_volume)
 
 
     def set_ceph_mon_env(self, ps_uuid):
@@ -1271,14 +1278,20 @@ class Longjob(object):
             os.environ['cephBackupStorageMonUrls'] = 'root:password@%s' % ps_mon_ip
 
     def submit_longjob(self, job_data, name, job_type=None):
-        if job_type == 'image':
-            _job_name = self.add_image_job_name
-        elif job_type == 'crt_vm_image':
-            _job_name = self.crt_vm_image_job_name
-        elif job_type == 'crt_vol_image':
-            _job_name = self.crt_vol_image_job_name
-        elif job_type == 'cleanup':
-            _job_name = 'APIReclaimSpaceFromImageStoreMsg'
+        job_name_dict = {'image': 'APIAddImageMsg',
+                         'crt_vm_image': 'APICreateRootVolumeTemplateFromRootVolumeMsg',
+                         'crt_vol_image': 'APICreateDataVolumeTemplateFromVolumeMsg',
+                         'cleanup': 'APIReclaimSpaceFromImageStoreMsg',
+                         'live_migration': 'APIMigrateVmMsg'}
+#         if job_type == 'image':
+#             _job_name = self.add_image_job_name
+#         elif job_type == 'crt_vm_image':
+#             _job_name = self.crt_vm_image_job_name
+#         elif job_type == 'crt_vol_image':
+#             _job_name = self.crt_vol_image_job_name
+#         elif job_type == 'cleanup':
+#             _job_name = 'APIReclaimSpaceFromImageStoreMsg'
+        _job_name = job_name_dict[job_type]
         long_job = longjob_ops.submit_longjob(_job_name, job_data, name)
         assert long_job.state == "Running"
         cond_longjob = res_ops.gen_query_conditions('apiId', '=', long_job.apiId)
@@ -1297,7 +1310,7 @@ class Longjob(object):
                     time.sleep(1)
         progress_list = [int(i) for i in progress_set if len(i) <= 3]
         progress_list.sort()
-        if self.target_bs.type != inventory.SFTP_BACKUP_STORAGE_TYPE:
+        if job_type == 'live_migration' or self.target_bs.type != inventory.SFTP_BACKUP_STORAGE_TYPE:
             test_util.test_dsc("Task Progress History: %s" % progress_list)
             assert progress_list, 'Get task progress failed!'
         time.sleep(10)
@@ -1312,7 +1325,7 @@ class Longjob(object):
         else:
             assert longjob.jobResult == "Succeeded"
         job_data_name = job_data.split('"')[3]
-        if job_type != 'cleanup':
+        if job_type not in ['cleanup', 'live_migration']:
             image_inv = res_ops.query_resource(res_ops.IMAGE, eval(self.cond_name.replace('name_to_replace', job_data_name)))[0]
             assert image_inv.status == 'Ready'
             self.image = test_image.ZstackTestImage()
@@ -1364,6 +1377,10 @@ class Longjob(object):
         except:
             pass
 
+    def del_vols(self):
+        for vol in self.vol_list:
+            vol_ops.delete_volume(vol.get_volume().uuid)
+
     def crt_vm_image(self, target_bs=None):
         name = 'longjob_crt_vm_image'
         bs = res_ops.query_resource(res_ops.BACKUP_STORAGE)
@@ -1383,6 +1400,10 @@ class Longjob(object):
         "volumeUuid"="%s"}' %(self.vol_create_image_name, self.target_bs.uuid, self.data_volume.get_volume().uuid)
         self.submit_longjob(job_data, name, job_type='crt_vol_image')
 
+    def live_migrate_vm(self):
+        name = 'longjob_live_migrate_vm'
+        job_data = '{"name"="%s", "vmInstanceUuid"="%s"}' % (name, self.vm.get_vm().uuid)
+        self.submit_longjob(job_data, name, job_type='live_migration')
 
 def disable_all_pss():
     ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
