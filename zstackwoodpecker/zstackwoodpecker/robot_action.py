@@ -182,6 +182,18 @@ class robot_test_dict(object):
             except:  # root_volume can not clean
                 pass
 
+    def lite_check(self):
+        test_util.test_logger("**************************Lite-check**************************")
+        # check_vm start
+        for k, vm in self.vm.items():
+            if vm.state == "Running":
+                vm.reboot()
+            elif vm.state == "Stopped":
+                vm.start()
+            elif vm.state == "Destroyed":
+                vm.recover()
+                vm.start()
+
 
 class robot(object):
     def __init__(self):
@@ -525,6 +537,8 @@ def robot_run_constant_path(robot_test_obj, set_robot=True, checking_step=1, fai
             robot_test_obj.test_dict.check()
 
         STEP += 1
+
+    robot_test_obj.test_dict.lite_check()
 
     test_util.test_logger("Robot action run over!")
 

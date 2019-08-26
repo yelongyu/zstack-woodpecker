@@ -83,9 +83,11 @@ def test():
     vm.check()
     test_obj_dict.add_vm(vm)
     vm_uuid = vm.get_vm().uuid
-
+    vm_cluster_uuid = vm.get_vm().clusterUuid
     #2.data volume operations test
+    mini_cluster = "miniStorage::clusterUuid::%s" % vm_cluster_uuid
     volume_creation_option = test_util.VolumeOption()
+    volume_creation_option.set_system_tags([mini_cluster]) 
     ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].uuid
     volume_creation_option.set_primary_storage_uuid(ps_uuid)
     #create thin/thick data volume with random disksize and random provision type

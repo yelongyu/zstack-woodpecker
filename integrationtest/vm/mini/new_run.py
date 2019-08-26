@@ -32,7 +32,7 @@ def test():
     while repeat > 0:
         test_util.test_logger("Robot action: Iteration %s" % (repeat))
         test_dict = robot_test_obj.get_test_dict()
-        Robot.robot_run_constant_path(robot_test_obj, set_robot=True)
+        Robot.robot_run_constant_path(robot_test_obj, set_robot=False)
 
         repeat -= 1
         test_dict.cleanup()
