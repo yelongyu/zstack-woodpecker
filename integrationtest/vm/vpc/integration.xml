@@ -16,6 +16,7 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_two_vpc_two_vm_connection.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_two_vpc_two_vm_connection.py::vm1_l3_vxlan_vm2_l3_vxlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_two_vpc_two_vm_connection.py::vm1_l3_vlan_vm2_l3_vxlan</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_auto_reconnect_with_manl3_recover.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_only</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_attach_l3</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_create_delete_vpc.py::vr_attach_l3_has_vm</case>
