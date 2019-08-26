@@ -534,10 +534,12 @@ def prepare_test_env(vm_inv, aio_target):
     zstack_install_script = os.environ['zstackInstallScript']
     target_file = '/root/zstack_installer.sh'
     vm_ip = vm_inv.vmNics[0].ip
-    vm_username = test_lib.lib_get_vm_username(vm_inv)
-    vm_password = test_lib.lib_get_vm_password(vm_inv)
-    #vm_username = root
-    #vm_password = password
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+    #vm_username = test_lib.lib_get_vm_username(vm_inv)
+    #vm_password = test_lib.lib_get_vm_password(vm_inv)
+    #vm_username = 'root'
+    #vm_password = 'password'
     scp_file_to_vm(vm_ip, zstack_install_script, target_file)
 
     #all_in_one_pkg = os.environ['zstackPkg']
@@ -550,8 +552,12 @@ def prepare_upgrade_test_env(vm_inv, aio_target, upgrade_pkg):
     zstack_install_script = os.environ['zstackInstallScript']
     target_file = '/root/zstack_installer.sh'
     vm_ip = vm_inv.vmNics[0].ip
-    vm_username = test_lib.lib_get_vm_username(vm_inv)
-    vm_password = test_lib.lib_get_vm_password(vm_inv)
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+    #vm_username = 'root'
+    #vm_password = 'password'
+    #vm_username = test_lib.lib_get_vm_username(vm_inv)
+    #vm_password = test_lib.lib_get_vm_password(vm_inv)
     scp_file_to_vm(vm_ip, zstack_install_script, target_file)
 
     scp_file_to_vm(vm_ip, upgrade_pkg, aio_target)
@@ -562,8 +568,12 @@ def prepare_yum_repo(vm_inv):
     origin_file = '/etc/yum.repos.d/epel.repo'
     target_file = '/etc/yum.repos.d/epel.repo'
     vm_ip = vm_inv.vmNics[0].ip
-    vm_username = test_lib.lib_get_vm_username(vm_inv)
-    vm_password = test_lib.lib_get_vm_password(vm_inv)
+    vm_username = os.environ['imageUsername']
+    vm_password = os.environ['imagePassword']
+    #vm_username = 'root'
+    #vm_password = 'password'
+    #vm_username = test_lib.lib_get_vm_username(vm_inv)
+    #vm_password = test_lib.lib_get_vm_password(vm_inv)
     scp_file_to_vm(vm_ip, origin_file, target_file)
 
     ssh.make_ssh_no_password(vm_ip, vm_username, vm_password)

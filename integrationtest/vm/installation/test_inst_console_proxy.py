@@ -59,7 +59,10 @@ def test():
         vip = '172.20.61.254'
 
     ssh_cmd = 'ssh  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), test_lib.lib_get_vm_password(vm_inv))
+    username = 'root'
+    userpassword = 'password'
+    #ssh.make_ssh_no_password(vm_ip, test_lib.lib_get_vm_username(vm_inv), test_lib.lib_get_vm_password(vm_inv))
+    ssh.make_ssh_no_password(vm_ip, username, userpassword)
     cmd = '%s ifconfig eth0:0 %s up' % (ssh_cmd, vip)
     process_result = test_stub.execute_shell_in_process(cmd, tmp_file)
 
