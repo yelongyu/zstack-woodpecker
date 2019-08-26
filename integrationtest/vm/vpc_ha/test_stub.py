@@ -130,6 +130,24 @@ def check_ha_status(ha_group_uuid):
             status = 1 | status
     return status
 
+def update_ha_status(ha_group_uuid):
+    ha_group = res_ops.get_resource(res_ops.VPC_HA_GROUP, uuid=ha_group_uuid)
+    vr_refs = ha_group[0].vrRefs
+    for i in range(0,2):
+        vr_uuid = vr_refs[i].uuid
+        vr_inv = res_ops.get_resource(res_ops.APPLIANCE_VM, uuid=vr_uuid)
+        ha_status = vr_inv[0].haStatus
+        if ha_status=='Master':
+            vr = ZstackTestVR(vr_inv[0])
+            vr.reboot()
+            break
+
+def update_ha_group_monitorip(ha_group_uuid, monitorIp=None):
+    ha_group = res_ops.get_resource(res_ops.VPC_HA_GROUP, uuid=ha_group_uuid)
+    monitorinfo = ha_group[0].monitors
+    monitorip = monitorinfo[0].monitorIp
+    vpc_ops.change_vpc_ha_monitor_ips(monitorIp, ha_group_uuid)  
+
 def attach_l3_to_vpc_vr(vpc_vr, l3_system_name_list=L3_SYSTEM_NAME_LIST):
     l3_name_list = [os.environ.get(name) for name in l3_system_name_list]
     l3_list = [test_lib.lib_get_l3_by_name(name) for name in l3_name_list]

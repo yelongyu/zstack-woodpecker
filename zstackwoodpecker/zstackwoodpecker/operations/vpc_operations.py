@@ -147,7 +147,7 @@ def query_vpc_ha_group(session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventories
 
-def change_vpc_ha_monitor_ips(monitorIps, uuid):
+def change_vpc_ha_monitor_ips(monitorIps, uuid, session_uuid=None):
     action = api_actions.ChangeVpcHaGroupMonitorIpsAction()
     action.timeout = 300000
     action.monitorIps = monitorIps
