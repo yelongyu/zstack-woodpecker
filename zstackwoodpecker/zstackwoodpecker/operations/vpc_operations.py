@@ -226,3 +226,59 @@ def delete_netflow(uuid, deleteMode, session_uuid = None):
     action.deleteMode = deleteMode
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def create_firewall(vpcUuid, name, description = None, session_uuid = None):
+    action = api_actions.CreateVpcFirewallAction()
+    action.timeout = 300000
+    action.vpcUuid = vpcUuid
+    action.name = name
+    action.description = description
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def create_rule_set(vpcFirewallUuid, name, actionType, description = None, session_uuid = None):
+    action = api_actions.CreateFirewallRuleSetAction()
+    action.timeout = 300000
+    action.vpcFirewallUuid = vpcFirewallUuid
+    action.name = name
+    # valid values: [drop, accept, reject]
+    action.actionType = actionType
+    action.description = description
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def query_vpc_firewall(conditions, session_uuid = None):
+    action = api_actions.QueryVpcFirewallAction()
+    action.timeout = 300000
+    action.conditions = conditions
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def query_rule_set(conditions, session_uuid = None):
+    action = api_actions.QueryFirewallRuleSetAction()
+    action.timeout = 300000
+    action.conditions = conditions
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def create_rule(vpcFirewallUuid, ruleSetUuid, action, ruleNumber, state, protocol = None, destPort = None, sourcePort = None, sourceIp = None, destIp = None, allowStates = None, tcpFlag = None, icmpTypeName = None, description = None, session_uuid = None):
+    action = api_actions.CreateFirewallRuleAction()
+    action.timeout = 300000
+    action.vpcFirewallUuid = vpcFirewallUuid
+    action.ruleSetUuid = ruleSetUuid
+    # valid values: [drop, reject, accept]
+    action.action = action
+    action.ruleNumber = ruleNumber
+    # valid values: [enable, disable]
+    action.state = state
+    action.description = description
+    action.protocol = protocol
+    action.destPort = destPort
+    action.sourcePort = sourcePort
+    action.sourceIp = sourceIp
+    action.destIp = destIp
+    action.allowStates = allowStates
+    action.tcpFlag = tcpFlag
+    action.icmpTypeName = icmpTypeName
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
