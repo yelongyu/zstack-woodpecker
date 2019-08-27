@@ -61,10 +61,11 @@ def test():
     conf_ops.change_global_config("networkService", "defaultDhcpMtu.l2VlanNetwork", '1450')
     if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
         os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
-    deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
-    child1 = os.popen('ifconfig br_eth0 | grep 172 | awk \'{print $2}\'')
+    #deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
+    #child1 = os.popen('ifconfig br_eth0 | grep 172 | awk \'{print $2}\'')
+    child1 = os.popen('ifconfig eth0 | grep 172 | awk \'{print $2}\'')
     pub_ip = child1.read()
-    child2 = os.popen('ifconfig br_eth1 | grep 192.168 | awk \'{print $2}\'')
+    child2 = os.popen('ifconfig eth1 | grep 192.168 | awk \'{print $2}\'')
     management_ip = child2.read()
     cmd = 'zstack-ctl change_ip --ip=%s' % (management_ip)
     ssh.execute(cmd, pub_ip, 'root', 'password')
@@ -83,7 +84,8 @@ def test():
         ssh.execute('zstack-ctl start', pub_ip, 'root', 'password')
     else:
         print 'mn have been Running'
-    ssh.execute('ip route del 192.168.200.100 via 172.24.0.1 dev br_eth0', pub_ip, 'root', 'password')
+    ssh.execute('ip route del 192.168.200.100 via 172.24.0.1 dev eth0', pub_ip, 'root', 'password')
+    deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
 
     for host in hosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
