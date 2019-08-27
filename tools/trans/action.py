@@ -199,6 +199,7 @@ class reinit_vm(Action):
     def __init__(self):
         Action.__init__(self)
         self.run_state = resource.STOPPED
+        self.restart = False
 
     def check(self, all_vms, tags):
         Action.check(self, all_vms, tags)
@@ -210,12 +211,15 @@ class reinit_vm(Action):
             return vm
         vm = random.choice(all_vms.get_not_ha_resource())
         self.path.append(vm.stop())
+        self.restart = True
         return vm
 
     def run(self, tags):
         Action.run(self, tags)
         vm = self.check(resource.all_vms, tags)
         self.path.append(vm.reinit())
+        if self.restart:
+            self.path.append(vm.start())
         return self.path
 
 class change_vm_image(Action):
@@ -439,7 +443,6 @@ class delete_volume(Action):
         else:
             print "There is no resource volume to delete_volume.Must add create_volume"
             self.volume = resource.Volume()
-            print self.volume.name
             self.path.append(self.volume.create([]))
         return self.volume
 
@@ -615,12 +618,10 @@ class delete_root_snapshot(Action):
         for vm in vm_list:
             if vm.snapshots:
                 snapshot = random.choice(vm.snapshots)
-                print 1
                 return vm, snapshot
         else:
             vm = random.choice(all_vms.stopped + all_vms.running)
             self.path.append(vm.create_root_snapshot())
-            print 2
             return vm, vm.snapshots[0]
 
     def run(self, tags):
@@ -1551,16 +1552,14 @@ class create_image_from_backup(Action):
 class create_vm_from_vmbackup(Action):
     def __init__(self):
         Action.__init__(self)
-        self.snapshots = []
 
     def check(self, all_backups, tags):
         Action.check(self, all_backups, tags)
         if len(all_backups.enabled) != 0:
             backup_list = all_backups.enabled
-            random.shuffle(backup_list)
-            for backup in backup_list:
-                if backup.groupId:
-                    return backup
+            key = random.choice(all_backups.group.keys())
+            if key:
+                return all_backups.group[key][0]
         else:
             if len(resource.all_vms.running + resource.all_vms.stopped) == 0:
                 vm = resource.Vm()

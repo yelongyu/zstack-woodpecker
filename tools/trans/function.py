@@ -74,7 +74,8 @@ fun_dict = {
     "create_vm_from_vmbackup": create_vm_from_vmbackup,
     "create_volume_from_image": create_volume_from_image,
 
-    "batch_delete_snapshot": batch_delete_snapshots
+    "batch_delete_snapshot": batch_delete_snapshots,
+    "change_volume_attached_vm": change_volume_attached_vm,
     # "attach_iso": attach_iso,
     # "detach_iso": detach_iso,
 }

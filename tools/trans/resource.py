@@ -22,6 +22,8 @@ QCOW2 = "'qcow2'"
 ISO = "'iso'"
 
 MINI = False
+# todo
+LOCAL = False
 
 
 class resource_dict(object):
@@ -274,7 +276,8 @@ class Vm(Resource):
         new_vm = Vm()
         all_vms.add(new_vm, RUNNING)
         for volume in self.volumes:
-            new_volume = Volume()
+            name = "'clone@" + volume.name[1:]
+            new_volume = Volume(name)
             all_volumes.add(new_volume, ATTACHED)
             new_volume.state = ATTACHED
             new_volume.vm = new_vm
@@ -297,7 +300,6 @@ class Vm(Resource):
         return "[TestAction.create_volume_snapshot, %s, %s]" % (self.root_name, snapshot.name)
 
     def delete_root_snapshot(self, snapshot):
-        print snapshot.name
         self.snapshots.remove(snapshot)
         if snapshot.groupId and all_snapshots.group.has_key(snapshot.groupId):
             groupId = snapshot.groupId
@@ -310,8 +312,12 @@ class Vm(Resource):
         return snapshot.use()
 
     def create_vm_snapshot(self):
-        groupId = "vm_snap" + str(len(all_snapshots.group) + 1)
-        description = (self.name + "" + "_".join([vol.name for vol in self.volumes])).replace("'", "")
+        temp = 0
+        for key in all_snapshots.group.keys():
+            if int(key[-1]) > temp:
+                temp = int(key[-1])
+        groupId = "vm_snap" + str(temp + 1)
+        description = (self.name + "@" + "_".join([vol.name for vol in self.volumes])).replace("'", "")
         all_snapshots.group[groupId] = []
         root_snapshot_name = self.name[:-1] + "-snapshot" + str(all_snapshots.len + 1) + "'"
         root_snapshot = Snapshot(root_snapshot_name)
@@ -328,16 +334,18 @@ class Vm(Resource):
         return "[TestAction.create_vm_snapshot, %s, %s]" % (self.name, root_snapshot.name)
 
     def delete_vm_snapshot(self, groupId):
-        print all_snapshots.group
-        print groupId
         vm_snapshot_name = ''
         for snapshot in self.root_volume.snapshots:
             if snapshot.groupId == groupId:
                 self.snapshots.remove(snapshot)
                 for vol_snapshot in all_snapshots.group[groupId]:
                     all_snapshots.change_state(vol_snapshot, vol_snapshot.state, DELETED)
-                    if vol_snapshot in vol_snapshot.volume.snapshots:
+                    if vol_snapshot.volume and vol_snapshot in vol_snapshot.volume.snapshots:
                         vol_snapshot.volume.snapshots.remove(vol_snapshot)
+                    if vol_snapshot in self.snapshots:
+                        self.snapshots.remove(vol_snapshot)
+                    vol_snapshot.volume = None
+                    vol_snapshot.vm = None
                 vm_snapshot_name = snapshot.name
         for snap in all_snapshots.group[groupId]:
             snap.groupId = None
@@ -374,7 +382,7 @@ class Vm(Resource):
 
     def create_vm_backup(self):
         groupId = "vm_backup" + str(len(all_backups.group) + 1)
-        description = (self.name + "_" + "_".join([vol.name for vol in self.volumes])).replace("'", "")
+        description = (self.name + "@" + "_".join([vol.name for vol in self.volumes])).replace("'", "")
         all_backups.group[groupId] = []
         root_backup_name = self.name[:-1] + "-backup" + str(all_backups.len + 1) + "'"
         root_backup = Backup(root_backup_name)
@@ -398,6 +406,7 @@ class Vm(Resource):
                 for vol_backup in all_backups.group[groupId]:
                     all_backups.change_state(vol_backup, vol_backup.state, DELETED)
                     vol_backup.volume.backups.remove(vol_backup)
+                    vol_backup.volume = None
                 vm_backup_name = backup.name
         for back in all_backups.group[groupId]:
             back.groupId = None
@@ -549,6 +558,8 @@ class Snapshot(Resource):
     def delete(self):
         all_snapshots.change_state(self, self.state, DELETED)
         self.state = DELETED
+        self.volume = None
+        self.vm = None
         return "[TestAction.delete_volume_snapshot, %s]" % self.name
 
     def use(self):
@@ -595,6 +606,7 @@ class Backup(Resource):
     def delete(self):
         all_backups.change_state(self, self.state, DELETED)
         self.state = DELETED
+        self.volume = None
         return "[TestAction.delete_volume_backup, %s]" % self.name
 
     def use(self):
@@ -615,7 +627,7 @@ class Backup(Resource):
         vm.volumes = volumes
         for volume in volumes:
             volume.vm = vm
-        return "[TestAction.create_vm_from_backup, %s]" % self.name
+        return "[TestAction.create_vm_from_vmbackup, %s]" % self.name
 
     def create_image(self):
         image_name = self.name.split('-')[0] + "'"
@@ -676,9 +688,7 @@ class Image(Resource):
 
 
 def batch_delete_snapshot(snapshots):
-    print snapshots
     for snap in snapshots:
-        print snap.name
         all_snapshots.change_state(snap, snap.state, DELETED)
         if snap.groupId and all_snapshots.group.has_key(snap.groupId):
             groupId = snap.groupId
@@ -686,11 +696,9 @@ def batch_delete_snapshot(snapshots):
                 _snap.groupId = None
             all_snapshots.group.pop(groupId)
         if "vm" in snap.name:
-            print snap.volume.vm.snapshots
             snap.volume.vm.snapshots.remove(snap)
         else:
             snap.volume.snapshots.remove(snap)
-    print all_snapshots
     return ("[TestAction.batch_delete_volume_snapshot, [" + "%s," * len(snapshots) + "]]") % tuple([i.name for i in snapshots])
 
 

@@ -15,10 +15,10 @@ import os
 TestAction = ts_header.TestAction
 def path():
 
-    return dict(initial_formation="template5", path_list=[
+    return dict(initial_formation="template5", checing_point=%s, faild_point=%s, path_list=[
 '''
 
-TAIL = "])"
+TAIL = "])\n"
 
 
 def _parse(zh_paths):
@@ -46,22 +46,26 @@ def reset():
 
 
 def parse_csv(csv_filename):
-    with open(csv_filename, "rb") as f:
+    with open(csv_filename, "r") as f:
         action_path = []
         while True:
-            line = f.readline()
+            line = f.readline().decode("UTF-8").strip('\r').strip('\n')
             if not line:
                 break
-            action_path.append(line.strip("\n").split(","))
+            action_path.append(line.replace("\r", '').split(","))
     return action_path
 
 
-def write_to_file(action_path, name):
+def write_to_file(action_path, name, checking_point, faild_point):
     resource.reset()
     py_path = parse(_parse(action_path))
+
+    if faild_point == "auto":
+        faild_point = len(py_path)
+
     all_resources = resource.all_vms + resource.all_volumes + resource.all_snapshots + resource.all_backups + resource.all_images
     with open(name, "w") as f:
-        f.write(HEAD)
+        f.write(HEAD % (checking_point, faild_point))
         for i in py_path:
             f.write("\t\t")
             f.write(i)
@@ -70,8 +74,7 @@ def write_to_file(action_path, name):
         f.write("\n\n\n\n'''\nThe final status:\n")
         f.write(str(all_resources))
         f.write("\n'''")
-
-
+    print name + "---------done!"
 
 
 def main():
@@ -91,11 +94,18 @@ def main():
         help="[Optional]The auto created path file will be put in this directory. Default is current directory"
     )
     arg_parser.add_option(
+        "-p", "--path-name",
+        dest="path_name",
+        default="",
+        action="store",
+        help="[Optional]The auto created path file will named {path_name}path[num].py"
+    )
+    arg_parser.add_option(
         "-n", "--num",
         dest="num",
         default="1",
         action="store",
-        help="[Optional]The auto created path file will be named path[num].py. Defaule value is 1"
+        help="[Optional]The auto created path file will be named path[num].py. Default value is 1"
     )
     arg_parser.add_option(
         "-m", "--mini",
@@ -104,23 +114,52 @@ def main():
         action="store_true",
         help="[Optional]if env is mini must add -m"
     )
-#创建云主机cpu随机large,创建云盘容量随机large,加载数据云盘
+    arg_parser.add_option(
+        "-l", "--local",
+        dest="local",
+        default=False,
+        action="store_true",
+        help="[Optional]if env is local must add -l"
+    )
+    arg_parser.add_option(
+        "-C", "--checking-point",
+        dest="checking_point",
+        default=1,
+        action="store",
+        help="[Optional]robot run checker until the step == checking-point. Default value is 1"
+    )
+    arg_parser.add_option(
+        "-F", "--faild-point",
+        dest="faild_point",
+        default='100000',
+        action="store",
+        help="[Optional]robot run faild will return success when the path-step == faild-point. Default value is 100000. If you choose 'auto' ,that means the final step is faild-point"
+    )
+
     (options, arg) = arg_parser.parse_args()
     if options.mini:
         resource.MINI = True
+    if options.local:
+        resource.LOCAL = True
+    checking_point = options.checking_point
+    if "auto" in options.faild_point:
+        faild_point = "auto"
+    else:
+        faild_point = int(options.faild_point)
 
     jieba.load_userdict("./words")
 
     thread_list = []
     csv_filename = options.csv_file
     directory = options.directory
+    path_name = options.path_name
     if directory[-1] == '/':
         directory = directory[-1]
-    filename = directory + "/path%s.py"
+    filename = directory + "/" +  path_name +"path%s.py"
     action_path = parse_csv(csv_filename)
     for i in range(len(action_path)):
         name = filename % str(i + int(options.num))
-        t = threading.Thread(target=write_to_file(action_path[i],name))
+        t = threading.Thread(target=write_to_file(action_path[i], name, checking_point, faild_point))
         thread_list.append(t)
         t.start()
     for t in thread_list:
@@ -129,13 +168,4 @@ def main():
     print "Done!"
 
 if __name__ == "__main__":
-    # t_list = []
-    # for i in range(1):
-    #     name = "path"+str(i)+".py"
-    #     t = threading.Thread(target=write_to_file(_test,name))
-    #     t_list.append(t)
-    #     t.start()
-    # for t in t_list:
-    #     t.join()
     main()
-    # print parse(_parse(_test))

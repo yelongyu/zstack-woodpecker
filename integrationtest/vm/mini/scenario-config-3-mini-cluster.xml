@@ -1,0 +1,5 @@
+<testConfig>
+    <scenarioConfig>scenario-3-mini-cluster.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-1-mini-cluster.tmpt</scenarioConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
