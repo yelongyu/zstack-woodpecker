@@ -17,12 +17,18 @@ import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.scenario_operations as sce_ops
+import zstackwoodpecker.operations.image_operations as img_ops
 import time
 import os
 import random
 import threading
 import hashlib
 import random
+
+WINDOWS_URL = 'http://172.20.1.22/mirror/diskimages/windows-2012-cn-qcow2.qcow2'
+UBUNTU_URL = 'http://172.20.1.22/mirror/diskimages/ubuntu14-test.qcow2'
+CENTOS_URL = 'http://172.20.1.22/mirror/diskimages/centos7-test.qcow2.no-qemu-ga'
+image_url_list = [WINDOWS_URL, UBUNTU_URL, CENTOS_URL]
 
 MN_IP = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
 admin_password = hashlib.sha512('password').hexdigest()
@@ -42,13 +48,26 @@ def recover_hosts(host_uuids, host_ips, wait_time):
         host_ops.reconnect_host(uuid)
 
 def operations_shutdown(shutdown_thread, host_uuids, host_ips, wait_time, operation_thread=None):
-    if operation_thread:
-        operation_thread.start()
     shutdown_thread.start()
+    if operation_thread:
+        fail_flag = 1
+        timeout = 60
+        operation_thread.start()
+        while timeout:
+            if operation_thread.exitcode:
+                test_util.test_logger('@@Operation failed because:\n %s' % operation_thread.exc_traceback)
+                fail_flag = 0
+                break
+            else:
+                time.sleep(1)
+                timeout -= 1
+        if fail_flag:
+            test_util.test_fail("@@Operation successed@@")
+            shutdown_thread.join(0.1)
     shutdown_thread.join()
     time.sleep(180)
-    recover_hosts(host_uuids, host_ips, wait_time)
-
+    recover_hosts(host_uuids, host_ips, wait_time) 
+    
 def test():
     global test_obj_dict
     wait_time = 120
@@ -57,8 +76,11 @@ def test():
     cond = res_ops.gen_query_conditions('managementIp', '=', MN_IP)
     MN_HOST = res_ops.query_resource(res_ops.HOST, cond)[0]
     cluster_list = res_ops.get_resource(res_ops.CLUSTER)
-    vm = test_stub.create_vm()
-    test_obj_dict.add_vm(vm)
+    #add images
+    img_option = test_util.ImageOption()
+    bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], None)[0].uuid
+    img_option.set_backup_storage_uuid_list([bs_uuid])
+    img_option.set_format('qcow2')
     for i in range(round): 
         host_uuids = []
         host_ips = []
@@ -74,9 +96,11 @@ def test():
                 wait_time = 900 #wait mn up
             host_uuids.append(host.uuid)
             host_ips.append(host.managementIp)
-        migrate_thread = threading.Thread(target=test_stub.migrate_vm_to_random_host, args=(vm,))
-        power_off_thread = threading.Thread(target=host_ops.poweroff_host, args=(host_uuids, admin_password, mn_flag))
-        operations_shutdown(power_off_thread, host_uuids, host_ips, wait_time, migrate_thread) 
+        img_option.set_name('image%s' % i)
+        img_option.set_url(image_url_list[i])
+        upload_image_thread = test_stub.ExcThread(target=img_ops.add_image, args=(img_option,))
+        power_off_thread = test_stub.ExcThread(target=host_ops.poweroff_host, args=(host_uuids, admin_password, mn_flag))
+        operations_shutdown(power_off_thread, host_uuids, host_ips, wait_time, upload_image_thread) 
     test_util.test_pass("pass")
 
 def error_cleanup():

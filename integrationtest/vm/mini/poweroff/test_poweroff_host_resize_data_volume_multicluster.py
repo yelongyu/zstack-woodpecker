@@ -51,32 +51,26 @@ def operations_shutdown(shutdown_thread, host_uuids, host_ips, wait_time, operat
 
 def test():
     global test_obj_dict
-    wait_time = 120
+    wait_time = 900
     round = 2 
     test_util.test_logger("@@:mnip:{}".format(zstack_management_ip))
     cond = res_ops.gen_query_conditions('managementIp', '=', MN_IP)
     MN_HOST = res_ops.query_resource(res_ops.HOST, cond)[0]
-    cluster_list = res_ops.get_resource(res_ops.CLUSTER)
-    vm = test_stub.create_vm()
-    test_obj_dict.add_vm(vm)
+    volume = test_stub.create_mini_volume()
+    test_obj_dict.add_volume(volume)
     for i in range(round): 
         host_uuids = []
         host_ips = []
-        mn_flag = None # if candidate hosts including MN node
+        mn_flag = 1 # if candidate hosts including MN node
         #operations & power off random hosts
         test_util.test_logger("round {}".format(i))
-        cluster_uuid = random.choice(cluster_list).uuid 
-        cond = res_ops.gen_query_conditions('cluster.uuid', '=', cluster_uuid)
-        cluster_hosts = res_ops.query_resource(res_ops.HOST, cond)
-        for host in cluster_hosts:
-            if host.uuid == MN_HOST.uuid:
-                mn_flag = 1
-                wait_time = 900 #wait mn up
+        hosts = res_ops.query_resource(res_ops.HOST)
+        for host in hosts:
             host_uuids.append(host.uuid)
             host_ips.append(host.managementIp)
-        migrate_thread = threading.Thread(target=test_stub.migrate_vm_to_random_host, args=(vm,))
+        resize_data_vol_thread = threading.Thread(target=vol_ops.resize_data_volume, args=(volume.get_volume().uuid, volume.get_volume().size + 1073741824))
         power_off_thread = threading.Thread(target=host_ops.poweroff_host, args=(host_uuids, admin_password, mn_flag))
-        operations_shutdown(power_off_thread, host_uuids, host_ips, wait_time, migrate_thread) 
+        operations_shutdown(power_off_thread, host_uuids, host_ips, wait_time, resize_data_vol_thread) 
     test_util.test_pass("pass")
 
 def error_cleanup():

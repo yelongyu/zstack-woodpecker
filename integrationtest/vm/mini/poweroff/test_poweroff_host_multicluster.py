@@ -26,9 +26,8 @@ import random
 
 MN_IP = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
 admin_password = hashlib.sha512('password').hexdigest()
-zstack_management_ip = os.environ.get('zstackManagementIp')
-test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
+zstack_management_ip = os.environ.get('zstackManagementIp')
 
 def recover_hosts(host_uuids, host_ips, wait_time):
     for ip in host_ips:
@@ -51,32 +50,23 @@ def operations_shutdown(shutdown_thread, host_uuids, host_ips, wait_time, operat
 
 def test():
     global test_obj_dict
-    wait_time = 120
+    wait_time = 900
     round = 2 
     test_util.test_logger("@@:mnip:{}".format(zstack_management_ip))
     cond = res_ops.gen_query_conditions('managementIp', '=', MN_IP)
     MN_HOST = res_ops.query_resource(res_ops.HOST, cond)[0]
-    cluster_list = res_ops.get_resource(res_ops.CLUSTER)
-    vm = test_stub.create_vm()
-    test_obj_dict.add_vm(vm)
     for i in range(round): 
         host_uuids = []
         host_ips = []
-        mn_flag = None # if candidate hosts including MN node
+        mn_flag = 1 # if candidate hosts including MN node
         #operations & power off random hosts
         test_util.test_logger("round {}".format(i))
-        cluster_uuid = random.choice(cluster_list).uuid 
-        cond = res_ops.gen_query_conditions('cluster.uuid', '=', cluster_uuid)
-        cluster_hosts = res_ops.query_resource(res_ops.HOST, cond)
-        for host in cluster_hosts:
-            if host.uuid == MN_HOST.uuid:
-                mn_flag = 1
-                wait_time = 900 #wait mn up
+        hosts = res_ops.query_resource(res_ops.HOST)
+        for host in hosts:
             host_uuids.append(host.uuid)
             host_ips.append(host.managementIp)
-        migrate_thread = threading.Thread(target=test_stub.migrate_vm_to_random_host, args=(vm,))
         power_off_thread = threading.Thread(target=host_ops.poweroff_host, args=(host_uuids, admin_password, mn_flag))
-        operations_shutdown(power_off_thread, host_uuids, host_ips, wait_time, migrate_thread) 
+        operations_shutdown(power_off_thread, host_uuids, host_ips, wait_time) 
     test_util.test_pass("pass")
 
 def error_cleanup():

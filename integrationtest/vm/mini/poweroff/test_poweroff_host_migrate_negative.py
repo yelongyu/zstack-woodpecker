@@ -42,13 +42,26 @@ def recover_hosts(host_uuids, host_ips, wait_time):
         host_ops.reconnect_host(uuid)
 
 def operations_shutdown(shutdown_thread, host_uuids, host_ips, wait_time, operation_thread=None):
-    if operation_thread:
-        operation_thread.start()
     shutdown_thread.start()
+    if operation_thread:
+        fail_flag = 1
+        timeout = 60
+        operation_thread.start()
+        while timeout:
+            if operation_thread.exitcode:
+                test_util.test_logger('@@Operation failed because:\n %s' % operation_thread.exc_traceback)
+                fail_flag = 0
+                break
+            else:
+                time.sleep(1)
+                timeout -= 1
+        if fail_flag:
+            test_util.test_fail("@@Operation successed@@")
+            shutdown_thread.join(0.1)
     shutdown_thread.join()
     time.sleep(180)
     recover_hosts(host_uuids, host_ips, wait_time)
-
+    
 def test():
     global test_obj_dict
     wait_time = 120
@@ -74,8 +87,8 @@ def test():
                 wait_time = 900 #wait mn up
             host_uuids.append(host.uuid)
             host_ips.append(host.managementIp)
-        migrate_thread = threading.Thread(target=test_stub.migrate_vm_to_random_host, args=(vm,))
-        power_off_thread = threading.Thread(target=host_ops.poweroff_host, args=(host_uuids, admin_password, mn_flag))
+        migrate_thread = test_stub.ExcThread(target=test_stub.migrate_vm_to_random_host, args=(vm,))
+        power_off_thread = test_stub.ExcThread(target=host_ops.poweroff_host, args=(host_uuids, admin_password, mn_flag))
         operations_shutdown(power_off_thread, host_uuids, host_ips, wait_time, migrate_thread) 
     test_util.test_pass("pass")
 

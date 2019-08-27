@@ -17,6 +17,7 @@ import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.scenario_operations as sce_ops
+import zstackwoodpecker.operations.image_operations as img_ops
 import time
 import os
 import random
@@ -49,34 +50,37 @@ def operations_shutdown(shutdown_thread, host_uuids, host_ips, wait_time, operat
     time.sleep(180)
     recover_hosts(host_uuids, host_ips, wait_time)
 
+def create_root_volume_template(vm):
+    bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], None)[0].uuid
+    image_creation_option = test_util.ImageOption()
+    image_creation_option.set_name('root-volume-image-test')
+    image_creation_option.set_root_volume_uuid(vm.get_vm().rootVolumeUuid)
+    image_creation_option.set_backup_storage_uuid_list([bs_uuid])
+    image = img_ops.create_root_volume_template(image_creation_option)
+    return image
+
 def test():
     global test_obj_dict
-    wait_time = 120
+    wait_time = 900
     round = 2 
     test_util.test_logger("@@:mnip:{}".format(zstack_management_ip))
     cond = res_ops.gen_query_conditions('managementIp', '=', MN_IP)
     MN_HOST = res_ops.query_resource(res_ops.HOST, cond)[0]
-    cluster_list = res_ops.get_resource(res_ops.CLUSTER)
     vm = test_stub.create_vm()
-    test_obj_dict.add_vm(vm)
+    test_obj_dict.add_vm(vm) 
     for i in range(round): 
         host_uuids = []
         host_ips = []
-        mn_flag = None # if candidate hosts including MN node
-        #operations & power off random hosts
+        mn_flag = 1 # if candidate hosts including MN node
+        #operations & power off all hosts
         test_util.test_logger("round {}".format(i))
-        cluster_uuid = random.choice(cluster_list).uuid 
-        cond = res_ops.gen_query_conditions('cluster.uuid', '=', cluster_uuid)
-        cluster_hosts = res_ops.query_resource(res_ops.HOST, cond)
-        for host in cluster_hosts:
-            if host.uuid == MN_HOST.uuid:
-                mn_flag = 1
-                wait_time = 900 #wait mn up
+        hosts = res_ops.query_resource(res_ops.HOST)
+        for host in hosts:
             host_uuids.append(host.uuid)
             host_ips.append(host.managementIp)
-        migrate_thread = threading.Thread(target=test_stub.migrate_vm_to_random_host, args=(vm,))
+        create_img_thread = threading.Thread(target=create_root_volume_template, args=(vm,))
         power_off_thread = threading.Thread(target=host_ops.poweroff_host, args=(host_uuids, admin_password, mn_flag))
-        operations_shutdown(power_off_thread, host_uuids, host_ips, wait_time, migrate_thread) 
+        operations_shutdown(power_off_thread, host_uuids, host_ips, wait_time, create_img_thread) 
     test_util.test_pass("pass")
 
 def error_cleanup():

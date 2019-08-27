@@ -62,7 +62,7 @@ def create_root_volume_template(vm):
 def test():
     global test_obj_dict
     wait_time = 120
-    round = 3 
+    round = 2 
     test_util.test_logger("@@:mnip:{}".format(zstack_management_ip))
     cond = res_ops.gen_query_conditions('managementIp', '=', MN_IP)
     MN_HOST = res_ops.query_resource(res_ops.HOST, cond)[0]
