@@ -31,6 +31,9 @@ from zstacklib.utils.http import json_post
 import zstackwoodpecker.test_state as test_state
 from cherrypy.scaffold import root
 import zstackwoodpecker.operations.config_operations as conf_ops
+import sys
+import threading
+import traceback
 
 original_root_password = "password"
 
@@ -1318,5 +1321,23 @@ class ImageReplication(object):
         cmd = 'service zstack-imagestorebackupstorage %s' % op
         ssh.execute(cmd, bs_ip, "root", "password", port=22)
 
-
-
+class ExcThread(threading.Thread):
+    def __init__(self,group=None, target=None, name=None,
+                 args=(), kwargs=None, verbose=None):
+        threading.Thread.__init__(self, group, target, name, args, kwargs)
+        if kwargs is None:
+            kwargs = {}
+        self.__target = target
+        self.__args = args
+        self.__kwargs = kwargs
+        self.exitcode = 0
+        self.exception = None
+        self.exc_traceback = ''
+    def run(self):
+        try:
+            if self.__target:
+                self.__target(*self.__args, **self.__kwargs)
+        except Exception as e:
+            self.exitcode = 1
+            self.exception = e
+            self.exc_traceback = ''.join(traceback.format_exception(*sys.exc_info()))
