@@ -9,6 +9,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.host_operations as host_ops
+import zstackwoodpecker.operations.config_operations as config_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
@@ -31,6 +32,7 @@ def test():
     global max_attempts
     global storagechecker_timeout
 
+    config_ops.change_global_config('localStoragePrimaryStorage', 'liveMigrationWithStorage.allow', 'true')
     must_ps_list = [inventory.LOCAL_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE]
     test_lib.skip_test_if_any_ps_not_deployed(must_ps_list)
 

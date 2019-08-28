@@ -20,7 +20,7 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
-    recnt_timeout=60000
+    recnt_timeout=90000
     test_util.test_dsc('Test Host Reconnect within %s ms' % recnt_timeout)
     vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
     test_obj_dict.add_vm(vm)

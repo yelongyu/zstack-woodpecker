@@ -66,7 +66,7 @@ def test():
         test_util.test_skip('Skip in no private env.')
     else:
         pri_l3_uuid = test_lib.lib_get_l3_by_name(pri_l3_name).uuid
-    pub_l3_name = os.environ.get('l3PublicNetworkName') #zone1
+    pub_l3_name = os.environ.get('l3PublicNetworkName1') #zone1
     test_util.test_logger("@@DEBUG@@:{}".format(pub_l3_name))
     pub_l3_uuid = test_lib.lib_get_l3_by_name(pub_l3_name).uuid
     vm_nic = vm.vm.vmNics[0]
