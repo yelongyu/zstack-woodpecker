@@ -1,5 +1,6 @@
 import ../scenario.tmpt
 import ./deploy-1-mini-cluster.tmpt
+import ./scenario.tmpt
 hostType = miniHost
 vmStorageL3Uuid = 3a21c6bf70894795829854bf8339642b
 vmName1 = jenkins_nightly_mevoco_fv_mini_IP_RANGE218_389_mn_ha2_vyos-ceph-ps1
