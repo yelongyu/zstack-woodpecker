@@ -45,5 +45,5 @@ def path():
 		[TestAction.create_volume_snapshot, "volume10", 'snapshot1'], \
 		[TestAction.use_volume_snapshot, "snapshot1"], \
                 [TestAction.delete_volume_snapshot, "snapshot1"], \
-		[TestAction.reboot_vm, "vm1"]])
+		[TestAction.start_vm, "vm1"]])
 
