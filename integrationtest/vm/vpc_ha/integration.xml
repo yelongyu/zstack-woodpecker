@@ -53,7 +53,6 @@
         <case timeout='2400' repeat='1' noparallel='True'>test_vpc_disable_enable_snat_100_times.py::vm1_l3_vlan_vm2_l3_vxlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_standard_no_auth.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_stub_no_auth.py::vm1_l3_vlan_vm2_l3_vlan</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_nssa_no_auth.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_standard_auth_plaintext.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_stub_plaintext.py::vm1_l3_vlan_vm2_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ospf_nssa_auth_plaintext.py::vm1_l3_vlan_vm2_l3_vlan</case>
@@ -79,5 +78,6 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_pf.py::vm1_ha_classic_vm2_vpc</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_pf.py::vm1_ha_vm2_noha_upgrade_two_vpc</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_pf.py::vm1_ha_vm2_ha_one_vpc_1vlan_1vxlan</case>
+	<case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_update_monitorIP.py</case>
     </suite>
 </integrationTest>
