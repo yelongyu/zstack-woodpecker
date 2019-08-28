@@ -5,6 +5,7 @@ test_stub to share test operations
 import os
 import time
 import hashlib
+import commands
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
@@ -31,9 +32,42 @@ from zstacklib.utils.http import json_post
 import zstackwoodpecker.test_state as test_state
 from cherrypy.scaffold import root
 import zstackwoodpecker.operations.config_operations as conf_ops
+import subprocess
 import sys
+import time
 import threading
 import traceback
+import apibinding.api_actions as api_actions
+import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+import zstackwoodpecker.zstack_test.zstack_test_security_group as zstack_sg_header
+import zstackwoodpecker.zstack_test.zstack_test_load_balancer as zstack_lb_header
+import zstackwoodpecker.zstack_test.zstack_test_port_forwarding as zstack_pf_header
+import zstackwoodpecker.operations.account_operations as  account_operations
+import zstackwoodpecker.test_state as test_state
+import zstackwoodpecker.operations.net_operations as net_ops
+import zstackwoodpecker.operations.account_operations as acc_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.longjob_operations as longjob_ops
+import zstackwoodpecker.operations.cdrom_operations as cdrom_ops
+import apibinding.inventory as inventory
+import random
+import functools
+from zstackwoodpecker.test_chain import TestChain
+import commands
+from lib2to3.pgen2.token import STAR
+from collections import OrderedDict
+import telnetlib
+import types
+
+PfRule = test_state.PfRule
+Port = test_state.Port
+
+rule1_ports = Port.get_ports(Port.rule1_ports)
+rule2_ports = Port.get_ports(Port.rule2_ports)
+rule3_ports = Port.get_ports(Port.rule3_ports)
+rule4_ports = Port.get_ports(Port.rule4_ports)
+rule5_ports = Port.get_ports(Port.rule5_ports)
+denied_ports = Port.get_denied_ports()
 
 original_root_password = "password"
 
@@ -1334,6 +1368,74 @@ class ExcThread(threading.Thread):
         self.exception = None
         self.exc_traceback = ''
     def run(self):
+
+class VIPQOS(object):
+    def __init__(self):
+        self.mn_ip = None
+        self.ssh_cmd = 'sshpass -p password ssh -o StrictHostKeyChecking=no root@'
+        self.inbound_width = None
+        self.outbound_width = None
+        self.iperf_url = None
+        self.vm_ip = None
+        self.vm_ip2 = None
+        self.port = None
+        self.iperf_port = None
+        self.lb = None
+        self.vr = None
+        self.reconnected = False
+
+    def install_iperf(self, vm_ip):
+        #subprocess.call('sshpass -p password scp /etc/yum.repos.d/zstack-local.repo root@%s:/etc/yum.repos.d' % vm1_host_ip, shell=True)
+        #subprocess.call('sshpass -p password ssh root@%s yum --disablerepo=* --enablerepo=zstack-local install iperf3 -y' % vm1_host_ip, shell=True)
+        iperf_url = os.getenv('iperfUrl')
+        iperf_file = iperf_url.split('/')[-1]
+        cmd_loc = 'sshpass -p password scp -o StrictHostKeyChecking=no root@%s .' % iperf_url
+	print 'pengtao debug: iperfUrl: %s' %cmd_loc
+        if not os.path.exists(iperf_file):
+            commands.getstatusoutput(cmd_loc)
+        cmd_install = 'which iperf3'
+        ret = commands.getstatusoutput(cmd_install)
+        if ret[0] == 0:
+            print 'iperf3 is already installed'
+        else:
+            os.system('rpm -ivh /opt/zstack-dvd/Packages/iperf3-3.1.7-2.el7.x86_64.rpm')
+        cmd = "sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:; %s ' rpm -ivh %s'" % (iperf_file, vm_ip, self.ssh_cmd + vm_ip, iperf_file)
+        if commands.getstatusoutput(self.ssh_cmd + vm_ip + ' iperf3 -v')[0] != 0:
+            ret = commands.getstatusoutput(cmd)
+            print '*' * 90
+            print ret
+            if ret[0] != 0:
+                test_util.test_fail('fail to install iperf.')
+
+    def start_iperf_server(self, vm_ip):
+        terminate_cmd =  self.ssh_cmd + vm_ip + " pkill -9 iperf3"
+        commands.getstatusoutput(terminate_cmd)
+        time.sleep(5)
+        if self.iperf_port:
+            cmd = self.ssh_cmd + self.vm_ip + ' "iperf3 -s -p %s -D"' % self.iperf_port
+        else:
+            cmd = self.ssh_cmd + self.vm_ip + ' "iperf3 -s -D"'
+        commands.getstatusoutput(cmd)
+
+    def create_vm(self, l3_network):
+        self.vm = create_vlan_vm(os.getenv(l3_network))
+        self.vm.check()
+        self.vm_ip = self.vm.vm.vmNics[0].ip
+#         time.sleep(60)
+
+    def create_vm2(self, l3_network):
+        self.vm2 = create_vlan_vm(os.getenv(l3_network))
+        self.vm2.check()
+        self.vm_ip2 = self.vm.vm.vmNics[0].ip
+#         time.sleep(60)
+
+    def attach_eip_service(self):
+        try:
+            net_ops.attach_eip_service_to_l3network(self.pri_l3_uuid, self.service_uuid)
+        except:
+            pass
+
+    def detach_eip_service(self):
         try:
             if self.__target:
                 self.__target(*self.__args, **self.__kwargs)
@@ -1341,3 +1443,149 @@ class ExcThread(threading.Thread):
             self.exitcode = 1
             self.exception = e
             self.exc_traceback = ''.join(traceback.format_exception(*sys.exc_info()))
+            net_ops.detach_eip_service_from_l3network(self.pri_l3_uuid, self.service_uuid)
+        except:
+            pass
+
+    def create_vip(self, flat):
+        self.mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+        commands.getoutput("iptables -F")
+        self.vm_nic_uuid = self.vm.vm.vmNics[0].uuid
+        self.pri_l3_uuid = self.vm.vm.vmNics[0].l3NetworkUuid
+        if flat:
+            cond = res_ops.gen_query_conditions('type', '=', 'Flat')
+            self.service_uuid = res_ops.query_resource(res_ops.NETWORK_SERVICE_PROVIDER, cond)[0].uuid
+            self.attach_eip_service()
+            cond_publ = res_ops.gen_query_conditions('category', '=', 'Public')
+            l3_uuid = res_ops.query_resource(res_ops.L3_NETWORK, cond_publ)[0].uuid
+        else:
+            self.vr = test_lib.lib_find_vr_by_l3_uuid(self.pri_l3_uuid)[0]
+            time.sleep(10)
+            l3_uuid = test_lib.lib_find_vr_pub_nic(self.vr).l3NetworkUuid
+        self.vip = create_vip('vip_for_qos', l3_uuid)
+        self.vip_ip = self.vip.get_vip().ip
+        self.vip_uuid = self.vip.get_vip().uuid
+
+    def create_eip(self, flat=False):
+        self.create_vip(flat)
+        eip = create_eip('qos_test', vip_uuid=self.vip.get_vip().uuid, vnic_uuid=self.vm_nic_uuid, vm_obj=self.vm)
+        self.vip.attach_eip(eip)
+        time.sleep(10)
+
+    def set_vip_qos(self, inbound_width=None, outbound_width=None, port=None, iperf_port=None):
+        self.inbound_width = inbound_width * 1024 * 1024
+        self.outbound_width = outbound_width * 1024 * 1024
+        self.port = port
+        self.iperf_port = iperf_port
+        net_ops.set_vip_qos(vip_uuid=self.vip_uuid, inboundBandwidth=self.inbound_width, outboundBandwidth=self.outbound_width, port=port)
+        time.sleep(10)
+
+    def del_vip_qos(self):
+        net_ops.delete_vip_qos(self.vip_uuid, self.port)
+        time.sleep(10)
+
+    def create_pf(self):
+#         self.create_vip(flat=False)
+#         startPort, endPort = Port.get_start_end_ports(Port.rule3_ports)
+#         self.iperf_port = gen_random_port(startPort, endPort)
+        pf_creation_opt = PfRule.generate_pf_rule_option(self.mn_ip, protocol=inventory.TCP, 
+                                                         vip_target_rule=Port.rule3_ports, private_target_rule=Port.rule3_ports, 
+                                                         vip_uuid=self.vip.get_vip().uuid, vm_nic_uuid=self.vm_nic_uuid)
+        test_pf = zstack_pf_header.ZstackTestPortForwarding()
+        test_pf.set_creation_option(pf_creation_opt)
+        test_pf.create(self.vm)
+        self.vip.attach_pf(test_pf)
+
+    def create_lb(self, port):
+#         self.create_vip(flat=False)
+        self.iperf_port = port
+        self.lb = zstack_lb_header.ZstackTestLoadBalancer()
+        self.lb.create('lb for vip qos test', self.vip.get_vip().uuid)
+        lb_creation_option = test_lib.lib_create_lb_listener_option(lbl_name='vip qos test',
+                                                                    lbl_port = port, lbi_port = port)
+        lbl = self.lb.create_listener(lb_creation_option)
+        lbl.add_nics([self.vm2.vm.vmNics[0].uuid])
+
+    def check_bandwidth(self, vm_ip, direction, cmd, excepted_bandwidth):
+        if self.vr and not self.reconnected:
+            vm_ops.reconnect_vr(self.vr.uuid)
+            self.reconnected = True
+            time.sleep(10)
+        for ip in [self.mn_ip, self.vm_ip, self.vm_ip2]:
+            if ip:
+                print 'pengtao debug: begin install iperf ip: %s' %ip
+                self.install_iperf(ip)
+        commands.getoutput(self.ssh_cmd + vm_ip +" iptables -F")
+        time.sleep(10)
+        print 'pengtao debug: begin start iperf server'
+        self.start_iperf_server(vm_ip)
+        time.sleep(30)
+        actual_bandwidth, bndwth = 0, 0
+        for _ in range(5):
+            (status, ret) = commands.getstatusoutput(cmd)
+            seper = '*' * 80
+            print "%s\n%s\n%s" % (seper, ret, seper)
+            if direction == 'out':
+                pos = -3
+            else:
+                pos = -4
+            summ = ret.split('\n')[pos]
+            bndwth = float(summ.split()[-3])
+            if summ.split()[-2] == 'Kbits/sec':
+                bndwth /= 1024
+            elif summ.split()[-2] == 'Gbits/sec':
+                bndwth *= 1024
+            if status == 0:
+                if excepted_bandwidth == 1000:
+                    assert bndwth < excepted_bandwidth
+                    break
+                else:
+#                     if abs(bndwth - excepted_bandwidth) / excepted_bandwidth < 0.1:
+                    if bndwth <= excepted_bandwidth or (bndwth - excepted_bandwidth) / excepted_bandwidth < 0.1:
+                        actual_bandwidth = bndwth
+                        break
+                    else:
+                        time.sleep(10)
+            else:
+                raise Exception('Execute command %s error: %s' % (cmd, ret))
+        if not bndwth:
+            test_util.test_fail("Get VIP bandwidth failed")
+        if excepted_bandwidth < 1000 and actual_bandwidth == 0:
+            test_util.test_fail('Except bandwidth: %s, actual bandwidth: %s.' % (excepted_bandwidth, bndwth))
+
+    def check_outbound_bandwidth(self, vm_ip=None):
+        print 'debug pengtao'
+        if not vm_ip:
+            vm_ip = self.vm_ip
+        if self.iperf_port:
+            if self.port:
+                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -t 5 -O 1 -R" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
+            else:
+                cmd = "iperf3 -c %s -p %s -t 5 -O 1 -R " % (self.vip_ip, self.iperf_port)
+        else:
+            cmd = "iperf3 -c %s -t 5 -O 1 -R" % self.vip_ip
+	print 'pengtao debug cmd : %s' % cmd
+        self.check_bandwidth(vm_ip, 'out', cmd, self.outbound_width/(1024 * 1024))
+
+    def check_inbound_bandwidth(self, vm_ip=None):
+        if not vm_ip:
+            vm_ip = self.vm_ip
+        if self.iperf_port:
+            if self.port:
+                cmd = "iperf3 -c %s -p %s --cport %s --bind %s -t 5 -O 1 --get-server-output" % (self.vip_ip, self.iperf_port, self.port, self.mn_ip)
+            else:
+                cmd = "iperf3 -c %s -p %s -t 5 -O 1 --get-server-output" % (self.vip_ip, self.iperf_port)
+        else:
+            cmd = "iperf3 -c %s -t 5 -O 1 --get-server-output" % self.vip_ip
+        self.check_bandwidth(vm_ip, 'in', cmd, self.inbound_width/(1024 * 1024))
+
+
+def gen_random_port(start=1, end=100):
+#     cmd = "lsof -i -P -n | grep LISTEN | awk -F ':' '{print $2}' | awk '{print $1}'"
+    cmd = "netstat -plnt | awk 'NR>2{print $4}'"
+    ret = commands.getoutput(cmd).split('\n')
+#     ret = list(set(ret))
+    port_listening = [int(p.split(':')[-1]) for p in ret if p]
+    port_range = xrange(start, end)
+    port_val_list = [port for port in port_range if port not in port_listening]
+    return random.choice(port_val_list)
