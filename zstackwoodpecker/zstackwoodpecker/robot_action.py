@@ -814,8 +814,20 @@ def start_vm(robot_test_obj, args):
 
     target_vm = robot_test_obj.get_test_dict().vm[args[0]]
 
-    target_vm.start()
-    target_vm.update()
+    n = 0
+    while n < 5:
+        try:
+            target_vm.start()
+            target_vm.update()
+        except:
+            n += 1
+            time.sleep(10)
+            continue
+        finally:
+            if target_vm.state == "Running":
+                break
+
+    assert target_vm.state == "Running"
 
     for volume in target_vm.test_volumes:
         volume.update()
