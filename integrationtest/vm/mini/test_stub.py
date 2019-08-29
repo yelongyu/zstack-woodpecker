@@ -1368,6 +1368,13 @@ class ExcThread(threading.Thread):
         self.exception = None
         self.exc_traceback = ''
     def run(self):
+        try:
+            if self.__target:
+                self.__target(*self.__args, **self.__kwargs)
+        except Exception as e:
+            self.exitcode = 1
+            self.exception = e
+            self.exc_traceback = ''.join(traceback.format_exception(*sys.exc_info()))
 
 class VIPQOS(object):
     def __init__(self):
