@@ -72,7 +72,7 @@ def test():
 
     os.system('rm -f %s' % tmp_file)
     test_stub.destroy_vm_scenario(vm_inv.uuid)
-    test_util.test_pass('ZStack cnt upgrade '2.4.0','2.5.0','2.6.0','3.0.0','3.1.0','3.2.0','3.3.0','3.4.0','3.5.0','3.5.2' Test Success')
+    test_util.test_pass('ZStack cnt upgrade 2.4.0 2.5.0 2.6.0 3.0.0 3.1.0 3.2.0 3.3.0 3.4.0 3.5.0.1 3.5.2 Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
