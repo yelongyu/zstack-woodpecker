@@ -1513,7 +1513,8 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                     action.sessionUuid = session_uuid
                     action.name = generate_dup_name(generate_dup_name(cluster.name_, zone_ref, 'z'), cluster_ref, 'c')
                     action.description = generate_dup_name(generate_dup_name(cluster.description__, zone_ref, 'z'), cluster_ref, 'c')
-        
+                    if cluster.description_ == 'MiniCluster':
+                        action.systemTags = ["cluster::migrate::network::cidr::99.99.99.0/24"]
                     action.hypervisorType = cluster.hypervisorType_
                     action.zoneUuid = zinv.uuid
                     thread = threading.Thread(target=_add_cluster, args=(action, zone_ref, cluster, cluster_ref, ))

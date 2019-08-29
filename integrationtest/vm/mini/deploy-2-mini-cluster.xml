@@ -144,7 +144,7 @@
         </primaryStorages>
 
         <clusters>
-          <cluster name="$clusterName" description="Test"
+          <cluster name="$clusterName" description="MiniCluster"
             hypervisorType="$clusterHypervisorType">
             <hosts>
               <host name="$hostName" description="Test" managementIp="$hostIp"
@@ -176,7 +176,7 @@
             <l2NetworkRef>$l2VlanNetworkName19</l2NetworkRef>
             <l2NetworkRef>$l2VlanNetworkName20</l2NetworkRef>
           </cluster>
-          <cluster name="$clusterName2" description="Test"
+          <cluster name="$clusterName2" description="MiniCluster"
             hypervisorType="$clusterHypervisorType">
             <hosts>
               <host name="$hostName3" description="Test" managementIp="$hostIp3"

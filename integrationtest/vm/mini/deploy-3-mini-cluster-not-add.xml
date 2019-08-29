@@ -168,7 +168,7 @@
         </primaryStorages>
 
         <clusters>
-          <cluster name="$clusterName" description="Test"
+          <cluster name="$clusterName" description="MiniCluster"
             hypervisorType="$clusterHypervisorType">
             <hosts>
               <host name="$hostName" description="Test" managementIp="$hostIp"
