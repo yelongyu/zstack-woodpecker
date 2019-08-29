@@ -1,0 +1,8 @@
+<cases default_version="2.6.0">
+  <case>test_create_vm_fake</case>
+  <case start_version="2.6.0" end_version="3.1.0">test_create_vm_fake1</case>
+  <case start_version="2.6.0">volume/test_create_volume_fake</case>
+  <!--<case start_version="3.5.2">test_create_vm2</case>-->
+  <!--<case start_version="3.5.2">test_create_vm3</case>-->
+  <!--<case start_version="3.5.2">test_create_vm4</case>-->
+</cases>

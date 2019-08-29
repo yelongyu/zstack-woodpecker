@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <!--basicConfig will set basic test environment, include where is install
+        script, installation binary, database and rabbitmq information etc.-->
+  <basicConfig>
+  <!-- The following configurations are path in test machine.
+        zstackPkg is zstack all in one package tar.gz file.
+        zstackInstallScript is the installation script, which could be
+    downloaded from zstack website or get from zstack-utility/installation/
+        zstackInstallPath is the path zstackPkg will be installed. It should be
+    carefully set. The contents in this folder will be deleted permanently in
+    testing.
+        zstackProperties is optional. It is zstack.properties. Tester could
+    assign special zstack.properties. If not providing this line, testing will
+    just use zstack default property file.
+        testAgent is the woodpecker test agent tar.gz package. It will be widely
+    used in woodpecker testing.
+        db.admin is the database admin user. Usually it is root.
+        db.username is the user who will operate zstack database. Usually it is
+    zstack.
+        db.server_root_password is the root password for the database's host OS.
+    woodpecker uses it to install and config database.
+        rabbitmq.password is the root password for rabbitmq's host OS.
+    woodpecker uses it to install and start rabbitmq-server
+
+        This config file could be used to deploy zstack cloud environment by
+    zstack-cli, after zstack server is started. The detailed information could
+    be found in zstack-cli help manual.
+  -->
+    <zstackPkg>$zstackPkg</zstackPkg>
+    <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
+    <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
+    <zstackProperties>$zstackPropertiesPath</zstackProperties>
+    <testAgent>$zstackTestAgentPkgPath</testAgent>
+    <db>
+      <!-- Database server IP address or hostname -->
+      <server>$DBServer</server>
+      <admin>$DBAdminUser</admin>
+      <adminPassword>$DBAdminPassword</adminPassword>
+      <username>$DBUserName</username>
+      <server_root_password>$hostPassword</server_root_password>
+      <!-- <password>$DBPassword</password>
+      <port>$DBPort</port> -->
+    </db>
+    <rabbitmq>
+        <server>$rabbitmqServerIp</server>
+        <password>$hostPassword</password>
+    </rabbitmq>
+  </basicConfig>
+
+  <!--deployConfig define the zstack test infraastructure, including computer resource, network infrastructure etc. -->
+  <deployerConfig xmlns="http://zstack.org/schema/zstack">
+    <nodes description="Woodpecker will send zstack command to the 1st node.
+        multi nodes support real hosts or docker (if providing dockerImage and
+        it is found in `docker images`). ">
+      <node name="$node1Name" ip="$node1Ip"
+        username="$nodeUserName" password="$nodePassword"
+        description="The default node 1. It could be same as test machine."/>
+      <!-- multi node setting
+      <node name="$node2Name" dockerImage="$node2DockerImage" ip="$node2Ip"
+        username="$nodeUserName" password="$nodePassword"
+        description="multi nodes have same catalinaHome as node 1"/>
+      <node name="$node3Name" dockerImage="$node3DockerImage" ip="$node3Ip"
+        username="$nodeUserName" password="$nodePassword"
+        description="multi nodes have same catalinaHome as node 1" />
+      -->
+    </nodes>
+
+    <instanceOfferings>
+      <instanceOffering name="$instanceOfferingName_s"
+        description="Test"
+        memoryCapacity="$instanceOfferingMemory_s"
+        cpuNum="$instanceOfferingCpuNum_s"
+        />
+      <virtualRouterOffering name="$virtualRouterOfferingName_s"
+        memoryCapacity="$virtualRouterOfferingMemory_s"
+        cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
+        <zoneRef>$zoneName</zoneRef>
+        <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
+        <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
+        <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
+        <imageRef>$virtualRouterImageName</imageRef>
+      </virtualRouterOffering>
+    </instanceOfferings>
+
+    <backupStorages>
+      <imageStoreBackupStorage name="$imageStoreBackupStorageName"
+        description="Test" url="$sftpBackupStorageUrl"
+        username="$sftpBackupStorageUsername"
+        password="$sftpBackupStoragePassword"
+        hostname="$sftpBackupStorageHostname" />
+      <sftpBackupStorage name="$sftpBackupStorageName2"
+        description="Test" url="$sftpBackupStorageUrl2"
+	username="$sftpBackupStorageUsername2"
+	password="$sftpBackupStoragePassword2"
+	hostname="$sftpBackupStorageHostname2"
+	port="$sftpBackupStoragePort2"/>
+    </backupStorages>
+
+    <images>
+      <image name="$imageName_s" description="Test Image1"
+        format="$rootImageFormat" url="$imageUrl_s"
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
+      </image>
+      <image name="$imageName_net" description="Test Image2"
+        format="$rootImageFormat" url="$imageUrl_net"
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+      </image>
+      <image name="$imageName3" description="Test Image3"
+        format="$rootImageFormat" url="$imageUrl3"
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
+      </image>
+      <image name="$virtualRouterImageName"
+        description="virtual router image" format="$rootImageFormat"
+        username="$vrImageUsername" password="$vrImagePassword"
+        mediaType="$rootMediaType"
+        hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+      </image>
+    </images>
+
+    <diskOfferings>
+      <diskOffering name="$largeDiskOfferingName"
+        description="large Disk Offering"
+        diskSize="$largeDiskOfferingSize" />
+
+      <diskOffering name="$mediumDiskOfferingName"
+        description="Medium Disk Offering"
+        diskSize="$mediumDiskOfferingSize" />
+
+      <diskOffering name="$smallDiskOfferingName"
+        description="Small Disk Offering"
+        diskSize="$smallDiskOfferingSize" />
+    </diskOfferings>
+
+    <zones>
+      <zone name="$zoneName" description="Test">
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+        <backupStorageRef>$sftpBackupStorageName2</backupStorageRef>
+        <primaryStorages>
+	  <localPrimaryStorage name="$localPrimaryStorageName"
+            description="Test Local Primary Storage"
+            url="$localPrimaryStorageUrl" />
+        </primaryStorages>
+
+        <clusters>
+          <cluster name="$clusterName" description="Test"
+            hypervisorType="$clusterHypervisorType">
+            <hosts>
+              <host name="$hostName" description="Test" managementIp="$hostIp"
+                username="$hostUsername" password="$hostPassword" />
+              <host name="$hostName2" description="Test2" managementIp="$hostIp2"
+                username="$hostUsername2" password="$hostPassword2" port="$hostPort2"/>
+              <host name="$hostName3" description="Test3" managementIp="$hostIp3"
+                username="$hostUsername3" password="$hostPassword3" />
+              <host name="$hostName4" description="Test4" managementIp="$hostIp4"
+                username="$hostUsername4" password="$hostPassword4" port="$hostPort4"/>
+            </hosts>
+            <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
+            <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+            <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+            <l2NetworkRef>$l2NoVlanNetworkName2</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
+            <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
+          </cluster>
+        </clusters>
+
+        <l2Networks>
+          <l2NoVlanNetwork name="$l2PublicNetworkName"
+            description="Test" physicalInterface="$l2PublicNetworkInterface">
+            <l3Networks>
+              <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network">
+                <ipRange name="$ipRangeName" description="Test"
+                  startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
+                  netmask="$ipRangeNetmask" />
+                <dns>$DNSServer</dns>
+                <networkService provider="VirtualRouter">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>DNS</serviceType>
+                  <serviceType>SNAT</serviceType>
+                  <serviceType>PortForwarding</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2NoVlanNetwork>
+
+          <l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network"
+            physicalInterface="$l2NoVlanNetworkInterface1">
+            <l3Networks>
+              <l3BasicNetwork name="$l3NoVlanNetworkName1" description = "guest l3 network with user defined vlan">
+                <ipRange name="$noVlanIpRangeName1"
+                  startIp="$noVlanIpRangeStart1"
+                  endIp="$noVlanIpRangeEnd1"
+                  gateway="$noVlanIpRangeGateway1"
+                  netmask="$noVlanIpRangeNetmask1"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="VirtualRouter">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>DNS</serviceType>
+                  <serviceType>SNAT</serviceType>
+                  <serviceType>PortForwarding</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2NoVlanNetwork>
+
+          <l2NoVlanNetwork name="$l2NoVlanNetworkName2" description="guest l2 network2"
+            physicalInterface="$l2NoVlanNetworkInterface2">
+            <l3Networks>
+              <l3BasicNetwork name="$l3NoVlanNetworkName2" description = "guest l3 network2 with user defined vlan">
+                <ipRange name="$noVlanIpRangeName2"
+                  startIp="$noVlanIpRangeStart2"
+                  endIp="$noVlanIpRangeEnd2"
+                  gateway="$noVlanIpRangeGateway2"
+                  netmask="$noVlanIpRangeNetmask2"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="VirtualRouter">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>DNS</serviceType>
+                  <serviceType>SNAT</serviceType>
+                  <serviceType>PortForwarding</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2NoVlanNetwork>
+
+          <l2VlanNetwork name="$l2VlanNetworkName1"
+            description="guest l2 vlan network1"
+            physicalInterface="$l2NetworkPhysicalInterface"
+            vlan="$l2Vlan1">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetworkName1"
+                description = "guest test vlan network with DHCP DNS and SNAT"
+                domain_name = "$L3VlanNetworkDomainName1">
+                <ipRange name="$vlanIpRangeName1"
+                  startIp="$vlanIpRangeStart1"
+                  endIp="$vlanIpRangeEnd1"
+                  gateway="$vlanIpRangeGateway1"
+                  netmask="$vlanIpRangeNetmask1"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="VirtualRouter">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>DNS</serviceType>
+                  <serviceType>SNAT</serviceType>
+                  <serviceType>PortForwarding</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+
+          <l2VlanNetwork name="$l2VlanNetworkName2"
+            description="guest l2 vlan network 2"
+            physicalInterface="$l2NetworkPhysicalInterface"
+            vlan="$l2Vlan2">
+            <l3Networks>
+              <l3BasicNetwork name="$l3VlanNetwork2"
+                description = "guest test vlan network 2"
+                domain_name = "$L3VlanNetworkDomainName2">
+                <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2" gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
+                <dns>$DNSServer</dns>
+                <networkService provider="VirtualRouter">
+                  <serviceType>DHCP</serviceType>
+                  <serviceType>DNS</serviceType>
+                  <serviceType>SNAT</serviceType>
+                  <serviceType>PortForwarding</serviceType>
+                  <serviceType>Eip</serviceType>
+                </networkService>
+                <networkService provider="SecurityGroup">
+                  <serviceType>SecurityGroup</serviceType>
+                </networkService>
+              </l3BasicNetwork>
+            </l3Networks>
+          </l2VlanNetwork>
+        </l2Networks>
+      </zone>
+    </zones>
+  </deployerConfig>
+</config>

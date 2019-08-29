@@ -1,0 +1,5 @@
+import ./deploy.tmpt
+
+imageStoreBackupStorageName = image-store-backup-storage
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/local-ps

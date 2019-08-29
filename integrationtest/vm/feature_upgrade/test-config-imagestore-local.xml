@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-imagestore-local.xml</deployConfig>
+    <deployConfigTemplate>deploy-imagestore-local.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>
