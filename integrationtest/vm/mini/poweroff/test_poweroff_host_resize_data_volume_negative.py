@@ -43,6 +43,7 @@ def recover_hosts(host_uuids, host_ips, wait_time):
 
 def operations_shutdown(shutdown_thread, host_uuids, host_ips, wait_time, operation_thread=None):
     shutdown_thread.start()
+    time.sleep(3)
     if operation_thread:
         fail_flag = 1
         timeout = 60
@@ -69,16 +70,19 @@ def test():
     test_util.test_logger("@@:mnip:{}".format(zstack_management_ip))
     cond = res_ops.gen_query_conditions('managementIp', '=', MN_IP)
     MN_HOST = res_ops.query_resource(res_ops.HOST, cond)[0]
-    cluster_list = res_ops.get_resource(res_ops.CLUSTER)
-    volume = test_stub.create_mini_volume()
+    vm = test_stub.create_vm()
+    cluster_uuid = vm.get_vm().clusterUuid
+    systemtags = ["miniStorage::clusterUuid::%s" % cluster_uuid]
+    volume = test_stub.create_mini_volume(system_tags=systemtags)
+    cond = res_ops.gen_query_conditions('resourceUuid', '=', volume.get_volume().uuid)
     test_obj_dict.add_volume(volume)
+    vol_ops.attach_volume(volume.get_volume().uuid, vm.get_vm().uuid)
     for i in range(round): 
         host_uuids = []
         host_ips = []
         mn_flag = None # if candidate hosts including MN node
         #operations & power off random hosts
         test_util.test_logger("round {}".format(i))
-        cluster_uuid = random.choice(cluster_list).uuid 
         cond = res_ops.gen_query_conditions('cluster.uuid', '=', cluster_uuid)
         cluster_hosts = res_ops.query_resource(res_ops.HOST, cond)
         for host in cluster_hosts:

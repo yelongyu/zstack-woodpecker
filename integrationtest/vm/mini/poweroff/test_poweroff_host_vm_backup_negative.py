@@ -71,6 +71,7 @@ def test():
     MN_HOST = res_ops.query_resource(res_ops.HOST, cond)[0]
     cluster_list = res_ops.get_resource(res_ops.CLUSTER)
     vm = test_stub.create_vm()
+    cluster_uuid = vm.get_vm().clusterUuid
     test_obj_dict.add_vm(vm)
     bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid
     backup_creation_option = test_util.BackupOption()
@@ -82,7 +83,6 @@ def test():
         mn_flag = None # if candidate hosts including MN node
         #operations & power off random hosts
         test_util.test_logger("round {}".format(i))
-        cluster_uuid = random.choice(cluster_list).uuid 
         cond = res_ops.gen_query_conditions('cluster.uuid', '=', cluster_uuid)
         cluster_hosts = res_ops.query_resource(res_ops.HOST, cond)
         for host in cluster_hosts:
