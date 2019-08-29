@@ -261,13 +261,13 @@ def query_rule_set(conditions, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def create_rule(vpcFirewallUuid, ruleSetUuid, action, ruleNumber, state, protocol = None, destPort = None, sourcePort = None, sourceIp = None, destIp = None, allowStates = None, tcpFlag = None, icmpTypeName = None, description = None, session_uuid = None):
+def create_rule(vpcFirewallUuid, ruleSetUuid, actiontype, ruleNumber, state, protocol = None, destPort = None, sourcePort = None, sourceIp = None, destIp = None, allowStates = None, tcpFlag = None, icmpTypeName = None, description = None, session_uuid = None):
     action = api_actions.CreateFirewallRuleAction()
     action.timeout = 300000
     action.vpcFirewallUuid = vpcFirewallUuid
     action.ruleSetUuid = ruleSetUuid
     # valid values: [drop, reject, accept]
-    action.action = action
+    action.action = actiontype
     action.ruleNumber = ruleNumber
     # valid values: [enable, disable]
     action.state = state
@@ -280,5 +280,84 @@ def create_rule(vpcFirewallUuid, ruleSetUuid, action, ruleNumber, state, protoco
     action.allowStates = allowStates
     action.tcpFlag = tcpFlag
     action.icmpTypeName = icmpTypeName
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def AttachFirewallRuleSetToL3(vpcFirewallUuid, l3Uuid, forward, ruleSetUuid, session_uuid = None):
+    action = api_actions.AttachFirewallRuleSetToL3Action()
+    action.timeout = 300000
+    action.vpcFirewallUuid = vpcFirewallUuid
+    action.l3Uuid = l3Uuid
+#valid values: [in, out]
+    action.forward = forward
+    action.ruleSetUuid = ruleSetUuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def DetachFirewallRuleSetFromL3(vpcFirewallUuid, l3Uuid, forward, session_uuid = None):
+    action = api_actions.DetachFirewallRuleSetFromL3Action()
+    action.timeout = 300000
+    action.vpcFirewallUuid = vpcFirewallUuid
+    action.l3Uuid =  l3Uuid
+# forward valid values: [in, out]
+    action.forward = forward
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def ChangeFirewallRuleState(uuid, state, session_uuid = None):
+    action = api_actions.ChangeFirewallRuleStateAction()
+    action.timeout = 300000
+    action.uuid = uuid
+    action.state = state
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def UpdateFirewallRuleSet(uuid, name = None, description = None, actionType = None, session_uuid = None):
+    action = api_actions.UpdateFirewallRuleSetAction()
+    action.timeout = 300000
+    action.uuid = uuid
+    action.name =  name
+    action.description =  description
+    action.actionType = actionType
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def UpdateVpcFirewall(uuid, name = None, description = None, session_uuid = None):
+    action = api_actions.UpdateVpcFirewallAction()
+    action.timeout = 300000
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def DeleteFirewallRuleSet(uuid,deleteMode = None, session_uuid = None):
+    action = api_actions.DeleteFirewallRuleSetAction()
+    action.timeout = 300000
+    action.uuid = uuid
+    action.deleteMode = deleteMode
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def DeleteFirewall(uuid, deleteMode = None, session_uuid = None):
+    action = api_actions.DeleteFirewallAction()
+    action.timeout = 300000
+    action.uuid = uuid
+    action.deleteMode = deleteMode
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def DeleteFirewallRule(uuid, deleteMode = None, session_uuid = None):
+    action = api_actions.DeleteFirewallRuleAction()
+    action.timeout = 300000
+    action.uuid = uuid
+    action.deleteMode = deleteMode
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def RefreshFirewall(uuid, session_uuid = None):
+    action = api_actions.RefreshFirewallAction()
+    action.timeout = 300000
+    action.uuid = uuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
