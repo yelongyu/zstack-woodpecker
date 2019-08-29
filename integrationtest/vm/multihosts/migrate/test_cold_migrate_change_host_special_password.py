@@ -14,7 +14,7 @@ import zstackwoodpecker.operations.account_operations as account_ops
 import apibinding.inventory as inventory
 import apibinding.api_actions as api_actions
 import zstacklib.utils.ssh as ssh
-
+import os
 
 vm = None
 test_stub = test_lib.lib_get_test_stub()
@@ -49,6 +49,7 @@ def test():
     test_util.test_dsc('Test KVM Host Infomation: password')
 
 #create vm and stop and migrate
+    os.environ['hostPassword']='password*()'
     vm = test_stub.create_vr_vm('migrate_stopped_vm', 'imageName_s', 'l3VlanNetwork2')
     vm.check()
     target_host = test_lib.lib_find_random_host(vm.vm)
@@ -70,7 +71,7 @@ def test():
                 host_ops.reconnect_host(i.uuid)
     else:
         test_util.test_skip("There is no host. Skip test")
-
+    os.environ['hostPassword']='password'
     test_util.test_dsc('Test KVM Host Infomation: password')
 
     test_util.test_pass('Migrate Stopped VM with special_password Test Success')
@@ -91,7 +92,7 @@ def error_cleanup():
     #    test_util.test_skip("There is no host. Skip test")
 
     #test_util.test_dsc('Test KVM Host Infomation: password')
-
+    os.environ['hostPassword']='password'
     if vm:
         try:
             vm.destroy()
