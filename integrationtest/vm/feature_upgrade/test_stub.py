@@ -1,4 +1,5 @@
 # coding=utf-8
+import importlib
 import os
 import subprocess
 import sys
@@ -6,11 +7,7 @@ import time
 import uuid
 import xml.dom.minidom as xmldom
 
-import importlib
 import zstacklib.utils.ssh as ssh
-import zstackwoodpecker.operations.resource_operations as res_ops
-import zstackwoodpecker.operations.scenario_operations as sce_ops
-import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 
 # -------------------------------------------------------------------------------------
@@ -110,7 +107,6 @@ def find_cases(all_cases, current_version):
                 need_execute_cases_list.append(case)
             else:
                 not_execute_cases_anymore.append(case)
-        # need_execute_cases_list.append(case)
 
     for case in not_execute_cases_anymore:
         all_cases.remove(case)
@@ -119,140 +115,12 @@ def find_cases(all_cases, current_version):
 
 
 # -------------------------------------------------------------------------------------
-iso_dict = {
-    "2.3.0": "%s/iso/zstack_230.iso",
-    "2.3.1": '%s/iso/zstack_230.iso',
-    "2.3.2": "%s/iso/zstack_230.iso",
-    "2.4.0": '%s/iso/zstack_240.iso',
-    "2.5.0": '%s/iso/zstack_250.iso',
-    "2.6.0": '%s/iso/zstack_260.iso',
-    "3.0.0": '%s/iso/zstack_260.iso',
-    "3.0.1": '%s/iso/zstack_301.iso',
-    "3.1.0": '%s/iso/zstack_310.iso',
-    "3.1.3": '%s/iso/zstack_310.iso',
-    "3.2.0": '%s/iso/zstack_320.iso',
-    "3.3.0": '%s/iso/zstack_330.iso',
-    # "3.4.0"
-    # "3.5.0"
-    # "3.5.1"
-    # "3.5.2"
-}
-
-bin_path = '%s/installation-package/zstack-installer-%s.bin'
-
 
 def initial(management_ip):
     # todo: zsha2_vip
 
     make_ssh_no_password(management_ip, tmp_file)
     update_old_repo(management_ip, tmp_file)
-
-    # vm_cond = res_ops.gen_query_conditions('vmNics.ip', '=', management_ip)
-    # vm = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, vm_cond).inventories[0]
-    #
-    # volume_image_cond = res_ops.gen_query_conditions("name", "=", data_image_name)
-    # volume_image = sce_ops.query_resource(zstack_management_ip, res_ops.IMAGE, volume_image_cond).inventories[0]
-    #
-    # data_volume_name = 'Test_feature__data_volume_for_nightly'
-    # ps_uuid = vm.allVolumes[0].primaryStorageUuid
-    # data_volume = sce_ops.create_volume_from_template(zstack_management_ip, volume_image.uuid, ps_uuid,
-    #                                                   data_volume_name, vm.hostUuid,
-    #                                                   systemtags=['capability::virtio-scsi'])
-    #
-    # test_util.test_dsc('attach the data volume to vm')
-    # sce_ops.attach_volume(zstack_management_ip, data_volume.uuid, vm.uuid)
-    #
-    # tag_cond = res_ops.gen_query_conditions("resourceUuid", "=", data_volume.uuid)
-    # tags = sce_ops.query_resource(zstack_management_ip, res_ops.SYSTEM_TAG, tag_cond).inventories
-    # for tag in tags:
-    #     if "kvm::volume" in tag.tag:
-    #         wwn = tag.tag.split("::")[2]
-    #         break
-    # # mount
-    # mount_volume(management_ip, wwn)
-
-
-def mount_volume(management_ip, wwn):
-    ssh_cmd = "ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s" % management_ip
-    test_util.test_logger("MN Mount Volume")
-
-    cmd = "touch /root/mount_volume.sh & chmod a+x /root/mount_volume.sh"
-    test_lib.lib_execute_ssh_cmd(management_ip, "root", "password", cmd)
-    shell_script = '''
-    mkdir -p %s
-    device="/dev/`ls -l /dev/disk/by-id | grep %s | awk \'{print \$11}\' | awk -F/ \'{print \$3}\' | tail -n1`"
-    mount ${device} %s
-    ''' % (mount_point, wwn, mount_point)
-    with open("/root/mount_volume.sh", "w+") as f:
-        f.write(shell_script)
-
-    scp_file_to_vm(management_ip, "/root/mount_volume.sh", "/root/mount_volume.sh")
-    cmd = "%s bash /root/mount_volume.sh" % ssh_cmd
-    if test_lib.lib_execute_ssh_cmd(management_ip, "root", "password", cmd):
-        test_util.test_logger("Mount Volume success")
-    else:
-        test_util.test_fail("Mount Volume faild")
-
-
-def upgrade_mn(management_ip, current_version, next_version):
-    print "\nUpgrade MN: %s ----> %s" % (current_version, next_version)
-    # # upgrade_iso
-    # if iso_dict[current_version] != iso_dict[next_version]:
-    #     test_util.test_logger("upgrade iso %s --> %s" % (iso_dict[current_version], iso_dict[next_version]))
-    #     upgrade_iso(management_ip, iso_dict[next_version] % mount_point)
-    #
-    # # upgrade_bin
-    # test_util.test_logger("upgrade bin %s --> %s" % (current_version, next_version))
-    # next_version_bin = "%s/installation-package/zstack-installer-%s.bin" % (mount_point, next_version)
-    # upgrade_bin(management_ip, next_version_bin)
-    # # check mn
-
-    test_util.test_logger('Upgrade zstack to %s' % next_version)
-    upgrade_pkg = os.environ.get('zstackPkg_%s' % next_version)
-    upgrade_zstack(management_ip, upgrade_pkg, tmp_file)
-    start_mn(management_ip)
-
-    # todo check resource status
-
-
-def upgrade_iso(management_ip, iso_path):
-    ssh_cmd = "ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s" % management_ip
-    iso_mount_point = "/tmp/%s" % uuid.uuid1().get_hex()
-    test_lib.lib_execute_ssh_cmd(management_ip, "root", "password", "mkdir %s" % iso_mount_point)
-    zstack_upgrade_path = "%s/scripts/zstack-upgrade" % iso_mount_point
-
-    mount_cmd = "mount %s %s" % (iso_path, iso_mount_point)
-    cmd = "%s %s" % (ssh_cmd, mount_cmd)
-    process_result = execute_shell_in_process(cmd, tmp_file)
-
-    if process_result != 0:
-        test_util.test_fail('mount iso faild')
-    else:
-        test_util.test_logger('mount iso success')
-
-    cp_cmd = "echo 'y' | cp %s /opt/; umount %s;" % (zstack_upgrade_path, iso_mount_point)
-    test_lib.lib_execute_ssh_cmd(management_ip, "root", "password", cp_cmd)
-    upgrade_cmd = "/opt/zstack-upgrade -r ../../../%s" % iso_path
-    cmd = "%s %s" % (ssh_cmd, upgrade_cmd)
-    process_result = execute_shell_in_process(cmd, tmp_file)
-
-    if process_result != 0:
-        test_util.test_fail('upgrade iso faild')
-    else:
-        test_util.test_logger('upgrade iso success')
-
-
-def upgrade_bin(management_ip, bin_path):
-    ssh_cmd = "ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s" % management_ip
-    upgrade_cmd = "WEBSITE='%s' bash %s -u" % ('localhost', bin_path)
-    cmd = "%s %s" % (ssh_cmd, upgrade_cmd)
-
-    process_result = execute_shell_in_process(cmd, tmp_file)
-
-    if process_result != 0:
-        test_util.test_fail('upgrade_zstack faild')
-    else:
-        test_util.test_logger('upgrade_zstack success')
 
 
 def update_repo(management_ip, tmp_file):

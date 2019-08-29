@@ -1,8 +1,10 @@
 # coding=utf-8
-import test_stub
 import os
 
+import test_stub
+
 management_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
+
 
 def test():
     test_stub.initial(management_ip)
