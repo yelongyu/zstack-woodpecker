@@ -13,7 +13,7 @@ import zstackwoodpecker.operations.volume_operations as vol_ops
 import apibinding.inventory as inventory
 
 _config_ = {
-        'timeout' : 1000,
+        'timeout' : 1800,
         'noparallel' : True
         }
 

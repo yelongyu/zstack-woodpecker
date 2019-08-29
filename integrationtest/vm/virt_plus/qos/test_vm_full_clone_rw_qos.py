@@ -13,7 +13,7 @@ import zstackwoodpecker.operations.volume_operations as vol_ops
 import apibinding.inventory as inventory
 
 _config_ = {
-        'timeout' : 1000,
+        'timeout' : 1800,
         'noparallel' : True
         }
 
@@ -89,8 +89,13 @@ def test():
         test_util.test_fail('Retrieved disk qos not match')
 
     test_stub.make_ssh_no_password(new_vm_inv)
-    test_stub.test_fio_bandwidth(new_vm_inv, read_bandwidth, '/dev/vda')
-    test_stub.test_fio_bandwidth(new_vm_inv, read_bandwidth, '/dev/vdb')
+    test_stub.test_fio_bandwidth(new_vm_inv, read_bandwidth*2, '/dev/vda')
+    test_stub.test_fio_bandwidth(new_vm_inv, read_bandwidth*2, '/dev/vdb')
+
+    os.system("sshpass -p '%s' ssh %s@%s 'mount /dev/vdb1 %s'"%(user_password, user_name, new_vm_inv.vmNics[0].ip, path))
+
+    test_stub.test_fio_bandwidth(new_vm_inv, write_bandwidth*2)
+    test_stub.test_fio_bandwidth(new_vm_inv, write_bandwidth*2, path)
 
     vol_ops.delete_disk_offering(volume_offering_uuid)
     vol_ops.delete_disk_offering(volume_offering_uuid)
