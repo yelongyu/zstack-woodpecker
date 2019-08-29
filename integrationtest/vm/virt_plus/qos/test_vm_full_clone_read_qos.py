@@ -77,6 +77,7 @@ def test():
         test_util.test_logger('Find 2 volumes for [vm:] %s.' % new_vm.vm.uuid)
 
     new_vm_inv = new_vm.get_vm()
+    test_stub.make_ssh_no_password(new_vm_inv)
     test_stub.install_fio(new_vm_inv)
 
     if vm_ops.get_vm_disk_qos(test_lib.lib_get_data_volumes(new_vm_inv)[0].uuid).volumeBandwidthRead != read_bandwidth*2:
