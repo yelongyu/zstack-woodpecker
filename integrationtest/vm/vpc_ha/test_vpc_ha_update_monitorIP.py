@@ -57,10 +57,8 @@ def test():
         test_stub.check_ha_status(ha_group.uuid)
         i += 1
     
-    i = 0
     for ha_group in ha_group_list:
-    	test_stub.update_ha_group_monitorip(ha_group.uuid, monitorIp=[monitorIp_list[i]])
-    	i += 1
+    	test_stub.update_ha_group_monitorip(ha_group.uuid, monitorIp=monitorIp_list)
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_ha_group()
@@ -78,20 +76,22 @@ def test():
         test_stub.check_ha_status(ha_group.uuid)
         i += 1
 
-    i = 0
     for ha_group in new_ha_group_list:
-    	test_stub.update_ha_group_monitorip(ha_group.uuid, monitorIp=[monitorIp_list[i]])
-    	i += 1
+    	test_stub.update_ha_group_monitorip(ha_group.uuid, monitorIp=monitorIp_list)
+
+    for ha_group in new_ha_group_list:
+    	test_stub.update_ha_group_monitorip(ha_group.uuid, monitorIp=['6.6.6.6'])
 
     test_util.test_dsc("change vpc vr ha status ")
     for ha_group in new_ha_group_list:
         test_stub.update_ha_status(ha_group.uuid)
         test_stub.check_ha_status(ha_group.uuid)
 
-    i = 0
     for ha_group in new_ha_group_list:
     	test_stub.update_ha_group_monitorip(ha_group.uuid, monitorIp=['6.6.6.6'])
-    	i += 1
+    
+    for ha_group in new_ha_group_list:
+    	test_stub.update_ha_group_monitorip(ha_group.uuid, monitorIp=monitorIp_list)
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_ha_group()
