@@ -1247,8 +1247,8 @@ class Longjob(object):
         self.target_bs = None
         self.vol_list = []
 
-    def create_vm(self):
-        self.vm = create_basic_vm()
+    def create_vm(self, l3_name=None):
+        self.vm = create_basic_vm(l3_name=l3_name)
 
     def create_data_volume(self, ceph_pool=None, scsi=False):
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.getenv('rootDiskOfferingName'))
@@ -1269,6 +1269,14 @@ class Longjob(object):
         self.data_volume.check()
         self.vol_list.append(self.data_volume)
 
+    def mount_disk_in_vm(self, vm):
+        import tempfile
+        test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, '22', timeout=600)
+        script_file = tempfile.NamedTemporaryFile(delete=False)
+#         script_file.write('''device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | grep -v '[[:digit:]]'| sort | tail -1`" \n mount ${device}1 /mnt''')
+        script_file.write('''device="/dev/`ls -ltr --file-type /dev | awk '$4~/disk/ {print $NF}' | tail -1`" \n mkfs.vfat ${device} \n mount ${device} /mnt''')
+        script_file.close()
+        test_lib.lib_execute_shell_script_in_vm(vm.vm, script_file.name)
 
     def set_ceph_mon_env(self, ps_uuid):
         cond_vol = res_ops.gen_query_conditions('uuid', '=', ps_uuid)
@@ -1400,9 +1408,13 @@ class Longjob(object):
         "volumeUuid"="%s"}' %(self.vol_create_image_name, self.target_bs.uuid, self.data_volume.get_volume().uuid)
         self.submit_longjob(job_data, name, job_type='crt_vol_image')
 
-    def live_migrate_vm(self):
+    def live_migrate_vm(self, allow_unknown=False):
         name = 'longjob_live_migrate_vm'
-        job_data = '{"name"="%s", "vmInstanceUuid"="%s"}' % (name, self.vm.get_vm().uuid)
+        #For MINI
+        if allow_unknown:
+            job_data = '{"name"="%s", "vmInstanceUuid"="%s", "allowUnknown"="true", "migrateFromDestination"="true"}' % (name, self.vm.get_vm().uuid)
+        else:
+            job_data = '{"name"="%s", "vmInstanceUuid"="%s"}' % (name, self.vm.get_vm().uuid)
         self.submit_longjob(job_data, name, job_type='live_migration')
 
 def disable_all_pss():

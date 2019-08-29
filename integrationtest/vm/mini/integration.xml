@@ -86,7 +86,7 @@
 		<case timeout='1800' noparallel='True'>log/test_mini_log_gc_check.py</case>
 		<case timeout='1800' noparallel='True'>log/test_api_log_delete.py</case>
 		<case timeout='7200' noparallel='True'>poweroff/test_poweroff_host.py</case>
-		
+		<case timeout='7200' noparallel='True'>test_vm_migrate_progress3.py</case>
 		<!--<case timeout='1200' noparallel='True'>ha/test_minips_vm_ha_force_stop.py</case>
 		<case timeout='1200' noparallel='True'>ha/test_minips_both_mns_force_stop_recover.py</case>
 		<case timeout='1200' noparallel='True'>ha/test_minips_net_sep_vm_ha_mag_dis_vm_run.py</case>
