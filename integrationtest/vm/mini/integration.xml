@@ -171,5 +171,14 @@
 		<case timeout='1800' noparallel='True'>virt_plus/image_store/test_create_100_images.py</case>
 		<case timeout='1800' noparallel='True'>virt_plus/image_store/test_create_vm_images.py</case>
 		<case timeout='1800' noparallel='True'>virt_plus/image_store/test_crt_2_vms_imgs_from_same_img.py</case>
+		<case timeout='1800' noparallel='True'>vip_qos/test_flat_vip_qos_1m.py</case>
+		<case timeout='1800' noparallel='True'>vip_qos/test_flat_vip_port_qos_multi_crt.py</case>
+		<case timeout='1800' noparallel='True'>vip_qos/test_flat_vip_port_qos_in_17m_out_15m.py</case>
+		<case timeout='1800' noparallel='True'>vip_qos/test_flat_vip_multi_port_qos.py</case>
+		<case timeout='1800' noparallel='True'>vip_qos/test_flat_vip_qos_27m.py</case>
+		<case timeout='1800' noparallel='True'>vip_qos/test_flat_vip_port_qos_1m.py</case>
+		<case timeout='1800' noparallel='True'>vip_qos/test_flat_vip_qos_in_99m_out_121m.py</case>
+		<case timeout='1800' noparallel='True'>vip_qos/test_flat_vip_port_qos_51m.py</case>
+		<case timeout='1800' noparallel='True'>vip_qos/test_flat_vip_qos_multi_crt.py</case>
 	</suite>
 </integrationTest>

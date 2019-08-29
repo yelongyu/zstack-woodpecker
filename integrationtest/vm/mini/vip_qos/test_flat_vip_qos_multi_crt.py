@@ -7,6 +7,11 @@ New Integration Test for vip qos.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
+import zstackwoodpecker.operations.config_operations as conf_ops
+import os
+    if os.getenv('zstackHaVip'):
+        os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.getenv('zstackHaVip')
+    conf_ops.change_global_config("networkService", "defaultDhcpMtu.l2VlanNetwork", '1450')
 
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
