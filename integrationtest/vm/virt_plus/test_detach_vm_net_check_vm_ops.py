@@ -28,8 +28,7 @@ def test():
 #    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
     if ps_type != 'MiniStorage':
-	vm_name='basic-test-vm'
-        vm = test_stub.create_vm(vm_name, image_name, l3_name)
+        vm = test_stub.create_vlan_vm(l3_name)
     else:
         vm = test_stub.create_vr_vm(l3_name='l3VlanNetworkName1', image_name=image_name, vm_name='basic-test-vm')
     test_obj_dict.add_vm(vm)

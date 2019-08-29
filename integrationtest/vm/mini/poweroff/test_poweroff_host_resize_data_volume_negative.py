@@ -43,6 +43,7 @@ def recover_hosts(host_uuids, host_ips, wait_time):
 
 def operations_shutdown(shutdown_thread, host_uuids, host_ips, wait_time, operation_thread=None):
     shutdown_thread.start()
+    time.sleep(120)
     time.sleep(3)
     if operation_thread:
         fail_flag = 1
