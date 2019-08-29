@@ -1,5 +1,5 @@
 '''
-cnt upgrade from 2.3.0 to '2.4.0','2.5.0','2.6.0','3.0.0','3.1.0','3.2.0','3.3.0','3.4.0','3.5.0','3.5.2' and lastest version
+cnt upgrade from  '2.3.1','2.3.2','2.4.0','2.5.0' upgrade 2.6 bug http://jira.zstack.io/browse/ZSTAC-16775 and lastest version
 @author: Yetian update 2018-11-26, 2019-08-29
 '''
 import os
@@ -46,13 +46,13 @@ def test():
     #test_stub.update_iso(vm_ip, tmp_file, iso_path, upgrade_script_path)
 
     #pkg_num = 1.9
-    release_ver=['2.4.0','2.5.0','2.6.0','3.0.0','3.1.0','3.2.0','3.3.0','3.4.0','3.5.0.1','3.5.2']
-    #release_ver=['2.3.1','2.3.2','2.4.0','2.5.0']
+    #release_ver=['2.4.0','2.5.0','2.6.0','3.0.0','3.1.0','3.2.0','3.3.0','3.4.0','3.5.0.1','3.5.2']
+    release_ver=['2.3.1','2.3.2','2.4.0','2.5.0']
     curren_num = float(os.environ.get('releasePkgNum'))
     for pkg_num in release_ver:
     #while pkg_num <= curren_num:
-	if str(pkg_num) == '3.2.0':
-		test_stub.update_repo(vm_ip, tmp_file)
+	#if str(pkg_num) == '3.2.0':
+		#test_stub.update_repo(vm_ip, tmp_file)
         test_util.test_logger('Upgrade zstack to %s' % pkg_num)
         upgrade_pkg = os.environ.get('zstackPkg_%s' % pkg_num)
         test_stub.upgrade_zstack(vm_ip, upgrade_pkg, tmp_file) 
@@ -72,7 +72,8 @@ def test():
 
     os.system('rm -f %s' % tmp_file)
     test_stub.destroy_vm_scenario(vm_inv.uuid)
-    test_util.test_pass('ZStack cnt upgrade 2.4.0 2.5.0 2.6.0 3.0.0 3.1.0 3.2.0 3.3.0 3.4.0 3.5.0.1 3.5.2 Test Success')
+    #test_util.test_pass('ZStack cnt upgrade 2.4.0 2.5.0 2.6.0 3.0.0 3.1.0 3.2.0 3.3.0 3.4.0 3.5.0.1 3.5.2 Test Success')
+    test_util.test_pass('ZStack cnt upgrade 2.4.0 2.5.0 Test Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():
