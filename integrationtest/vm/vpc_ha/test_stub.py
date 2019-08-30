@@ -104,10 +104,6 @@ def create_vpc_ha_group(ha_group_name='test_vpc_ha', monitorIp=['192.168.0.1']):
     return vr_ha_inv 
 
 def create_vpc_vrouter_with_tags(vr_name='test_vpc', tags=None):
-    conf = res_ops.gen_query_conditions('name', '=', 'test_vpc')
-    vr_list = res_ops.query_resource(res_ops.APPLIANCE_VM, conf)
-    if vr_list:
-        return ZstackTestVR(vr_list[0])
     vr_offering = res_ops.get_resource(res_ops.VR_OFFERING)[0]
     vr_inv = vpc_ops.create_vpc_vrouter(name=vr_name, virtualrouter_offering_uuid=vr_offering.uuid, system_tags=[tags])
     return ZstackTestVR(vr_inv)
