@@ -67,7 +67,7 @@ def test():
     iperf_server.check()
     iperf_server_ip = iperf_server.get_vm().vmNics[0].ip
     test_util.test_dsc("iperf server ip is: %s" % iperf_server_ip)
-    test_obj_dict.add_vm(iperf_server_ip)
+    test_obj_dict.add_vm(iperf_server)
 
 # Begin to do test
     cmd = 'pkill iperf; iperf -c %s -i 1 -t 5' % vm_sender_ip
@@ -79,7 +79,8 @@ def test():
     else:
         test_util.test_dsc("Firewall worked, test pass")
 
-##delete netflow
+    vpc_ops.DetachFirewallRuleSetFromL3(fw.uuid, vm_sender_l3_uuid, 'out')
+##delete firewall resource
     vpc_ops.DeleteFirewallRule(rule.uuid, 'Permissive')
     vpc_ops.DeleteFirewallRuleSet(rs.uuid, 'Permissive')
     vpc_ops.DeleteFirewall(fw.uuid, 'Permissive')
