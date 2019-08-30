@@ -70,6 +70,7 @@ def test():
 
     time.sleep(5)
     test_stub.ensure_hosts_connected(120)
+    test_stub.ensure_pss_connected()
     vrs = test_lib.lib_get_all_vrs()
     for vr in vrs:
         vr_cond = res_ops.gen_query_conditions('uuid', '=', vr.uuid)
