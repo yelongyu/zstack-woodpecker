@@ -3430,7 +3430,7 @@ def lib_get_ShareableVolume_Vm(volume_uuid):
 def lib_gen_serial_script_for_vm(vm_inv):
     cmd = "ls /tmp/serial_log_gen.sh"
     host = lib_find_host_by_vm(vm_inv)
-    rsp = lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
+    rsp = lib_execute_ssh_cmd(host.managementIp, 'root', os.environ.get('hostPassword'), cmd)
 
     if rsp:
         test_util.test_logger("lib_gen_serial_script_for_vm: /tmp/serial_log_gen.sh is found in %s" % host.managementIp)
@@ -3452,11 +3452,11 @@ fi
         script_file.close()
 #        ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, host.username, os.environ.get('hostPassword'), port=22)
         try:
-            ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, host.username, os.environ.get('hostPassword'), port=22)
+            ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, 'root', os.environ.get('hostPassword'), port=22)
         except:
-            ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, host.username, os.environ.get('hostPassword'), port=2222)
+            ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, 'root', os.environ.get('hostPassword'), port=2222)
         os.unlink(script_file.name)
-        _rsp = lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
+        _rsp = lib_execute_ssh_cmd(host.managementIp, 'root', os.environ.get('hostPassword'), cmd)
         if _rsp:
             test_util.test_logger("lib_gen_serial_script_for_vm: /tmp/serial_log_gen.sh is generated in %s" % host.managementIp)
             return True
