@@ -51,22 +51,24 @@ def test():
     test_lib.lib_wait_target_up(vm_ip, 22)
 
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
-    test_util.test_dsc('create data volume from template') 
-    data_volume_name='Test_installation_data_volume_for_nightly'
-    data_volume_inv = sce_ops.create_volume_from_template(zstack_management_ip, data_image_uuid, ps_uuid, data_volume_name, host_uuid)
-    data_volume_uuid = data_volume_inv.uuid
+    #test_util.test_dsc('create data volume from template') 
+    #data_volume_name='Test_installation_data_volume_for_nightly'
+    #data_volume_inv = sce_ops.create_volume_from_template(zstack_management_ip, data_image_uuid, ps_uuid, data_volume_name, host_uuid)
+    #data_volume_uuid = data_volume_inv.uuid
 
     #test_util.test_dsc('query data volume') 
     #data_volume_name = 'Test_installation_data_volume_for_nightly'
     #conditions = res_ops.gen_query_conditions('name', '=', data_volume_name)
     #data_volume_uuid = res_ops.query_resource(res_ops.VOLUME, conditions)[0].uuid
 
-    test_util.test_dsc('attach the data volume to vm') 
-    sce_ops.attach_volume(zstack_management_ip, data_volume_uuid, vm_uuid)
+    #test_util.test_dsc('attach the data volume to vm') 
+    #sce_ops.attach_volume(zstack_management_ip, data_volume_uuid, vm_uuid)
     
-    test_util.test_dsc('mount the disk in vm') 
-    mount_point = '/testpath'
-    test_stub.mount_volume(vm_ip, mount_point, tmp_file)
+    test_util.test_dsc('mount the nfs server in vm') 
+    #mount_point = '/testpath'
+    mount_point = '/mnt'
+    #test_stub.mount_volume(vm_ip, mount_point, tmp_file)
+    test_stub.update_nfs(vm_ip, tmp_file)
 
     iso_19_path = '%s/iso/zstack_19.iso' % mount_point
     iso_10_path = '%s/iso/zstack_10.iso' % mount_point
@@ -81,6 +83,9 @@ def test():
     iso_310_path = '%s/iso/zstack_310.iso' % mount_point
     iso_320_path = '%s/iso/zstack_320.iso' % mount_point
     iso_330_path = '%s/iso/zstack_330.iso' % mount_point
+    iso_340_path = '%s/iso/zstack_340.iso' % mount_point
+    iso_350_path = '%s/iso/zstack_350.iso' % mount_point
+    iso_352_path = '%s/iso/zstack_352.iso' % mount_point
 
     test_util.test_dsc('Update MN IP')
     test_stub.update_mn_hostname(vm_ip, tmp_file)
@@ -92,7 +97,8 @@ def test():
 
     test_stub.update_local_iso(vm_ip, tmp_file, iso_19_path, upgrade_script_path)
 
-    release_ver=['1.9','1.10','2.0.0','2.1.0','2.2.0','2.3.0','2.3.1','2.3.2','2.4.0','2.5.0','2.6.0','3.0.0','3.0.1','3.1.0','3.1.3','3.2.0','3.3.0']
+    release_ver=['1.9','1.10','2.0.0','2.1.0','2.2.0','2.3.0','2.3.1','2.3.2','2.4.0','2.5.0','2.6.0','3.0.0','3.0.1','3.1.0','3.1.3','3.2.0','3.3.0','3.4.0','3.5.0.1','3.5.2']
+    #release_ver=['1.9','1.10','2.0.0','2.1.0','2.2.0','2.3.0','2.3.1','2.3.2','2.4.0','2.5.0','2.6.0','3.0.0','3.0.1','3.1.0','3.1.3','3.2.0','3.3.0']
     curren_num = float(os.environ.get('releasePkgNum'))
     for pkg_num in release_ver:
 	if str(pkg_num) == '1.10':
@@ -119,6 +125,12 @@ def test():
 		test_stub.update_local_iso(vm_ip, tmp_file, iso_320_path, upgrade_script_path)
 	if str(pkg_num) == '3.3.0':
 		test_stub.update_local_iso(vm_ip, tmp_file, iso_330_path, upgrade_script_path)
+	if str(pkg_num) == '3.4.0':
+		test_stub.update_local_iso(vm_ip, tmp_file, iso_340_path, upgrade_script_path)
+	if str(pkg_num) == '3.5.0.1':
+		test_stub.update_local_iso(vm_ip, tmp_file, iso_350_path, upgrade_script_path)
+	if str(pkg_num) == '3.5.2':
+		test_stub.update_local_iso(vm_ip, tmp_file, iso_352_path, upgrade_script_path)
         test_util.test_logger('Upgrade zstack to %s' % pkg_num)
         upgrade_pkg = '%s/installation-package/zstack-installer-%s.bin' % (mount_point, pkg_num)
         test_stub.upgrade_old_zstack(vm_ip, upgrade_pkg, tmp_file) 

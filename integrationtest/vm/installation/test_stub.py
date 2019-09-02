@@ -224,6 +224,15 @@ def update_repo(vm_ip, tmp_file):
     cmd = '''%s 'sed -i "1a 172.20.198.8 rsync.repo.zstack.io" /etc/hosts' ''' % ssh_cmd
     process_result = execute_shell_in_process(cmd, tmp_file)
 
+def update_nfs(vm_ip, tmp_file):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    cmd = '%s "mount 172.24.251.2:/home/install /mnt" ' % ssh_cmd
+    process_result = execute_shell_in_process(cmd, tmp_file)
+    if process_result != 0:
+        test_util.test_fail('mount nfs server failed')
+    else:
+        test_util.test_logger('mount nfs server success')
+
 def update_old_repo(vm_ip, tmp_file):
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
     cmd = '''%s 'echo "172.20.198.8 repo.zstack.io" >> /etc/hosts' ''' % ssh_cmd
