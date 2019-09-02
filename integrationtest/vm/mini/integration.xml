@@ -38,14 +38,15 @@
 		<case timeout='1800' noparallel='True'>vm/test_create_vm_with_illegal_parameters.py</case>
 		<case timeout='1800' noparallel='True'>vm/test_create_vm_backup.py</case>
 		<case timeout='1800' noparallel='True'>vm/test_create_vm_from_diff_images.py</case>
-		<case timeout='1800' noparallel='True'>host_shutdown/test_backup_vm.py</case>
-		<case timeout='1800' noparallel='True'>host_shutdown/test_create_data_volume_backup.py</case>
-		<case timeout='1800' noparallel='True'>host_shutdown/test_create_iso_image.py</case>
-		<case timeout='1800' noparallel='True'>host_shutdown/test_create_qcow2_image.py</case>
-		<case timeout='1800' noparallel='True'>host_shutdown/test_migrate_vm.py</case>
-		<case timeout='1800' noparallel='True'>host_shutdown/test_resize_data_thin_volume.py</case>
-		<case timeout='1800' noparallel='True'>host_shutdown/test_resize_vm_root_volume.py</case>
-		<case timeout='1800' noparallel='True'>host_shutdown/test_vm_create_template.py</case>
+		<case timeout='1800' noparallel='True'>poweroff/test_backup_vm_task.py</case>
+		<case timeout='1800' noparallel='True'>poweroff/test_create_data_volume_backup_task.py</case>
+		<case timeout='1800' noparallel='True'>poweroff/test_create_iso_image_task.py</case>
+		<case timeout='1800' noparallel='True'>poweroff/test_create_qcow2_image_task.py</case>
+		<case timeout='1800' noparallel='True'>poweroff/test_migrate_vm_task.py</case>
+		<case timeout='1800' noparallel='True'>poweroff/test_resize_data_thin_volume_task.py</case>
+		<case timeout='1800' noparallel='True'>poweroff/test_resize_vm_root_volume_task.py</case>
+		<case timeout='1800' noparallel='True'>poweroff/test_vm_create_template_task.py</case>
+		<case timeout='1800' noparallel='True'>poweroff/test_reconnect_host_task.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_del_image_replication_grp.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_dst_bs_nic_down.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_dst_bs_off.py</case>
