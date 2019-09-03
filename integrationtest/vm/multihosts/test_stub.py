@@ -29,6 +29,8 @@ import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.vpc_operations as vpc_ops
+import zstackwoodpecker.operations.longjob_operations as longjob_ops
+import zstacklib.utils.jsonobject as jsonobject
 import zstackwoodpecker.header.vm as vm_header
 import zstacklib.utils.xmlobject as xmlobject
 import zstacklib.utils.ssh as ssh
@@ -2105,13 +2107,44 @@ class MultiSharedPS(object):
             assert data_volume.get_volume().primaryStorageUuid == dst_ps.uuid
             self.set_ceph_mon_env(dst_ps.uuid)
 
+    def submit_longjob(self, job_data, name, job_name=None):
+        if not job_name:
+            job_name = 'APIPrimaryStorageMigrateVmMsg'
+        long_job = longjob_ops.submit_longjob(job_name, job_data, name)
+        assert long_job.state == "Running"
+        cond_longjob = res_ops.gen_query_conditions('apiId', '=', long_job.apiId)
+        progress_set = set()
+        for _ in xrange(900):
+            progress_inv = res_ops.get_task_progress(long_job.apiId).inventories
+            if not progress_inv:
+                time.sleep(1)
+                continue
+            else:
+                progress = progress_inv[0].content
+                progress_set.add(progress)
+                if '100' in progress or 'image cache' in progress:
+                    break
+                else:
+                    test_util.test_logger('PrimaryStorage Migration progress list: %s' % sorted(list(progress_set)))
+                    time.sleep(5)
+        progress_list = [int(i) for i in progress_set if len(i) <= 3]
+        progress_list.sort()
+        assert progress_list, 'Get task progress failed!'
+        time.sleep(10)
+        longjob = res_ops.query_resource(res_ops.LONGJOB, cond_longjob)[0]
+        assert longjob.state == "Succeeded"
+        assert longjob.jobResult == "Succeeded"
+
     def migrate_vm(self, vm=None):
         if not vm:
             vm = [self.vm[0]]
         for vmobj in vm:
             ps_to_migrate = self.get_ps_candidate(vmobj.get_vm().rootVolumeUuid)
             vmobj.stop()
-            datamigr_ops.ps_migrage_root_volume(ps_to_migrate.uuid, vmobj.get_vm().rootVolumeUuid)
+            job_data = '{"name"="%s", "vmInstanceUuid"="%s", "dstPrimaryStorageUuid"="%s"}' % (
+                'longjob_ps_migrate_vm', vmobj.get_vm().uuid, ps_to_migrate.uuid)
+            self.submit_longjob(job_data, 'migrate_root_volume')
+#             datamigr_ops.ps_migrage_root_volume(ps_to_migrate.uuid, vmobj.get_vm().rootVolumeUuid)
             vmobj.start()
             vmobj.check()
             vmobj.update()
