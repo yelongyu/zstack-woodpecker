@@ -47,6 +47,22 @@
 		<case timeout='1800' noparallel='True'>poweroff/test_resize_vm_root_volume_task.py</case>
 		<case timeout='1800' noparallel='True'>poweroff/test_vm_create_template_task.py</case>
 		<case timeout='1800' noparallel='True'>poweroff/test_reconnect_host_task.py</case>
+		<case timeout='1800' noparallel='True'>poweroff/test_poweroff_host.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_create_root_volume_image.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_create_root_volume_image_multicluster.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_migrate.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_migrate_multicluster.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_multicluster.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_resize_data_volume.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_resize_data_volume_multicluster.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_resize_root_volume.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_resize_root_volume_multicluster.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_upload_image.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_upload_image_multicluster.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_vm_backup.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_vm_backup_multicluster.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_volume_backup.py</case>
+                <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_volume_backup_multicluster.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_del_image_replication_grp.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_dst_bs_nic_down.py</case>
 		<case timeout='1800' noparallel='True'>image_replication/test_replicate_image_dst_bs_off.py</case>

@@ -114,5 +114,6 @@
 		<case timeout='1800' repeat='1'>test_instance_offering_last_host_preferred.py</case>
 		<case timeout='1800' repeat='1'>test_instance_offering_designated_host.py</case>
 		<case timeout='1800' repeat='1'>test_iso_create_vm_root_size_not_512_multiple.py</case>
+		<case timeout='2400' repeat='1'>vms/test_create_vm_zstore_check.py</case>
 	</suite>
 </integrationTest>
