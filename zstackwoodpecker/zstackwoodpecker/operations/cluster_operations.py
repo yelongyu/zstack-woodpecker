@@ -31,7 +31,7 @@ def create_cluster(cluster_option, session_uuid=None):
 
 def create_mini_cluster(mini_cluster_option, session_uuid=None):
     action = api_actions.CreateMiniClusterAction()
-    action.timeout = 300000
+    action.timeout = 900000
     action.zoneUuid = mini_cluster_option.get_zone_uuid()
     action.name = mini_cluster_option.get_name()
     action.username = mini_cluster_option.get_username()

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import random
@@ -6,29 +7,27 @@ import time
 import apibinding.inventory as inventory
 import zstacklib.utils.debug as debug
 import zstackwoodpecker.header.vm as vm_header
+import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.config_operations as conf_ops
 import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
 import zstackwoodpecker.operations.ha_operations as ha_ops
+import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
-import zstackwoodpecker.operations.backupstorage_operations as bs_ops
-import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.resource_stack as resource_stack_ops
+import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.operations.stack_template as stack_template_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
-import zstackwoodpecker.operations.scenario_operations as sce_ops
-import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as ts_header
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.snap as robot_snapshot_header
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
+import zstackwoodpecker.zstack_test.zstack_test_kvm_host as zstack_host_header
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstackwoodpecker.zstack_test.zstack_test_volume as zstack_vol_header
-import zstackwoodpecker.zstack_test.zstack_test_kvm_host as zstack_host_header
-import hashlib
 
 debug.install_runtime_tracedumper()
 test_stage = ts_header.TestStage
@@ -50,7 +49,7 @@ class robot_test_dict(object):
         self.image = {}  # {name: image_obj}
         self.snap_tree = {}  # {vol_name: snap_tree}
         self.volume_check = {}  # {name: robot_flag}
-        self.host = {} # {name: host_obj}
+        self.host = {}  # {name: host_obj}
 
     def __repr__(self):
         str = 'Dict:: \n'
@@ -481,7 +480,7 @@ class robot(object):
         bs = bs_ops.create_image_store_backup_storage(bs_option)
         bs_ops.attach_backup_storage(bs.uuid, host.zoneUuid)
 
-        #tag_ops.create_system_tag(resourceType="ImageStoreBackupStorageVO", resourceUuid=bs.uuid, tag="allowbackup")
+        # tag_ops.create_system_tag(resourceType="ImageStoreBackupStorageVO", resourceUuid=bs.uuid, tag="allowbackup")
 
         return bs
 
@@ -699,6 +698,7 @@ def create_vm(robot_test_obj, args):
     if changePsUuids:
         for uuid in changePsUuids:
             ps_ops.change_primary_storage_state(uuid, "enable")
+
 
 def migrate_vm(robot_test_obj, args):
     target_vm = None
@@ -1401,6 +1401,8 @@ def create_volume(robot_test_obj, args):
     disksize = 2 * 1024 * 1024 * 1024
     ps_type = None
     changePsUuids = []
+    if MINI:
+        cluster_uuid = robot_test_obj.default_config['MINI_CLUSTER']
 
     if len(args) < 1:
         test_util.test_fail("no resource available for next action: create volume")
@@ -1457,6 +1459,11 @@ def create_volume(robot_test_obj, args):
         else:
             disksize = arg_dict['size']
 
+    if "cluster" in arg_dict:
+        cluster_name = arg_dict['cluster']
+        cond = res_ops.gen_query_conditions("name", "=", cluster_name)
+        cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, cond)
+
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_name(target_volume_name)
     volume_creation_option.set_primary_storage_uuid(ps_uuid)
@@ -1489,7 +1496,10 @@ def create_volume(robot_test_obj, args):
         volume_creation_option.set_primary_storage_uuid(pss[0].uuid)
 
     if systemtags:
+        if MINI:
+            systemtags.append("miniStorage::clusterUuid::%s" % cluster_uuid)
         volume_creation_option.set_system_tags(systemtags)
+
     if not MINI:
         new_volume = test_lib.lib_create_volume_from_offering(volume_creation_option)
     else:
@@ -1506,6 +1516,7 @@ def create_volume(robot_test_obj, args):
 
     for uuid in changePsUuids:
         ps_ops.change_primary_storage_state(uuid, "enable")
+
 
 def create_scsi_volume():
     pass
@@ -2066,7 +2077,6 @@ def ps_migrate_vm(robot_test_obj, args):
         volume.update()
         volume.update_volume(update_utility=True)
 
-
     ps_ops.clean_up_trash_on_primary_storage(old_ps_uuid)
 
 
@@ -2077,6 +2087,7 @@ def create_mini_vm(robot_test_obj, args):
     l3_uuid = None
     large = False
     flag = None
+    cluster_name = "cluster1"
 
     arg_dict = parser_args(args[1:])
     if 'flag' in arg_dict:
@@ -2114,6 +2125,9 @@ def create_mini_vm(robot_test_obj, args):
             else:
                 l3_uuid = l3[0].uuid
 
+    if 'cluster' in arg_dict:
+        cluster_name = arg_dict['cluster']
+
     provisiong = 'Thin' if not arg_dict.has_key('provision') else arg_dict['provision']
     if flag and "thick" in flag:
         provisiong = "Thick"
@@ -2121,6 +2135,7 @@ def create_mini_vm(robot_test_obj, args):
     rootVolumeSystemTag = "volumeProvisioningStrategy::%sProvisioning" % provisiong
 
     cond = res_ops.gen_query_conditions('state', '=', "Enabled")
+    cond = res_ops.gen_query_conditions('name', '=', cluster_name, cond)
     cluster = res_ops.query_resource(res_ops.CLUSTER, cond)[0]
     robot_test_obj.default_config['MINI_CLUSTER'] = cluster.uuid
 
@@ -2328,6 +2343,8 @@ def delete_vm_snapshot(robot_test_obj, args):
             snapshot_name_list.append(name)
 
     batch_delete_volume_snapshot(robot_test_obj, [snapshot_name_list], real=False)
+
+
 def poweron_only(robot_test_obj, args, auto=None):
     def wait_host_up(timeout, hosts):
         timeout_max = timeout
@@ -2354,6 +2371,7 @@ def poweron_only(robot_test_obj, args, auto=None):
             if not hosts:
                 test_util.test_logger('all the hosts are up and Connected')
                 break
+
     zstack_management_ip = os.environ.get('zstackManagementIp')
     test_util.test_logger('@@DEBUG-zstack-management-ip:{}@@'.format(zstack_management_ip))
     hosts = []
@@ -2367,7 +2385,7 @@ def poweron_only(robot_test_obj, args, auto=None):
                 host_names.append(host.name)
     if not len(robot_test_obj.test_dict.host.items()):
         test_util.test_fail("No Host")
-    for name,host in robot_test_obj.test_dict.host.items():
+    for name, host in robot_test_obj.test_dict.host.items():
         if auto or name in host_names and host.host.state == 'PowerOff':
             test_util.test_logger("@@DEBUG-host-state@@Host{}:{}".format(name, host.host.state))
             hosts.append(host.host)
@@ -2379,7 +2397,8 @@ def poweron_only(robot_test_obj, args, auto=None):
         if host.status == "Connected":
             host.state = "Enabled"
         else:
-           test_util.test_fail("Host[{}] status is not 'Connected'".format(host.uuid))
+            test_util.test_fail("Host[{}] status is not 'Connected'".format(host.uuid))
+
 
 def poweroff_only(robot_test_obj, args):
     host_uuids = []
@@ -2419,9 +2438,10 @@ def poweroff_only(robot_test_obj, args):
         test_util.test_logger("@@Auto PowerOn Start@@")
         poweron_only(robot_test_obj, args, auto=1)
 
+
 action_dict = {
-    'poweroff_only' : poweroff_only,
-    'poweron_only' : poweron_only,
+    'poweroff_only': poweroff_only,
+    'poweron_only': poweron_only,
     'change_global_config_sp_depth': change_global_config_sp_depth,
     'recover_global_config_sp_depth': recover_global_config_sp_depth,
     "cleanup_imagecache_on_ps": cleanup_imagecache_on_ps,
