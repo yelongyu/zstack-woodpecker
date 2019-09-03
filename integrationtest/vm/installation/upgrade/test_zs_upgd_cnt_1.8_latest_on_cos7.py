@@ -43,10 +43,7 @@ def test():
     vm_inv = test_stub.create_vm_scenario(image_name, vm_name)
     vm_uuid = vm_inv.uuid
     ps_uuid = vm_inv.allVolumes[0].primaryStorageUuid
-    print ps_uuid
     host_uuid = vm_inv.hostUuid
-    print host_uuid
-    print data_image_uuid
     vm_ip = vm_inv.vmNics[0].ip
     test_lib.lib_wait_target_up(vm_ip, 22)
 
@@ -150,9 +147,9 @@ def test():
     test_stub.check_installation(vm_ip, tmp_file)
 
     os.system('rm -f %s' % tmp_file)
-    sce_ops.detach_volume(zstack_management_ip, data_volume_uuid, vm_uuid)
-    sce_ops.delete_volume(zstack_management_ip, data_volume_uuid)
-    sce_ops.expunge_volume(zstack_management_ip, data_volume_uuid)
+    #sce_ops.detach_volume(zstack_management_ip, data_volume_uuid, vm_uuid)
+    #sce_ops.delete_volume(zstack_management_ip, data_volume_uuid)
+    #sce_ops.expunge_volume(zstack_management_ip, data_volume_uuid)
     test_stub.destroy_vm_scenario(vm_inv.uuid)
     test_util.test_pass('''ZStack upgrade 1.9','1.10','2.0.0','2.1.0','2.2.0','2.3.0','2.3.1','2.3.2','2.4.0','2.5.0','2.6.0','3.0.0','3.0.1','3.1.0','3.1.3','3.2.0','3.3.0'Test Success''')
 
@@ -160,6 +157,6 @@ def test():
 def error_cleanup():
     global vm_inv,data_volume_uuid
     os.system('rm -f %s' % tmp_file)
-    vol_ops.delete_volume(data_volume_uuid)
-    vol_ops.expunge_volume(data_volume_uuid)
+    #vol_ops.delete_volume(data_volume_uuid)
+    #vol_ops.expunge_volume(data_volume_uuid)
     test_stub.destroy_vm_scenario(vm_inv.uuid)
