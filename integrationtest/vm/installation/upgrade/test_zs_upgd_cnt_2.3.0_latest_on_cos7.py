@@ -63,7 +63,7 @@ def test():
     test_util.test_dsc('mount nfs server in vm') 
     #mount_point = '/testpath'
     mount_point = '/mnt'
-    test_stub.mount_volume(vm_ip, mount_point, tmp_file)
+    test_stub.update_nfs(vm_ip, tmp_file)
 
     iso_232_path = '%s/iso/zstack_230.iso' % mount_point
     iso_240_path = '%s/iso/zstack_240.iso' % mount_point
