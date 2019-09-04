@@ -207,10 +207,12 @@ def reboot_vm_scheduler(vm_uuid, type, name, start_time=None, interval=None, rep
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def migrate_vm(vm_uuid, host_uuid, timeout = 480000, session_uuid = None):
+def migrate_vm(vm_uuid, host_uuid, timeout = 480000, session_uuid = None, allowUnknown=False, migrateFromDestination=False):
     action = api_actions.MigrateVmAction()
     action.vmInstanceUuid = vm_uuid
     action.hostUuid = host_uuid
+    action.allowUnknown = allowUnknown
+    action.migrateFromDestination = migrateFromDestination
     if not timeout:
         timeout = 480000
     action.timeout = timeout

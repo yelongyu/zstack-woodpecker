@@ -27,6 +27,10 @@ def test():
     # disconnect mn_host1
     host = cluster1_host[0]
     host_ops.update_kvm_host(host.uuid, 'username', "root1")
+    try:
+        host_ops.reconnect_host(host.uuid)
+    except:
+        test_util.test_logger("host: [%s] is disconnected" % host.uuid)
     disconnect = True
 
     # create_volume on 2 clusters

@@ -107,9 +107,9 @@ class ZstackTestVm(vm_header.TestVm):
         self.vm = vm_ops.reboot_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).reboot()
 
-    def migrate(self, host_uuid, timeout = None, session_uuid = None):
+    def migrate(self, host_uuid, timeout = None, session_uuid = None, allowUnknown=False, migrateFromDestination=False):
         self.vm = vm_ops.migrate_vm(self.vm.uuid, host_uuid, timeout,\
-                session_uuid)
+                session_uuid, allowUnknown, migrateFromDestination)
         super(ZstackTestVm, self).migrate(host_uuid)
 
     def expunge(self, session_uuid = None):
