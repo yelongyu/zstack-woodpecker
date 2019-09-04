@@ -45,5 +45,7 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_two_vm_connection.py::vm1_ha_vlan_vm2_ha_vlan_vrreconnect</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_two_vm_connection.py::vm1_ha_vlan_vm2_ha_vlan_vr_migrate</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_two_vm_connection.py::vm1_ha_vlan_vm2_ha_vxlan_hostreconnect</case>
+	<case timeout='2100' repeat='1' noparallel='True'>test_vpc_ha_2_pub_nic_vrouter_route_table.py</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_check_snat_state.py</case>
     </suite>
 </integrationTest>
