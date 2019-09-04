@@ -51,10 +51,16 @@ def test():
     global hosts
     MN_IP = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     mn_cond = res_ops.gen_query_conditions('managementIp', '=', MN_IP)
-    mn_host = res_ops.query_resource(res_ops.HOST, mn_cond)[0]
-    mn_host_uuid = mn_host.uuid
+    mn_host = res_ops.query_resource(res_ops.HOST, mn_cond)
+    if len(mn_host):
+        #Disable MN Host
+        mn_host_uuid = mn_host[0].uuid
+        host_ops.change_host_state(mn_host_uuid, 'disable')
     nfs_cond = res_ops.gen_query_conditions('type', '=', 'NFS') 
-    nfs_ps_uuid = res_ops.query_resource(res_ops.PRIMARY_STORAGE, nfs_cond)[0].uuid
+    nfs_ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, nfs_cond)
+    if not len(nfs_ps):
+        test_util.test_skip("No nfs ps, test skip")
+    nfs_ps_uuid = nfs_ps[0].uuid
     test_util.test_logger("@@nfs: %s" % nfs_ps_uuid)
     image_name = 'image_for_sg_test' 
     image_cond = res_ops.gen_query_conditions('name', '=', image_name)
@@ -68,8 +74,6 @@ def test():
     vm_create_option.set_image_uuid(image_uuid)
     vm_create_option.set_instance_offering_uuid(instance_offering_uuid)
     vm_create_option.set_ps_uuid(nfs_ps_uuid)
-    #Disable MN Host
-    host_ops.change_host_state(mn_host_uuid, 'disable')
     host_cond = res_ops.gen_query_conditions('managementIp', '!=', MN_IP)
     hosts = res_ops.query_resource(res_ops.HOST, host_cond)
     #1.check if /usr/local/zstack/imagestore exist in hosts
