@@ -47,6 +47,7 @@
 		<case timeout='1800' noparallel='True'>poweroff/test_resize_vm_root_volume_task.py</case>
 		<case timeout='1800' noparallel='True'>poweroff/test_vm_create_template_task.py</case>
 		<case timeout='1800' noparallel='True'>poweroff/test_reconnect_host_task.py</case>
+		<case timeout='1800' noparallel='True'>poweroff/test_add_mini_clusters_task.py</case>
 		<case timeout='1800' noparallel='True'>poweroff/test_poweroff_host.py</case>
                 <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_create_root_volume_image.py</case>
                 <case timeout='1800' noparallel='True'>poweroff/test_poweroff_host_create_root_volume_image_multicluster.py</case>

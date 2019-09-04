@@ -26,7 +26,7 @@ def create_cluster(cluster_option, session_uuid=None):
     action.zoneUuid = cluster_option.get_zone_uuid()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Cluster [uuid:] %s [name:] %s' % \
-            (evt.uuid, action.name))
+            (evt.inventory.uuid, action.name))
     return evt.inventory
 
 def create_mini_cluster(mini_cluster_option, session_uuid=None):
@@ -41,7 +41,7 @@ def create_mini_cluster(mini_cluster_option, session_uuid=None):
     action.hypervisorType = mini_cluster_option.get_hypervisor_type()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Mini cluster [uuid:] %s with [ips:] %s' % \
-                (evt.uuid, " ".join(action.hostManagementIps)))
+                (evt.inventory.uuid, " ".join(action.hostManagementIps)))
     return evt.inventory
 
 def delete_cluster(cluster_uuid, session_uuid=None):
