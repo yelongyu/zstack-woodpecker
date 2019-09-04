@@ -15,6 +15,7 @@ import commands
 from lib2to3.pgen2.token import STAR
 from zstacklib.utils import shell
 from collections import OrderedDict
+#from statements_tmp import statements
 
 zstack_management_ip = os.environ.get('zstackManagementIp')
 
@@ -1090,3 +1091,44 @@ def upgrade_old_zstack(vm_ip, old_bin, tmp_file):
     else:
        test_util.test_logger('upgrade zstack success')
 
+def create_vid(vm_ip, vid_name):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    login = "zstack-cli LogInByAccount accountName=admin password=password"
+    cmd_create_vid = '%s "%s;zstack-cli CreateIAM2VirtualID name=%s password=password"' % (ssh_cmd, login, vid_name)
+    test_util.test_logger("@@cmd_create_vid@@: %s" % cmd_create_vid)
+    result_cv = json.loads(os.popen(cmd_create_vid).read().split("\n\n")[1].replace("\'","\"").replace("true","\"true\"").replace("\n",""))
+    test_util.test_logger("@@DEBUG@@:%s" % result_cv['inventory']['uuid'])
+    vid_uuid = result_cv['inventory']['uuid'].encode('utf-8')
+
+    #cmd_create_role = '%s "%s;zstack-cli CreateRole name=all statements=\'%s\'"' % (ssh_cmd, login, statements)
+    #test_util.test_logger("@@cmd_create_role@@: %s" % cmd_create_role)
+    #result_cr = json.loads(os.popen(cmd_create_role).read().split("\n\n")[1].replace("\'","\"").replace("true","\"true\"").replace("\n",""))
+    #role_uuid = result_cr['inventory']['uuid'].encode('utf-8')
+    #cmd_attach_role = '%s "%s;zstack-cli AddRolesToIAM2VirtualID roleUuids=%s virtualIDUuid=%s"'  % (ssh_cmd, login, role_uuid, vid_uuid)
+    #test_util.test_logger("@@cmd_attach_role@@: %s" % cmd_attach_role)
+    #os.popen(cmd_attach_role)
+
+def get_vid_permissions(vm_ip, vid_name):
+    ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
+    login_vid = 'zstack-cli LoginIAM2VirtualID name=%s password=password' % (vid_name)
+    cmd_get_permission = '%s "%s;zstack-cli GetIAM2VirtualIDAPIPermission"' % (ssh_cmd, login_vid)
+    test_util.test_logger("@@cmd_get_permission@@: %s" % cmd_get_permission)
+    #test_util.test_logger(os.popen(cmd_get_permission).read().split("\n\n")[1].replace("\'","\"").replace("true","\"true\"").replace("false","\"false\"").replace("\n",""))
+    pms = json.loads(os.popen(cmd_get_permission).read().split("\n\n")[1].replace("\'","\"").replace("true","\"true\"").replace("false","\"false\"").replace("\n",""))['permissions']
+    test_util.test_logger("@@pms_str@@: %s\n @@type_pms_str@@: %s" % (pms ,type(pms)))
+    return pms
+
+def check_permissions(pms1, pms2):
+    fail_api_name_list = []
+    fail_allow_list = []
+    for api in pms1.keys():
+        if api not in pms2.keys():
+            fail_api_name_list.append(api)
+            continue
+        if pms1[api]['allow'] != pms2[api]['allow']:
+            fail_allow_list.append(api)
+    if len(fail_api_name_list):
+        test_util.test_fail("VID api check failed!\n Failed API list: %s" % fail_api_name_list)
+    if len(fail_allow_list):
+        test_util.test_fail("VID permission check failed!\n Failed API list: %s" % fail_allow_list)
+    test_util.test_logger("VID permission check pass!")
