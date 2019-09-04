@@ -129,7 +129,7 @@ def create_vm_multi_l3(l3_uuid_list, default_l3_uuid, vm_name = None, image_name
     return vm
 
 def create_vm(vm_name = 'vm_for_baremetal', image_name = None, \
-             l3_name = None, instance_offering_uuid = None, \
+             l3_name = None, instance_offering_uuid = None, root_disk_offering_uuid = None,\
              host_uuid = None, disk_offering_uuid = None, cluster_uuid = None, \
              system_tags = None, password = None, session_uuid = None):
     if not instance_offering_uuid:
@@ -151,6 +151,8 @@ def create_vm(vm_name = 'vm_for_baremetal', image_name = None, \
         vm_creation_option.set_cluster_uuid(cluster_uuid)
     if system_tags: 
         vm_creation_option.set_system_tags(system_tags)
+    if root_disk_offering_uuid:
+        vm_creation_option.set_root_disk_uuid(root_disk_offering_uuid)
     if disk_offering_uuid:
         vm_creation_option.set_data_disk_uuids(disk_offering_uuid)
     if password:

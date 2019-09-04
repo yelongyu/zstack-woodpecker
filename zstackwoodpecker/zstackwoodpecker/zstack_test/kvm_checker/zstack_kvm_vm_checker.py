@@ -15,6 +15,7 @@ import apibinding.inventory as inventory
 import zstacktestagent.plugins.vm as vm_plugin
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
+import time
 
 class zstack_kvm_vm_running_checker(checker_header.TestChecker):
     '''check kvm vm running status. If it is running, return self.judge(True). 

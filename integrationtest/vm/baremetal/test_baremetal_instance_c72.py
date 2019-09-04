@@ -13,6 +13,7 @@ import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+from vncdotool import api
 import test_stub
 import time
 import os
@@ -82,6 +83,12 @@ def test():
     baremetal_operations.power_on_baremetal(chassis_uuid)
     time.sleep(30)
     baremetal_operations.inspect_chassis(chassis_uuid)
+    time.sleep(2)
+    console = test_lib.lib_get_vm_console_address(vm.get_vm().uuid)
+    display = str(int(console.port)-5900)
+    client = api.connect(console.hostIp+":"+display)
+    client.keyPress('esc')
+    client.keyPress('4')
     hwinfo = test_stub.check_hwinfo(chassis_uuid)
     if not hwinfo:
         test_util.test_fail('Fail to get hardware info during the first inspection')

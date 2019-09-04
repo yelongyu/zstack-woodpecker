@@ -7,10 +7,12 @@ import zstackwoodpecker.operations.baremetal_operations as baremetal_operations
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.cluster_operations as cluster_ops
 import zstackwoodpecker.operations.net_operations as net_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import test_stub
+from vncdotool import api
 import time
 import os
 
@@ -52,7 +54,13 @@ def test():
     host_ip = host.managementIp
     cond = res_ops.gen_query_conditions('hypervisorType', '=', 'KVM')
     cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, cond)[0].uuid
-    vm = test_stub.create_vm(host_uuid = host_uuid, cluster_uuid = cluster_uuid)
+    root_disk_size = 10737418240
+    disk_offering_option = test_util.DiskOfferingOption()
+    disk_offering_option.set_name('root-disk-iso')
+    disk_offering_option.set_diskSize(root_disk_size)
+    root_disk_offering = vol_ops.create_volume_offering(disk_offering_option)
+    root_disk_uuid = root_disk_offering.uuid
+    vm = test_stub.create_vm(host_uuid = host_uuid, cluster_uuid = cluster_uuid, root_disk_offering_uuid=root_disk_uuid)
 
     test_util.test_dsc('Create chassis')
     test_stub.create_vbmc(vm, host_ip, 623)
@@ -88,6 +96,12 @@ def test():
 
     test_util.test_dsc('Inspect chassis and check hardware info')
     baremetal_operations.inspect_chassis(chassis_uuid)
+    time.sleep(2)
+    console = test_lib.lib_get_vm_console_address(vm.get_vm().uuid)
+    display = str(int(console.port)-5900)
+    client = api.connect(console.hostIp+":"+display)
+    client.keyPress('esc')
+    client.keyPress('4')    
     hwinfo = test_stub.check_hwinfo(chassis_uuid)
     if not hwinfo:
         test_util.test_fail('Fail to get hardware info during the first inspection')
