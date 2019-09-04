@@ -65,7 +65,7 @@ def test():
     image_name = 'image_for_sg_test' 
     image_cond = res_ops.gen_query_conditions('name', '=', image_name)
     image_uuid = res_ops.query_resource(res_ops.IMAGE, image_cond)[0].uuid 
-    l3_cond = res_ops.gen_query_conditions('category', '!=', 'Public')
+    l3_cond = res_ops.gen_query_conditions('category', '=', 'Private')
     l3_uuid = res_ops.query_resource(res_ops.L3_NETWORK, l3_cond)[0].uuid
     offering_cond = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, offering_cond)[0].uuid
