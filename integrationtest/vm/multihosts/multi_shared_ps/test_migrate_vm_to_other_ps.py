@@ -21,13 +21,13 @@ case_flavor = dict(from_shared1_to_shared2 = dict(shared1=True, shared2=False),
 def test():
     flavor = case_flavor[os.getenv('CASE_FLAVOR')]
     if flavor['shared1']:
-        multi_ps.create_vm(reverse=True)
+        multi_ps.create_vm(l3_name=os.getenv('l3PublicNetworkName'), reverse=True)
         multi_ps.copy_data(multi_ps.vm[0])
         multi_ps.create_image(multi_ps.vm[0])
         multi_ps.create_vm(image_name=multi_ps.image.name)
         multi_ps.check_data(multi_ps.vm[1])
     else:
-        multi_ps.create_vm()
+        multi_ps.create_vm(l3_name=os.getenv('l3PublicNetworkName'))
         multi_ps.copy_data(multi_ps.vm[0])
         multi_ps.create_image(multi_ps.vm[0])
         multi_ps.create_vm(image_name=multi_ps.image.name, reverse=True)

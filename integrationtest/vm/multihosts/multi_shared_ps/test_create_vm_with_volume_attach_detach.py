@@ -26,17 +26,17 @@ def test():
         multi_ps.create_vm(with_data_vol=True)
     if multi_ps.get_bs('Ceph'):
         multi_ps.create_vm(ceph_image=True)
-        multi_ps.data_volume.detach()
-        multi_ps.data_volume.attach(multi_ps.vm[0])
+        multi_ps.data_volume.values()[0].detach()
+        multi_ps.data_volume.values()[0].attach(multi_ps.vm[0])
     multi_ps.create_vm()
-    multi_ps.data_volume.detach()
-    multi_ps.data_volume.attach(multi_ps.vm[-1])
-    for vm in multi_ps:
+    multi_ps.data_volume.values()[0].detach()
+    multi_ps.data_volume.values()[0].attach(multi_ps.vm[-1])
+    for vm in multi_ps.vm:
         vm.stop()
-    multi_ps.data_volume.detach()
-    for vm in multi_ps:
+    multi_ps.data_volume.values()[0].detach()
+    for vm in multi_ps.vm:
         vm.start()
-    multi_ps.data_volume.attach(multi_ps.vm[0])
+    multi_ps.data_volume.values()[0].attach(multi_ps.vm[0])
 
     test_util.test_pass('Volume created with VM Detach/Attach Test Success')
 
