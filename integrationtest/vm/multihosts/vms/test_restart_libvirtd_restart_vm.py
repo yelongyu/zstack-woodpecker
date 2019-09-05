@@ -21,7 +21,7 @@ import time
 
 test_stub = test_lib.lib_get_test_stub()
 test_dict = test_state.TestStateDict()
-err_msg_check_flag = 'invalid '
+err_msg_check_flag = 'invalid connection pointer'
 hosts = None
 
 
