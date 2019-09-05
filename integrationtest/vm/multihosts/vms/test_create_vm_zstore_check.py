@@ -99,7 +99,7 @@ def test():
                 test_util.test_fail('Error msg check failed!\n Error msg:%s' % exc)
             break
     if not exc:
-        test_util.test_fail('Create VM successed, please check %s' % img_store_path)
+        test_util.test_logger('Create VM successed, please check %s' % img_store_path)
     test_util.test_logger('Error msg check pass!')
     #4.remove /var/lib/zstack/imagestorebackupstorage/package/zstack-store.bin, reconnect host;
     rm_cmd = 'rm -rf %s' % zs_store_bin_path
