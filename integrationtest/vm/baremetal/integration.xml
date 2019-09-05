@@ -4,6 +4,7 @@
         <case timeout='1200' repeat='1'>test_pxe_server.py</case>
         <case timeout='1200' repeat='1'>test_chassis.py</case>
         <case timeout='1200' repeat='1'>test_baremetal_instance.py</case>
+        <case timeout='1200' repeat='1'>test_change_port.py</case>
        <!-- 
         <case timeout='1200' repeat='1'>update_pxe_server.py</case>
         <case timeout='1200' repeat='1'>test_power_on.py</case>
