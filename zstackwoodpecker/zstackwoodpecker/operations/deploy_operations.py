@@ -1576,15 +1576,15 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
             continue 
         if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
             _deploy_mini_cluster(zone)
-            vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
-            for ip in vm_ip_list:
-                cmd = "wget http://172.20.1.27/mirror/mini/MegaCli64 -O /opt/MegaRAID/MegaCli/MegaCli64;chmod a+x /opt/MegaRAID/MegaCli/MegaCli64"
-                ssh.execute(cmd, ip, 'root', 'password')
-                cmd = "wget http://172.20.1.27/mirror/mini/smartctl -O /usr/sbin/smartctl;chmod a+x /usr/sbin/smartctl"
-                ssh.execute(cmd, ip, 'root', 'password')
         else:
             _deploy_cluster(zone)
     wait_for_thread_done()
+    vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
+    for ip in vm_ip_list:
+    cmd = "wget http://172.20.1.27/mirror/mini/MegaCli64 -O /opt/MegaRAID/MegaCli/MegaCli64;chmod a+x /opt/MegaRAID/MegaCli/MegaCli64"
+    ssh.execute(cmd, ip, 'root', 'password')
+    cmd = "wget http://172.20.1.27/mirror/mini/smartctl -O /usr/sbin/smartctl;chmod a+x /usr/sbin/smartctl"
+    ssh.execute(cmd, ip, 'root', 'password')
 
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone_name != zone.name_:
