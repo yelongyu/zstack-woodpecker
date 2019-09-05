@@ -361,3 +361,10 @@ def RefreshFirewall(uuid, session_uuid = None):
     action.uuid = uuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def query_rule_set_by_l3(conditions, session_uuid = None):
+    action = api_actions.QueryFirewallRuleSetL3RefAction()
+    action.timeout = 300000
+    action.conditions = conditions
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory

@@ -132,6 +132,7 @@ VROUTER_OSPF_NETWORK = 'VRouterOspfNetwork'
 REPLICATIONGROUP = 'ReplicationGroup'
 VPC_HA_GROUP = "VpcHaGroup"
 NETFLOW_COLLECTOR = "NetFlowCollector"
+FIREWALL_RS = "FirewallRuleSet"
 
 def find_item_by_uuid(inventories, uuid):
     for item in inventories:
@@ -666,6 +667,8 @@ def _gen_query_action(resource, condition=None):
 	action = api_actions.QueryVpcHaGroupAction()
     elif resource == NETFLOW_COLLECTOR:
 	action = api_actions.QueryFlowCollectorAction()
+    elif resource == FIREWALL_RS:
+        action = api_actions.QueryFirewallRuleSetL3RefAction()
     return action
 
 def query_event_from_resource_stack(conditions = [], resource=EVENT_FROM_STACK, session_uuid=None, count='false'):
