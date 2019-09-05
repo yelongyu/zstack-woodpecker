@@ -63,14 +63,14 @@ def test():
 
 # Create firewall
     fw = vpc_ops.create_firewall(vr.inv.uuid, 'test_fw', 'firewall for test')
-# Create rule set
+# Get rule set
     conf = res_ops.gen_query_conditions('l3NetworkUuid', '=', vm_sender_l3_uuid)
     rs = res_ops.query_resource(res_ops.FIREWALL_RS, conf)
     rs_uuid = rs[0].ruleSetUuid
     print 'debug rs_uuid rs_uuid rs_uuid  : %s' % rs_uuid
     #rs = vpc_ops.create_rule_set(fw.uuid, 'test_rule_set', 'accept', 'rule set for test')
 # Create rule
-    rule = vpc_ops.create_rule(fw.uuid, rs_uuid, 'drop', 1200, 'enable', protocol = 'UDP')
+    rule = vpc_ops.create_rule(fw.uuid, rs_uuid, 'reject', 1200, 'enable', protocol = 'UDP')
 # Attach rule set to l3
 # for ingress is the default Rule set so don't need attach l3 again
 #    vpc_ops.AttachFirewallRuleSetToL3(fw.uuid, vm_sender_l3_uuid, 'in', rs_uuid)
@@ -84,7 +84,7 @@ def test():
     print 'debug begin do test cmd : %s' % cmd
     (retcode, output, erroutput) = ssh.execute(cmd , vm_sender_ip, 'root', 'password')
     print 'debug output is: %s' %output
-    if "Connection refused" in output:
+    if "0.00 Bytes" in output and "0.00 bits/sec" in output:
         test_util.test_dsc("Firewall worked, test pass")
     else:
         test_util.test_fail("Firewall don't work ,except iperf can't connect server, test failed")
@@ -94,10 +94,8 @@ def test():
     print 'debug begin do test cmd : %s' % cmd
     (retcode, output, erroutput) = ssh.execute(cmd , vm_sender_ip, 'root', 'password')
     print 'debug output is: %s' %output
-    if "Connection refused" not in output:
+    if "0.00 Bytes" not in output and "0.00 bits/sec" not in output:
         test_util.test_dsc("Firewall disable rule worked, Connection successfully")
-    elif "Connection refused" in output:
-        test_util.test_fail("Firewall disable rule don't work , Connection refused")
     else:
         test_util.test_fail("Firewall disable rule don't work , test failed")
 #enable rule to test again
@@ -106,7 +104,7 @@ def test():
     print 'debug begin do test cmd : %s' % cmd
     (retcode, output, erroutput) = ssh.execute(cmd , vm_sender_ip, 'root', 'password')
     print 'debug output is: %s' %output
-    if "Connection refused" in output:
+    if "0.00 Bytes" in output and "0.00 bits/sec" in output:
         test_util.test_dsc("Firewall worked, test pass")
     else:
         test_util.test_fail("Firewall don't work ,except iperf can't connect server, test failed")
@@ -114,13 +112,12 @@ def test():
 #    vpc_ops.DetachFirewallRuleSetFromL3(fw.uuid, vm_sender_l3_uuid, 'out')
 #delete firewall resource
     vpc_ops.DeleteFirewallRule(rule.uuid, 'Permissive')
-    vpc_ops.DeleteFirewallRuleSet(rs_uuid, 'Permissive')
     vpc_ops.DeleteFirewall(fw.uuid, 'Permissive')
     test_util.test_pass("Firewall works well, test pass")
 
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
-#
+
 def env_recover():
     test_lib.lib_error_cleanup(test_obj_dict)
     test_stub.remove_all_vpc_vrouter()
