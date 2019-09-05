@@ -22,6 +22,7 @@
 		<case timeout='1800' repeat='1'>migrate/test_migrate_vm_with_deep_sp_chain.py</case>
 		<case timeout='600' repeat='1'>migrate/test_sharable_vol_live_migrate.py</case>
 		<case timeout='1200' repeat='1'>migrate/test_expunge_img_vm_migrate.py</case>
+		<case timeout='1200' repeat='1'>migrate/test_migrate_vm_with_libvirt_reboot.py</case>
 		<case timeout='600' repeat='1'>ps/test_disable_ps_live_migrate.py</case>
 		<case timeout='600' repeat='1'>ps/test_create_ceph_pool.py</case>
 		<case timeout='600' repeat='1'>ps/test_create_root_volume_ceph_pool.py</case>
