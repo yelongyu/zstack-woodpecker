@@ -112,16 +112,15 @@ def test():
         test_util.test_fail("Firewall don't work ,except iperf can't connect server, test failed")
 
 #    vpc_ops.DetachFirewallRuleSetFromL3(fw.uuid, vm_sender_l3_uuid, 'out')
-##delete firewall resource
-#    vpc_ops.DeleteFirewallRule(rule.uuid, 'Permissive')
-#    vpc_ops.DeleteFirewallRuleSet(rs_uuid, 'Permissive')
-#    vpc_ops.DeleteFirewall(fw.uuid, 'Permissive')
-#    test_util.test_pass("Firewall works well, test pass")
+#delete firewall resource
+    vpc_ops.DeleteFirewallRule(rule.uuid, 'Permissive')
+    vpc_ops.DeleteFirewallRuleSet(rs_uuid, 'Permissive')
+    vpc_ops.DeleteFirewall(fw.uuid, 'Permissive')
+    test_util.test_pass("Firewall works well, test pass")
 
-#    test_lib.lib_error_cleanup(test_obj_dict)
-#    test_stub.remove_all_vpc_vrouter()
+    test_lib.lib_error_cleanup(test_obj_dict)
+    test_stub.remove_all_vpc_vrouter()
 #
 def env_recover():
-#    test_lib.lib_error_cleanup(test_obj_dict)
-#    test_stub.remove_all_vpc_vrouter()
-	pass
+    test_lib.lib_error_cleanup(test_obj_dict)
+    test_stub.remove_all_vpc_vrouter()
