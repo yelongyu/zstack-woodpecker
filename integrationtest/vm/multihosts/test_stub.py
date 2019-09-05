@@ -44,7 +44,7 @@ from functools import wraps
 import itertools
 import types
 import copy
-#import traceback
+import traceback
 
 
 
@@ -2344,3 +2344,24 @@ class REVERTSP(object):
             for vm in self.vm:
                 vm.start()
                 vm.check()
+
+class ExcThread(threading.Thread):
+    def __init__(self,group=None, target=None, name=None,
+                 args=(), kwargs=None, verbose=None):
+        threading.Thread.__init__(self, group, target, name, args, kwargs)
+        if kwargs is None:
+            kwargs = {}
+        self.__target = target
+        self.__args = args
+        self.__kwargs = kwargs
+        self.exitcode = 0
+        self.exception = None
+        self.exc_traceback = ''
+    def run(self):
+        try:
+            if self.__target:
+                self.__target(*self.__args, **self.__kwargs)
+        except Exception as e:
+            self.exitcode = 1
+            self.exception = e
+            self.exc_traceback = ''.join(traceback.format_exception(*sys.exc_info()))
