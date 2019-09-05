@@ -1242,13 +1242,16 @@ class Longjob(object):
         self.vol_create_image_name = 'test-vol-crt-image'
         self.image_add_name = name if name else 'test-image-longjob'
         self.cond_name = "res_ops.gen_query_conditions('name', '=', 'name_to_replace')"
+        self.ssh_cmd = 'sshpass -p password ssh -o StrictHostKeyChecking=no root@'
         self.test_obj_dict = test_state.TestStateDict()
         self.image = None
         self.target_bs = None
         self.vol_list = []
+        self.thread_list = []
 
     def create_vm(self, l3_name=None):
         self.vm = create_basic_vm(l3_name=l3_name)
+        self.vm.check()
 
     def create_data_volume(self, ceph_pool=None, scsi=False):
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.getenv('rootDiskOfferingName'))
@@ -1408,7 +1411,40 @@ class Longjob(object):
         "volumeUuid"="%s"}' %(self.vol_create_image_name, self.target_bs.uuid, self.data_volume.get_volume().uuid)
         self.submit_longjob(job_data, name, job_type='crt_vol_image')
 
-    def live_migrate_vm(self, allow_unknown=False):
+    def install_stress(self, vm_ip=None):
+        if not vm_ip:
+            vm_ip = self.vm.get_vm().vmNics[0].ip
+        stress_url = os.getenv('stressUrl')
+        stress_file = stress_url.split('/')[-1]
+        cmd_loc = 'sshpass -p password scp -o StrictHostKeyChecking=no root@%s .' % stress_url
+        if not os.path.exists(stress_file):
+            test_util.test_logger(commands.getstatusoutput(cmd_loc))
+        scp_stress = "sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:/root/" % (stress_file, vm_ip)
+        test_util.test_logger(commands.getstatusoutput(scp_stress))
+        cmd = "rpm -ivh %s" % (stress_file)
+        try:
+            ssh.execute(cmd, vm_ip, 'root', 'password')
+        except:
+            test_util.test_fail('failed to install stress!')
+
+    def add_stress(self, networkio=True):
+        self.install_stress()
+        stress_cmd = '''stress -c 8 -i 4 -d 1 --vm 1 --vm-bytes  $(awk '/MemFree/{printf "%d\n", $2 * 0.8;}' < /proc/meminfo)k --timeout 60s'''
+        def stress(cmd, vm_ip):
+            ssh.execute(cmd, vm_ip, 'root', 'password')
+        def network_io(vm_ip):
+            src = commands.getoutput('ls /home/1*/zstack-utility.tar').split('\n')[0]
+            file_name = os.path.basename(src)
+            dst = os.path.join('/root', file_name)
+            ssh.scp_file(src, dst, vm_ip, 'root', 'password')
+        self.thread_list.append(threading.Thread(target=stress, args=(stress_cmd, self.vm.get_vm().vmNics[0].ip)))
+        if networkio:
+            self.thread_list.append(threading.Thread(target=network_io, args=(self.vm.get_vm().vmNics[0].ip, )))
+        for thrd in self.thread_list:
+            thrd.start()
+        time.sleep(3)
+
+    def live_migrate_vm(self, allow_unknown=False, join_thread=False):
         name = 'longjob_live_migrate_vm'
         #For MINI
         if allow_unknown:
@@ -1416,6 +1452,16 @@ class Longjob(object):
         else:
             job_data = '{"name"="%s", "vmInstanceUuid"="%s"}' % (name, self.vm.get_vm().uuid)
         self.submit_longjob(job_data, name, job_type='live_migration')
+        if join_thread:
+            for thrd in self.thread_list:
+                thrd.join()
+
+    def check_data_integrity(self):
+        cmd = 'tar xvf /root/zstack-utility.tar'
+        try:
+            ssh.execute(cmd, self.vm.get_vm().vmNics[0].ip, 'root', 'password')
+        except:
+            test_util.test_fail('The data integrity was broken after live migration')
 
 def disable_all_pss():
     ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
