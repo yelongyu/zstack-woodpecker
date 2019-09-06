@@ -724,6 +724,11 @@ def create_vm_by_image(robot_test_obj, args):
     vm_name = args[2]
     target_image = None
     ps_uuid = robot_test_obj.robot_resource['ps'][0]
+    cluster_name = "cluster1"
+
+    arg_dict = parser_args(args[3:])
+    if 'cluster' in arg_dict:
+        cluster_name = arg_dict['cluster']
 
     cond = res_ops.gen_query_conditions("system", "=", "false")
     if image_format != 'iso':
@@ -745,7 +750,8 @@ def create_vm_by_image(robot_test_obj, args):
     if not MINI:
         vm_creation_option.set_ps_uuid(ps_uuid)
     else:
-        cluster = res_ops.query_resource(res_ops.CLUSTER)[0]
+        cond = res_ops.gen_query_conditions("name", "=", cluster_name)
+        cluster = res_ops.query_resource(res_ops.CLUSTER, cond)[0]
         robot_test_obj.default_config['MINI_CLUSTER'] = cluster.uuid
         vm_creation_option.set_cluster_uuid(cluster.uuid)
     vm_creation_option.set_image_uuid(target_image.uuid)
@@ -792,6 +798,10 @@ def create_vm_by_image(robot_test_obj, args):
         cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, vm.get_vm().vmNics[0].ip,
                                                                  test_lib.lib_get_vm_username(vm.get_vm()),
                                                                  test_lib.lib_get_vm_password(vm.get_vm()), cmd)
+
+    if arg_dict.has_key('data_volume') and arg_dict['data_volume'] == 'true':
+        create_volume(robot_test_obj, ['auto-volume' + vm_name[-1], 'flag=scsi'])
+        attach_volume(robot_test_obj, [vm_name, 'auto-volume' + vm_name[-1]])
 
 
 def stop_vm(robot_test_obj, args):
@@ -2377,12 +2387,16 @@ def poweron_only(robot_test_obj, args, auto=None):
     hosts = []
     host_names = []
     timeout = 1200
+    cluster_name = "cluster1"
+    arg_dict = parser_args(args)
+    if 'cluster' in arg_dict:
+        cluster_name = arg_dict['cluster']
+
     test_util.test_logger("@@DEBUG-name,host\n {}@@".format(robot_test_obj.test_dict.host.items()))
     if not auto:
-        for cluster_name in args[0]:
-            cond = res_ops.gen_query_conditions('cluster.name', '=', cluster_name)
-            for host in res_ops.query_resource(res_ops.HOST, cond):
-                host_names.append(host.name)
+        cond = res_ops.gen_query_conditions('cluster.name', '=', cluster_name)
+        for host in res_ops.query_resource(res_ops.HOST, cond):
+            host_names.append(host.name)
     if not len(robot_test_obj.test_dict.host.items()):
         test_util.test_fail("No Host")
     for name, host in robot_test_obj.test_dict.host.items():
@@ -2407,12 +2421,16 @@ def poweroff_only(robot_test_obj, args):
     admin_password = hashlib.sha512(os.environ.get('hostPassword')).hexdigest()
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     mn_flag = None
+    cluster_name = "cluster1"
+
+    arg_dict = parser_args(args)
+    if 'cluster' in arg_dict:
+        cluster_name = arg_dict['cluster']
 
     hosts = res_ops.query_resource(res_ops.HOST)
-    for cluster_name in args[0]:
-        cond = res_ops.gen_query_conditions('cluster.name', '=', cluster_name)
-        for host in res_ops.query_resource(res_ops.HOST, cond):
-            host_names.append(host.name)
+    cond = res_ops.gen_query_conditions('cluster.name', '=', cluster_name)
+    for host in res_ops.query_resource(res_ops.HOST, cond):
+        host_names.append(host.name)
     for host in hosts:
         if host.name in host_names:
             host_uuids.append(host.uuid)
@@ -2434,9 +2452,8 @@ def poweroff_only(robot_test_obj, args):
     test_util.test_logger("@@PowerOffFlowDone@@")
     time.sleep(180)
     test_util.test_logger("@@DEBUG@@:updating host state finished, wake up")
-    if mn_flag:
-        test_util.test_logger("@@Auto PowerOn Start@@")
-        poweron_only(robot_test_obj, args, auto=1)
+    test_util.test_logger("@@Auto PowerOn Start@@")
+    poweron_only(robot_test_obj, args, auto=1)
 
 
 action_dict = {
