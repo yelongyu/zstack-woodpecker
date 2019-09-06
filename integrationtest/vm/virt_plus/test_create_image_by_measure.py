@@ -36,7 +36,7 @@ def create_image(target_vm, image_name):
 
 
 def test():
-    vm = test_stub.create_vm(vm_name='basic-test-vm')
+    vm = test_stub.create_vm(vm_name='basic-test-vm', rootVolumeSystemTags=["volumeProvisioningStrategy::ThinProvisioning"])
     test_obj_dict.add_vm(vm)
 
     root_volume_inv = vm.get_vm().allVolumes[0]
