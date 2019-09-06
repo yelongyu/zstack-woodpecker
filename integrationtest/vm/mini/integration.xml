@@ -11,6 +11,7 @@
 		<case timeout='1200' noparallel='True'>test_vm_migrate_progress_22_volumes.py</case>
 		<case timeout='7200' noparallel='True'>test_vm_migrate_progress_src_host_nic_down.py</case>
 		<case timeout='7200' noparallel='True'>test_vm_migrate_progress_with_stress.py</case>
+		<case timeout='7200' noparallel='True'>test_multi_vm_migrate_progress.py</case>
 		<case timeout='1200' noparallel='True'>test_resize_vm_root_volume.py</case>
 		<case timeout='1200' noparallel='True'>test_resize_vm_root_volumethin_provision.py</case>
 		<case timeout='1200' noparallel='True'>test_resize_data_volume.py</case>

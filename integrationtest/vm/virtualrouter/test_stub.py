@@ -140,13 +140,13 @@ def create_other_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None)
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     return create_vm([l3_net_uuid], image_uuid, 'other_vm', disk_offering_uuids, session_uuid = session_uuid)
 
-def create_basic_vm(disk_offering_uuids=None, system_tags=None, l3_name=None, session_uuid = None):
+def create_basic_vm(disk_offering_uuids=None, system_tags=None, l3_name=None, session_uuid = None, host_uuid=None):
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     if not l3_name:
         l3_name = os.environ.get('l3VlanNetworkName1')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
-    return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, system_tags=system_tags, session_uuid = session_uuid)
+    return create_vm([l3_net_uuid], image_uuid, 'basic_no_vlan_vm', disk_offering_uuids, system_tags=system_tags, session_uuid = session_uuid, host_uuid=host_uuid)
 
 def create_user_vlan_vm(l3_name=None, disk_offering_uuids=None, session_uuid = None):
     image_name = os.environ.get('imageName_net')
@@ -191,7 +191,8 @@ def create_vm_with_user_args(system_tags = None, session_uuid = None):
 # parameter: vmname; l3_net: l3_net_description, or [l3_net_uuid,]; image_uuid:
 def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
         disk_offering_uuids = None, default_l3_uuid = None, \
-        system_tags = [], instance_offering_uuid = None, strategy_type='InstantStart', session_uuid = None, ps_uuid=None, timeout=None):
+        system_tags = [], instance_offering_uuid = None, strategy_type='InstantStart', \
+        session_uuid = None, ps_uuid=None, timeout=None, host_uuid=None,):
     vm_creation_option = test_util.VmOption()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     if not instance_offering_uuid:
@@ -221,6 +222,7 @@ def create_vm(l3_uuid_list, image_uuid, vm_name = None, \
     vm_creation_option.set_ps_uuid(ps_uuid)
     vm_creation_option.set_strategy_type(strategy_type)
     vm_creation_option.set_timeout(900000)
+    vm_creation_option.set_host_uuid(host_uuid)
 #     vm_creation_option.set_timeout(600000)
 
     vm = zstack_vm_header.ZstackTestVm()
@@ -1249,9 +1251,10 @@ class Longjob(object):
         self.vol_list = []
         self.thread_list = []
 
-    def create_vm(self, l3_name=None):
-        self.vm = create_basic_vm(l3_name=l3_name)
+    def create_vm(self, l3_name=None, host_uuid=None):
+        self.vm = create_basic_vm(l3_name=l3_name, host_uuid=host_uuid)
         self.vm.check()
+        return self.vm
 
     def create_data_volume(self, ceph_pool=None, scsi=False):
         disk_offering = test_lib.lib_get_disk_offering_by_name(os.getenv('rootDiskOfferingName'))
@@ -1307,10 +1310,13 @@ class Longjob(object):
         assert long_job.state == "Running"
         cond_longjob = res_ops.gen_query_conditions('apiId', '=', long_job.apiId)
         progress_set = set()
-        for _ in xrange(1800):
+        for _ in xrange(900):
             progress_inv = res_ops.get_task_progress(long_job.apiId).inventories
             if not progress_inv:
                 time.sleep(1)
+                job = res_ops.query_resource(res_ops.LONGJOB, cond_longjob)[0]
+                if job.state == 'Failed':
+                    test_util.test_fail("jobResult: %s" % job.jobResult)
                 continue
             else:
                 progress = progress_inv[0].content
@@ -1318,7 +1324,7 @@ class Longjob(object):
                 if '100' in progress or 'image cache' in progress:
                     break
                 else:
-                    time.sleep(1)
+                    time.sleep(5)
         progress_list = [int(i) for i in progress_set if len(i) <= 3]
         progress_list.sort()
         if job_type == 'live_migration' or self.target_bs.type != inventory.SFTP_BACKUP_STORAGE_TYPE:
@@ -1416,50 +1422,66 @@ class Longjob(object):
             vm_ip = self.vm.get_vm().vmNics[0].ip
         stress_url = os.getenv('stressUrl')
         stress_file = stress_url.split('/')[-1]
-        cmd_loc = 'sshpass -p password scp -o StrictHostKeyChecking=no root@%s .' % stress_url
-        if not os.path.exists(stress_file):
+        cmd_loc = 'sshpass -p password scp -o LogLevel=quiet -o UserKnownHostsFile=/dev/null \
+                   -o StrictHostKeyChecking=no root@%s /tmp' % stress_url
+        if not os.path.exists('/tmp/%s' % stress_file):
             test_util.test_logger(commands.getstatusoutput(cmd_loc))
-        scp_stress = "sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:/root/" % (stress_file, vm_ip)
+        scp_stress = "sshpass -p password scp -o LogLevel=quiet -o UserKnownHostsFile=/dev/null \
+                      -o StrictHostKeyChecking=no /tmp/%s root@%s:/root/" % (stress_file, vm_ip)
         test_util.test_logger(commands.getstatusoutput(scp_stress))
-        cmd = "rpm -ivh %s" % (stress_file)
-        try:
-            ssh.execute(cmd, vm_ip, 'root', 'password')
-        except:
-            test_util.test_fail('failed to install stress!')
+        cmd_install = 'sshpass -p password ssh -o LogLevel=quiet -o UserKnownHostsFile=/dev/null \
+                        -o StrictHostKeyChecking=no root@%s "rpm -ivh /root/%s"' % (vm_ip, stress_file)
+        test_util.test_logger(commands.getoutput(cmd_install))
+        # cmd = "rpm -ivh /root/%s" % (stress_file)
+        # try:
+        #     ssh.execute(cmd, vm_ip, 'root', 'password')
+        # except:
+        #     test_util.test_fail('failed to install stress!')
 
-    def add_stress(self, networkio=True):
+    def add_stress(self, vm=None, networkio=True):
+        if not vm:
+            vm = self.vm
         self.install_stress()
-        stress_cmd = '''stress -c 8 -i 4 -d 1 --vm 1 --vm-bytes  $(awk '/MemFree/{printf "%d\n", $2 * 0.8;}' < /proc/meminfo)k --timeout 60s'''
-        def stress(cmd, vm_ip):
-            ssh.execute(cmd, vm_ip, 'root', 'password')
+        def stress(vm_ip):
+            stress_cmd = '''nohup stress -c 8 -i 4 -d 1 --vm 1 --vm-bytes  $(awk '/MemFree/{printf "%d\n", $2 * 0.8;}' < /proc/meminfo)k \
+                            --timeout 180s > /dev/null 2>&1 &'''
+            ssh.execute(stress_cmd, vm_ip, 'root', 'password')
         def network_io(vm_ip):
             src = commands.getoutput('ls /home/1*/zstack-utility.tar').split('\n')[0]
-            file_name = os.path.basename(src)
-            dst = os.path.join('/root', file_name)
-            ssh.scp_file(src, dst, vm_ip, 'root', 'password')
-        self.thread_list.append(threading.Thread(target=stress, args=(stress_cmd, self.vm.get_vm().vmNics[0].ip)))
+#             file_name = os.path.basename(src)
+#             dst = os.path.join('/root', file_name)
+            scp_cmd = "sshpass -p password scp -o StrictHostKeyChecking=no %s root@%s:/root/" % (src, vm_ip)
+            commands.getstatusoutput(scp_cmd)
+#             ssh.scp_file(src, dst, vm_ip, 'root', 'password')
+        vm_ip = vm.get_vm().vmNics[0].ip
+        stress(vm_ip)
+#         self.thread_list.append(threading.Thread(target=stress, args=(stress_cmd, vm.get_vm().vmNics[0].ip)))
         if networkio:
-            self.thread_list.append(threading.Thread(target=network_io, args=(self.vm.get_vm().vmNics[0].ip, )))
+            network_io(vm_ip)
+#             self.thread_list.append(threading.Thread(target=network_io, args=(vm.get_vm().vmNics[0].ip, )))
         for thrd in self.thread_list:
             thrd.start()
-        time.sleep(3)
+        time.sleep(5)
 
-    def live_migrate_vm(self, allow_unknown=False, join_thread=False):
+    def live_migrate_vm(self, vm=None, allow_unknown=False, join_thread=False):
+        if not vm:
+            vm = self.vm
         name = 'longjob_live_migrate_vm'
         #For MINI
         if allow_unknown:
-            job_data = '{"name"="%s", "vmInstanceUuid"="%s", "allowUnknown"="true", "migrateFromDestination"="true"}' % (name, self.vm.get_vm().uuid)
+            job_data = '{"name"="%s", "vmInstanceUuid"="%s", "allowUnknown"="true", "migrateFromDestination"="true"}' % (name, vm.get_vm().uuid)
         else:
-            job_data = '{"name"="%s", "vmInstanceUuid"="%s"}' % (name, self.vm.get_vm().uuid)
+            job_data = '{"name"="%s", "vmInstanceUuid"="%s"}' % (name, vm.get_vm().uuid)
         self.submit_longjob(job_data, name, job_type='live_migration')
         if join_thread:
             for thrd in self.thread_list:
                 thrd.join()
 
-    def check_data_integrity(self):
+    def check_data_integrity(self, vm=None):
+        vm = vm if vm else self.vm
         cmd = 'tar xvf /root/zstack-utility.tar'
         try:
-            ssh.execute(cmd, self.vm.get_vm().vmNics[0].ip, 'root', 'password')
+            ssh.execute(cmd, vm.get_vm().vmNics[0].ip, 'root', 'password')
         except:
             test_util.test_fail('The data integrity was broken after live migration')
 

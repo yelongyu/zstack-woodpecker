@@ -15,9 +15,19 @@ import zstackwoodpecker.operations.resource_operations as res_ops
 
 test_stub = test_lib.lib_get_test_stub('virtualrouter')
 longjob = test_stub.Longjob()
+host = None
 
+def wait_for_host_change(host_ip, status='Disconnected'):
+    conditions = res_ops.gen_query_conditions('managementIp', '=', host_ip)
+    host_status = res_ops.query_resource(res_ops.HOST, conditions)[0].status
+    for _ in xrange(60):
+        if host_status == status:
+            return
+        else:
+            time.sleep(3)
 
 def test():
+    global host
     os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.getenv('zstackHaVip')
     longjob.create_vm()
 
@@ -27,22 +37,25 @@ def test():
     test_stub_mini = test_lib.lib_get_test_stub()
 
     test_stub_mini.down_host_network(host.managementIp, test_lib.all_scenario_config, "managment_net")
-    time.sleep(90)
+    wait_for_host_change(host.managementIp)
 
     longjob.live_migrate_vm()
-    time.sleep(60)
+    # time.sleep(60)
 
     test_stub.up_host_network(host.managementIp, test_lib.all_scenario_config, "managment_net")
+
+    wait_for_host_change(host.managementIp, 'Connecting')
+
+    # check vm during host reconnecting
     longjob.vm.check()
 
-    for _ in range(100):
-        if res_ops.query_resource(res_ops.HOST, cond_host)[0].status == 'Connected':
-            break
-        else:
-            time.sleep(3)
+    wait_for_host_change(host.managementIp, 'Connected')
+
     test_util.test_pass('VM Live Migration with Progress Checking Test Success')
 
 def env_recover():
+    global host
+    test_stub.up_host_network(host.managementIp, test_lib.all_scenario_config, "managment_net")
     try:
         longjob.vm.destroy()
     except:
@@ -51,6 +64,8 @@ def env_recover():
 
 #Will be called only if exception happens in test().
 def error_cleanup():
+    global host
+    test_stub.up_host_network(host.managementIp, test_lib.all_scenario_config, "managment_net")
     try:
         longjob.vm.destroy()
     except:
