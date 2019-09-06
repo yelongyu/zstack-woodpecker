@@ -50,7 +50,7 @@ def path():
 		[TestAction.create_mini_vm, 'vm3', 'data_volume=true', 'cluster=cluster1'],
 		[TestAction.create_mini_vm, 'vm4', 'cluster=cluster2'],
 		[TestAction.create_vm_backup, 'vm4', 'vm4-backup4'],
-		[TestAction.resize_volume, 'vm4', 5*1024*1024],
+		[TestAction.resize_volume, 'vm3', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
 		[TestAction.delete_volume_backup, 'volume1-backup1'],
 ])
@@ -60,8 +60,8 @@ def path():
 
 '''
 The final status:
-Running:['vm3', 'vm4']
-Stopped:[]
+Running:['vm4']
+Stopped:['vm3']
 Enadbled:['vm1-backup2', 'volume1-backup3', 'vm4-backup4']
 attached:['auto-volume3']
 Detached:['volume4', 'volume5', 'volume1']

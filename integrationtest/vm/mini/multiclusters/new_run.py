@@ -16,6 +16,7 @@ test_dict = None
 
 def test():
     global test_dict
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.getenv('zstackHaVip')
     test_util.test_dsc('''Will mainly doing random test for all kinds of snapshot operations. VM, Volume and Image operations will also be tested. If reach 1 hour successful running condition, testing will success and quit.  SG actions, and VIP actions are removed in this robot test.
             VM resources: a special Utility vm is required to do volume attach/detach operation.
             ''')

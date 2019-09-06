@@ -5,8 +5,10 @@ import random
 import time
 
 import apibinding.inventory as inventory
+import urllib3
 import zstacklib.utils.debug as debug
 import zstackwoodpecker.header.vm as vm_header
+import zstackwoodpecker.operations.account_operations as account_ops
 import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.config_operations as conf_ops
 import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
@@ -2359,6 +2361,7 @@ def poweron_only(robot_test_obj, args, auto=None):
     def wait_host_up(timeout, hosts):
         timeout_max = timeout
         while timeout:
+            _hosts = []
             for host in hosts:
                 try:
                     _host = test_lib.lib_find_host_by_HostIp(host.managementIp)
@@ -2370,7 +2373,7 @@ def poweron_only(robot_test_obj, args, auto=None):
                     continue
                 if _host[0].status == "Connected":
                     test_util.test_logger('%s is up and Connected' % (host.managementIp))
-                    hosts.remove(host)
+                    _hosts.append(host)
                     test_util.test_logger('reconnecting host finished')
                     continue
                 else:
@@ -2378,6 +2381,8 @@ def poweron_only(robot_test_obj, args, auto=None):
                     if timeout == 0:
                         test_util.test_fail('%s is not up in %s seconds after start' % (host.managementIp, timeout_max))
                     time.sleep(15)
+            for host in _hosts:
+                hosts.remove(host)
             if not hosts:
                 test_util.test_logger('all the hosts are up and Connected')
                 break
@@ -2387,7 +2392,7 @@ def poweron_only(robot_test_obj, args, auto=None):
     hosts = []
     host_names = []
     timeout = 1200
-    cluster_name = "cluster1"
+    cluster_name = "cluster2"
     arg_dict = parser_args(args)
     if 'cluster' in arg_dict:
         cluster_name = arg_dict['cluster']
@@ -2406,6 +2411,7 @@ def poweron_only(robot_test_obj, args, auto=None):
             cond = res_ops.gen_query_conditions('vmNics.ip', '=', host.host.managementIp)
             vm_uuid = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0].uuid
             sce_ops.start_vm(zstack_management_ip, vm_uuid)
+    hosts = res_ops.query_resource(res_ops.HOST)
     wait_host_up(timeout, hosts)
     for host in hosts:
         if host.status == "Connected":
@@ -2421,7 +2427,7 @@ def poweroff_only(robot_test_obj, args):
     admin_password = hashlib.sha512(os.environ.get('hostPassword')).hexdigest()
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     mn_flag = None
-    cluster_name = "cluster1"
+    cluster_name = "cluster2"
 
     arg_dict = parser_args(args)
     if 'cluster' in arg_dict:
@@ -2440,20 +2446,70 @@ def poweroff_only(robot_test_obj, args):
             robot_test_obj.test_dict.add_host(host.name, host_off)
             if host.managementIp == mn_ip:
                 mn_flag = 1
-    off_ret = host_ops.poweroff_host(host_uuids, admin_password, mn_flag).results
-    test_util.test_logger("@@DEBUG-off_ret@@:{}".format(off_ret))
-    if len(off_ret):
-        for ret in off_ret:
-            if not ret.success:
-                fail_uuids.append(ret.uuid)
-    test_util.test_logger("@@Fail_uuids:{}@@".format(fail_uuids))
-    if len(fail_uuids):
-        test_util.test_fail("Power off hosts{} failed".format(fail_uuids))
-    test_util.test_logger("@@PowerOffFlowDone@@")
+    if mn_flag:
+        power_off(robot_test_obj, host_uuids, admin_password)
+    else:
+        off_ret = host_ops.poweroff_host(host_uuids, admin_password, mn_flag).results
+        test_util.test_logger("@@DEBUG-off_ret@@:{}".format(off_ret))
+        if len(off_ret):
+            for ret in off_ret:
+                if not ret.success:
+                    fail_uuids.append(ret.uuid)
+        test_util.test_logger("@@Fail_uuids:{}@@".format(fail_uuids))
+        if len(fail_uuids):
+            test_util.test_fail("Power off hosts{} failed".format(fail_uuids))
+        test_util.test_logger("@@PowerOffFlowDone@@")
+        test_util.test_logger("@@DEBUG@@:updating host state finished, wake up")
+        test_util.test_logger("@@Auto PowerOn Start@@")
     time.sleep(180)
-    test_util.test_logger("@@DEBUG@@:updating host state finished, wake up")
-    test_util.test_logger("@@Auto PowerOn Start@@")
     poweron_only(robot_test_obj, args, auto=1)
+
+
+def power_off(robot_test_obj, host_uuids, admin_password):
+    tmp_session_uuid = account_ops.login_as_admin()
+    management_node_ip = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
+    zstack_management_ip = os.environ.get('zstackManagementIp')
+
+    request_url = "http://" + management_node_ip + ":8080/zstack/v1/hosts/power-off/actions"
+
+    pool = urllib3.PoolManager(timeout=120.0, retries=urllib3.util.retry.Retry(15))
+    request_data = {
+        "powerOffHost": {
+            "adminPassword": admin_password,
+            "hostUuids": host_uuids
+        }
+    }
+    rd = json.dumps(request_data)
+    test_util.test_logger(rd)
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "OAuth " + tmp_session_uuid
+    }
+
+    try:
+        response = pool.urlopen('PUT', request_url, headers=headers, body=rd)
+    except urllib3.exceptions.MaxRetryError as e:
+        pass
+
+    test_util.test_logger(response.data)
+    hosts_dict = robot_test_obj.test_dict.host.items()
+    ips = [host.host.managementIp for _, host in hosts_dict]
+    temp = 15
+    while temp == 0:
+        _ips = []
+        for ip in ips:
+            cond = res_ops.gen_query_conditions('vmNics.ip', '=', ip)
+            vm = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+            if vm.state != "Running":
+                _ips.append(ip)
+        for ip in _ips:
+            ips.remove(ip)
+        if len(ips) == 0:
+            break
+        time.sleep(10)
+        temp -= 1
+    if temp == 0:
+        test_util.test_logger("%s vm is not Stopped in 0.254" % ','.join(ips))
 
 
 action_dict = {

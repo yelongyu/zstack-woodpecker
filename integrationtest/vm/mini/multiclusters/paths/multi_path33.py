@@ -20,24 +20,27 @@ def path():
 		[TestAction.recover_image, 'image1'],
 		[TestAction.delete_image, 'image1'],
 		[TestAction.expunge_image, 'image1'],
-		[TestAction.attach_volume, 'vm2', 'volume2'],
+		[TestAction.attach_volume, 'vm1', 'volume2'],
 		[TestAction.create_volume_backup, 'volume2', 'volume2-backup2'],
 		[TestAction.detach_volume, 'volume2'],
 		[TestAction.create_mini_vm, 'vm4', 'cluster=cluster1'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
-		[TestAction.migrate_vm, 'vm2'],
+		[TestAction.start_vm, 'vm3'],
+		[TestAction.migrate_vm, 'vm3'],
 		[TestAction.create_volume, 'volume3', 'cluster=cluster1', 'flag=scsi'],
-		[TestAction.attach_volume, 'vm4', 'volume3'],
+		[TestAction.attach_volume, 'vm1', 'volume3'],
 		[TestAction.create_volume, 'volume4', 'cluster=cluster2', 'flag=thick,scsi'],
 		[TestAction.delete_volume_backup, 'volume2-backup2'],
-		[TestAction.start_vm, 'vm1'],
-		[TestAction.stop_vm, 'vm1'],
+		[TestAction.start_vm, 'vm4'],
+		[TestAction.stop_vm, 'vm4'],
 		[TestAction.delete_volume, 'volume4'],
 		[TestAction.expunge_volume, 'volume4'],
-		[TestAction.destroy_vm, 'vm1'],
-		[TestAction.recover_vm, 'vm1'],
+		[TestAction.destroy_vm, 'vm4'],
+		[TestAction.recover_vm, 'vm4'],
+		[TestAction.start_vm, 'vm1'],
 		[TestAction.create_volume_backup, 'volume3', 'volume3-backup3'],
-		[TestAction.migrate_vm, 'vm2'],
+		[TestAction.stop_vm, 'vm1'],
+		[TestAction.migrate_vm, 'vm3'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
 		[TestAction.delete_volume_backup, 'volume3-backup3'],
 ])
@@ -47,8 +50,8 @@ def path():
 
 '''
 The final status:
-Running:['vm2', 'vm3', 'vm4']
-Stopped:['vm1']
+Running:['vm3']
+Stopped:['vm2', 'vm4', 'vm1']
 Enadbled:[]
 attached:['volume3']
 Detached:['volume1', 'volume2']

@@ -23,22 +23,28 @@ def path():
 		[TestAction.recover_image, 'image2'],
 		[TestAction.delete_image, 'vm1-image1'],
 		[TestAction.expunge_image, 'vm1-image1'],
-		[TestAction.create_volume_backup, 'volume2', 'volume2-backup3'],
+		[TestAction.attach_volume, 'vm1', 'volume1'],
+		[TestAction.create_volume_backup, 'volume1', 'volume1-backup3'],
+		[TestAction.detach_volume, 'volume1'],
 		[TestAction.create_mini_vm, 'vm3', 'data_volume=true', 'cluster=cluster2'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
-		[TestAction.resize_volume, 'vm3', 5*1024*1024],
+		[TestAction.resize_volume, 'vm2', 5*1024*1024],
 		[TestAction.create_volume, 'volume5', 'size=random', 'cluster=cluster1', 'flag=scsi'],
 		[TestAction.create_volume, 'volume6', 'cluster=cluster1', 'flag=thin,scsi'],
-		[TestAction.delete_volume_backup, 'volume2-backup3'],
+		[TestAction.delete_volume_backup, 'volume1-backup1'],
 		[TestAction.create_mini_vm, 'vm4', 'cluster=cluster2', 'flag=thick'],
-		[TestAction.delete_volume, 'volume5'],
-		[TestAction.expunge_volume, 'volume5'],
+		[TestAction.delete_volume, 'volume6'],
+		[TestAction.expunge_volume, 'volume6'],
 		[TestAction.add_image, 'image3', 'root', os.environ.get('isoForVmUrl')],
 		[TestAction.create_vm_by_image, 'image3', 'iso', 'vm5', 'cluster=cluster1'],
-		[TestAction.create_volume_backup, 'volume2', 'volume2-backup4'],
+		[TestAction.attach_volume, 'vm2', 'volume1'],
+		[TestAction.start_vm, 'vm2'],
+		[TestAction.create_volume_backup, 'volume1', 'volume1-backup4'],
+		[TestAction.stop_vm, 'vm2'],
+		[TestAction.detach_volume, 'volume1'],
 		[TestAction.create_image_from_volume, 'vm5', 'vm5-image4'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
-		[TestAction.delete_volume_backup, 'volume1-backup1'],
+		[TestAction.delete_volume_backup, 'volume1-backup3'],
 ])
 
 
@@ -46,13 +52,13 @@ def path():
 
 '''
 The final status:
-Running:['vm1', 'vm2', 'vm3', 'vm4', 'vm5']
-Stopped:[]
-Enadbled:['volume2-backup4', 'image2', 'image3', 'vm5-image4']
+Running:['vm4']
+Stopped:['vm1', 'vm3', 'vm2', 'vm5']
+Enadbled:['volume1-backup4', 'image2', 'image3', 'vm5-image4']
 attached:['volume2', 'auto-volume3']
-Detached:['volume1', 'volume6']
-Deleted:['volume3', 'vm1-backup2', 'volume2-backup3', 'volume1-backup1']
-Expunged:['volume5', 'vm1-image1']
+Detached:['volume5', 'volume1']
+Deleted:['volume3', 'vm1-backup2', 'volume1-backup1', 'volume1-backup3']
+Expunged:['volume6', 'vm1-image1']
 Ha:[]
 Group:
 '''

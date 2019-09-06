@@ -22,14 +22,14 @@ def path():
 		[TestAction.delete_volume, 'volume2'],
 		[TestAction.add_image, 'image1', 'root', 'http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2'],
 		[TestAction.attach_volume, 'vm2', 'volume1'],
-		[TestAction.stop_vm, 'vm2'],
 		[TestAction.use_volume_backup, 'volume1-backup1'],
-		[TestAction.start_vm, 'vm2'],
 		[TestAction.detach_volume, 'volume1'],
 		[TestAction.delete_image, 'image1'],
 		[TestAction.expunge_image, 'image1'],
-		[TestAction.attach_volume, 'vm2', 'volume1'],
+		[TestAction.attach_volume, 'vm1', 'volume1'],
+		[TestAction.start_vm, 'vm1'],
 		[TestAction.create_volume_backup, 'volume1', 'volume1-backup2'],
+		[TestAction.stop_vm, 'vm1'],
 		[TestAction.detach_volume, 'volume1'],
 		[TestAction.change_vm_ha, 'vm2'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
@@ -44,13 +44,13 @@ def path():
 		[TestAction.create_mini_vm, 'vm3', 'memory=random', 'cluster=cluster2'],
 		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.reboot_vm, 'vm2'],
-		[TestAction.attach_volume, 'vm1', 'volume3'],
-		[TestAction.create_volume_backup, 'volume3', 'volume3-backup3'],
-		[TestAction.detach_volume, 'volume3'],
+		[TestAction.attach_volume, 'vm3', 'volume1'],
+		[TestAction.create_volume_backup, 'volume1', 'volume1-backup3'],
+		[TestAction.detach_volume, 'volume1'],
 		[TestAction.create_image_from_volume, 'vm2', 'vm2-image2'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
-		[TestAction.create_vm_backup, 'vm1', 'vm1-backup4'],
-		[TestAction.delete_vm_backup, 'vm1-backup4'],
+		[TestAction.create_vm_backup, 'vm3', 'vm3-backup4'],
+		[TestAction.delete_vm_backup, 'vm3-backup4'],
 ])
 
 
@@ -60,10 +60,10 @@ def path():
 The final status:
 Running:['vm2', 'vm1', 'vm3']
 Stopped:[]
-Enadbled:['volume1-backup2', 'volume3-backup3', 'vm2-image2']
+Enadbled:['volume1-backup2', 'volume1-backup3', 'vm2-image2']
 attached:[]
-Detached:['volume1', 'volume3']
-Deleted:['volume4', 'volume1-backup1', 'vm1-backup4']
+Detached:['volume3', 'volume1']
+Deleted:['volume4', 'volume1-backup1', 'vm3-backup4']
 Expunged:['volume2', 'image1']
 Ha:['vm2']
 Group:

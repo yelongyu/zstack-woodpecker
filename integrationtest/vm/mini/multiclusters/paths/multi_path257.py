@@ -30,15 +30,19 @@ def path():
 		[TestAction.create_volume, 'volume3', 'size=random', 'cluster=cluster1', 'flag=scsi'],
 		[TestAction.delete_volume, 'volume2'],
 		[TestAction.recover_volume, 'volume2'],
-		[TestAction.create_volume_backup, 'volume1', 'volume1-backup4'],
-		[TestAction.delete_volume_backup, 'volume1-backup4'],
+		[TestAction.attach_volume, 'vm4', 'volume3'],
+		[TestAction.create_volume_backup, 'volume3', 'volume3-backup4'],
+		[TestAction.delete_volume_backup, 'volume3-backup4'],
+		[TestAction.detach_volume, 'volume3'],
 		[TestAction.create_mini_vm, 'vm5', 'memory=random', 'cluster=cluster1'],
 		[TestAction.create_volume, 'volume4', 'cluster=cluster2', 'flag=scsi'],
 		[TestAction.delete_volume, 'volume4'],
 		[TestAction.expunge_volume, 'volume4'],
 		[TestAction.destroy_vm, 'vm1'],
-		[TestAction.create_volume_backup, 'volume1', 'volume1-backup5'],
-		[TestAction.migrate_vm, 'vm4'],
+		[TestAction.attach_volume, 'vm4', 'volume3'],
+		[TestAction.create_volume_backup, 'volume3', 'volume3-backup5'],
+		[TestAction.detach_volume, 'volume3'],
+		[TestAction.migrate_vm, 'vm5'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
 		[TestAction.delete_vm_backup, 'vm3-backup2'],
 ])
@@ -48,12 +52,12 @@ def path():
 
 '''
 The final status:
-Running:['vm3', 'vm4', 'vm5']
-Stopped:[]
-Enadbled:['volume1-backup5', 'vm1-image2']
+Running:[]
+Stopped:['vm3', 'vm4', 'vm5']
+Enadbled:['volume3-backup5', 'vm1-image2']
 attached:['volume1']
-Detached:['volume3', 'volume2']
-Deleted:['vm1', 'vm1-backup1', 'volume1-backup4', 'vm3-backup2', 'volume1-backup2']
+Detached:['volume2', 'volume3']
+Deleted:['vm1', 'vm1-backup1', 'volume3-backup4', 'vm3-backup2', 'volume1-backup2']
 Expunged:['vm2', 'volume4', 'image1']
 Ha:[]
 Group:

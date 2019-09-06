@@ -39,7 +39,7 @@ def path():
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.delete_volume, 'volume1'],
 		[TestAction.expunge_volume, 'volume1'],
-		[TestAction.change_vm_ha, 'vm2'],
+		[TestAction.change_vm_ha, 'vm3'],
 		[TestAction.attach_volume, 'vm3', 'volume2'],
 		[TestAction.create_volume_backup, 'volume2', 'volume2-backup3'],
 		[TestAction.detach_volume, 'volume2'],
@@ -60,7 +60,7 @@ attached:[]
 Detached:['volume2']
 Deleted:[]
 Expunged:['volume1', 'image1']
-Ha:['vm2']
+Ha:['vm3']
 Group:
 	vm_backup1:['vm1-backup1']---vm1@
 '''

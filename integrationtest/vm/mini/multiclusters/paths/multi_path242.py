@@ -31,6 +31,7 @@ def path():
 		[TestAction.add_image, 'image2', 'root', os.environ.get('isoForVmUrl')],
 		[TestAction.create_vm_by_image, 'image2', 'iso', 'vm2', 'cluster=cluster1'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
+		[TestAction.start_vm, 'vm2'],
 		[TestAction.migrate_vm, 'vm2'],
 		[TestAction.attach_volume, 'vm2', 'volume2'],
 		[TestAction.detach_volume, 'volume2'],

@@ -14,16 +14,16 @@ def path():
 		[TestAction.destroy_vm, 'vm2'],
 		[TestAction.expunge_vm, 'vm2'],
 		[TestAction.create_mini_vm, 'vm3', 'cluster=cluster2'],
-		[TestAction.resize_volume, 'vm1', 5*1024*1024],
+		[TestAction.resize_volume, 'vm3', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
 		[TestAction.create_volume, 'volume2', 'cluster=cluster2', 'flag=scsi'],
 		[TestAction.attach_volume, 'vm3', 'volume2'],
 		[TestAction.create_volume, 'volume3', 'cluster=cluster2', 'flag=thick,scsi'],
 		[TestAction.add_image, 'image1', 'root', 'http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2'],
+		[TestAction.start_vm, 'vm3'],
 		[TestAction.create_vm_backup, 'vm3', 'vm3-backup2'],
 		[TestAction.stop_vm, 'vm3'],
 		[TestAction.use_vm_backup, 'vm3-backup2'],
-		[TestAction.start_vm, 'vm3'],
 		[TestAction.delete_image, 'image1'],
 		[TestAction.recover_image, 'image1'],
 		[TestAction.delete_image, 'image1'],
@@ -40,10 +40,10 @@ def path():
 		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.destroy_vm, 'vm3'],
 		[TestAction.recover_vm, 'vm3'],
-		[TestAction.attach_volume, 'vm1', 'volume4'],
-		[TestAction.create_volume_backup, 'volume4', 'volume4-backup5'],
-		[TestAction.detach_volume, 'volume4'],
-		[TestAction.resize_volume, 'vm1', 5*1024*1024],
+		[TestAction.attach_volume, 'vm4', 'volume5'],
+		[TestAction.create_volume_backup, 'volume5', 'volume5-backup5'],
+		[TestAction.detach_volume, 'volume5'],
+		[TestAction.resize_volume, 'vm4', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
 		[TestAction.delete_vm_backup, 'vm3-backup2'],
 ])
@@ -53,11 +53,11 @@ def path():
 
 '''
 The final status:
-Running:['vm1', 'vm4']
-Stopped:['vm3']
-Enadbled:['vm1-backup4', 'volume4-backup5']
+Running:[]
+Stopped:['vm3', 'vm1', 'vm4']
+Enadbled:['vm1-backup4', 'volume5-backup5']
 attached:[]
-Detached:['volume1', 'volume3', 'volume5', 'volume4']
+Detached:['volume1', 'volume3', 'volume4', 'volume5']
 Deleted:['volume1-backup1', 'vm3-backup2', 'volume2-backup2']
 Expunged:['vm2', 'volume2', 'image1']
 Ha:[]
