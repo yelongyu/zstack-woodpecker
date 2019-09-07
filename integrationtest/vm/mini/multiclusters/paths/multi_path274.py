@@ -20,8 +20,10 @@ def path():
 		[TestAction.delete_volume, 'volume2'],
 		[TestAction.recover_volume, 'volume2'],
 		[TestAction.add_image, 'image1', 'root', 'http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2'],
-		[TestAction.create_vm_backup, 'vm2', 'vm2-backup2'],
-		[TestAction.delete_vm_backup, 'vm2-backup2'],
+		[TestAction.start_vm, 'vm1'],
+		[TestAction.create_vm_backup, 'vm1', 'vm1-backup2'],
+		[TestAction.delete_vm_backup, 'vm1-backup2'],
+		[TestAction.stop_vm, 'vm1'],
 		[TestAction.delete_image, 'image1'],
 		[TestAction.expunge_image, 'image1'],
 		[TestAction.attach_volume, 'vm2', 'volume1'],
@@ -64,7 +66,7 @@ Stopped:['vm1', 'vm3', 'vm4']
 Enadbled:['volume1-backup1', 'volume1-backup3', 'vm2-backup4']
 attached:['auto-volume4']
 Detached:['volume2', 'volume4', 'volume1']
-Deleted:['vm2-backup2']
+Deleted:['vm1-backup2']
 Expunged:['volume3', 'image1']
 Ha:[]
 Group:

@@ -33,7 +33,7 @@ def path():
 		[TestAction.add_image, 'image3', 'root', os.environ.get('isoForVmUrl')],
 		[TestAction.create_vm_by_image, 'image3', 'iso', 'vm5', 'cluster=cluster2'],
 		[TestAction.create_vm_backup, 'vm4', 'vm4-backup3'],
-		[TestAction.resize_volume, 'vm5', 5*1024*1024],
+		[TestAction.resize_volume, 'vm3', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
 		[TestAction.attach_volume, 'vm5', 'volume1'],
 		[TestAction.create_volume_backup, 'volume1', 'volume1-backup4'],

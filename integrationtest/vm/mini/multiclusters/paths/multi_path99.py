@@ -22,8 +22,8 @@ def path():
 		[TestAction.create_vm_backup, 'vm4', 'vm4-backup2'],
 		[TestAction.stop_vm, 'vm4'],
 		[TestAction.use_vm_backup, 'vm4-backup2'],
-		[TestAction.delete_image, 'vm4-image1'],
-		[TestAction.recover_image, 'vm4-image1'],
+		[TestAction.delete_image, 'image2'],
+		[TestAction.recover_image, 'image2'],
 		[TestAction.delete_image, 'vm4-image1'],
 		[TestAction.expunge_image, 'vm4-image1'],
 		[TestAction.create_vm_backup, 'vm3', 'vm3-backup3'],
@@ -37,18 +37,18 @@ def path():
 		[TestAction.use_volume_backup, 'volume1-backup1'],
 		[TestAction.start_vm, 'vm2'],
 		[TestAction.detach_volume, 'volume1'],
-		[TestAction.destroy_vm, 'vm5'],
-		[TestAction.expunge_vm, 'vm5'],
+		[TestAction.destroy_vm, 'vm3'],
+		[TestAction.expunge_vm, 'vm3'],
 		[TestAction.delete_volume, 'volume2'],
 		[TestAction.expunge_volume, 'volume2'],
-		[TestAction.start_vm, 'vm3'],
-		[TestAction.reboot_vm, 'vm3'],
+		[TestAction.start_vm, 'vm5'],
+		[TestAction.reboot_vm, 'vm5'],
 		[TestAction.start_vm, 'vm4'],
 		[TestAction.create_vm_backup, 'vm4', 'vm4-backup4'],
 		[TestAction.stop_vm, 'vm4'],
-		[TestAction.create_image_from_volume, 'vm3', 'vm3-image3'],
+		[TestAction.create_image_from_volume, 'vm5', 'vm5-image3'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
-		[TestAction.delete_vm_backup, 'vm3-backup3'],
+		[TestAction.delete_vm_backup, 'vm4-backup2'],
 ])
 
 
@@ -56,15 +56,15 @@ def path():
 
 '''
 The final status:
-Running:['vm2', 'vm3']
+Running:['vm2', 'vm5']
 Stopped:['vm4']
-Enadbled:['volume1-backup1', 'vm4-backup2', 'vm4-backup4', 'image2', 'vm3-image3']
-attached:[]
-Detached:['volume1', 'auto-volume5']
-Deleted:['vm1', 'volume3', 'vm3-backup3']
-Expunged:['vm5', 'volume2', 'vm4-image1']
+Enadbled:['volume1-backup1', 'vm3-backup3', 'vm4-backup4', 'image2', 'vm5-image3']
+attached:['auto-volume5']
+Detached:['volume1']
+Deleted:['vm1', 'volume3', 'vm4-backup2']
+Expunged:['vm3', 'volume2', 'vm4-image1']
 Ha:[]
 Group:
+	vm_backup2:['vm3-backup3']---vm3@
 	vm_backup3:['vm4-backup4']---vm4@
-	vm_backup1:['vm4-backup2']---vm4@
 '''

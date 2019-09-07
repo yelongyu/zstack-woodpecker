@@ -50,7 +50,7 @@ def path():
 		[TestAction.create_mini_vm, 'vm3', 'data_volume=true', 'cluster=cluster1'],
 		[TestAction.create_mini_vm, 'vm4', 'cluster=cluster2'],
 		[TestAction.create_vm_backup, 'vm4', 'vm4-backup4'],
-		[TestAction.resize_volume, 'vm3', 5*1024*1024],
+		[TestAction.resize_volume, 'vm4', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
 		[TestAction.delete_volume_backup, 'volume1-backup1'],
 ])

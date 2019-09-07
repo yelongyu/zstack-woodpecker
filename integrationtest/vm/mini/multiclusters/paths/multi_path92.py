@@ -23,10 +23,8 @@ def path():
 		[TestAction.delete_volume, 'volume3'],
 		[TestAction.recover_volume, 'volume3'],
 		[TestAction.add_image, 'image2', 'root', 'http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2'],
-		[TestAction.attach_volume, 'vm3', 'volume1'],
-		[TestAction.stop_vm, 'vm3'],
+		[TestAction.attach_volume, 'vm1', 'volume1'],
 		[TestAction.use_volume_backup, 'volume1-backup1'],
-		[TestAction.start_vm, 'vm3'],
 		[TestAction.detach_volume, 'volume1'],
 		[TestAction.delete_image, 'image2'],
 		[TestAction.delete_image, 'vm3-image1'],
@@ -36,9 +34,9 @@ def path():
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.create_mini_vm, 'vm4', 'cluster=cluster2'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
-		[TestAction.start_vm, 'vm3'],
-		[TestAction.migrate_vm, 'vm3'],
-		[TestAction.attach_volume, 'vm2', 'volume3'],
+		[TestAction.start_vm, 'vm4'],
+		[TestAction.migrate_vm, 'vm4'],
+		[TestAction.attach_volume, 'vm1', 'volume3'],
 		[TestAction.delete_volume, 'volume3'],
 		[TestAction.recover_volume, 'volume3'],
 		[TestAction.delete_vm_backup, 'vm1-backup2'],
@@ -47,10 +45,10 @@ def path():
 		[TestAction.expunge_volume, 'volume3'],
 		[TestAction.start_vm, 'vm2'],
 		[TestAction.reboot_vm, 'vm2'],
-		[TestAction.attach_volume, 'vm3', 'volume1'],
-		[TestAction.create_volume_backup, 'volume1', 'volume1-backup3'],
-		[TestAction.detach_volume, 'volume1'],
-		[TestAction.migrate_vm, 'vm5'],
+		[TestAction.start_vm, 'vm3'],
+		[TestAction.create_volume_backup, 'volume2', 'volume2-backup3'],
+		[TestAction.stop_vm, 'vm3'],
+		[TestAction.migrate_vm, 'vm4'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
 		[TestAction.start_vm, 'vm1'],
 		[TestAction.create_vm_backup, 'vm1', 'vm1-backup4'],
@@ -64,8 +62,8 @@ def path():
 '''
 The final status:
 Running:['vm2']
-Stopped:['vm4', 'vm3', 'vm5', 'vm1']
-Enadbled:['volume1-backup1', 'volume1-backup3', 'vm1-backup4']
+Stopped:['vm5', 'vm3', 'vm4', 'vm1']
+Enadbled:['volume1-backup1', 'volume2-backup3', 'vm1-backup4']
 attached:['volume2']
 Detached:['volume1']
 Deleted:['vm1-backup2', 'image2']

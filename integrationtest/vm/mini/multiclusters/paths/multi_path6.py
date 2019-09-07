@@ -19,25 +19,22 @@ def path():
 		[TestAction.delete_vm_backup, 'vm2-backup1'],
 		[TestAction.delete_image, 'image2'],
 		[TestAction.recover_image, 'image2'],
-		[TestAction.delete_image, 'image1'],
-		[TestAction.expunge_image, 'image1'],
+		[TestAction.delete_image, 'image2'],
+		[TestAction.expunge_image, 'image2'],
 		[TestAction.create_vm_backup, 'vm1', 'vm1-backup2'],
 		[TestAction.change_vm_ha, 'vm1'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
 		[TestAction.resize_volume, 'vm3', 5*1024*1024],
 		[TestAction.create_volume, 'volume3', 'size=random', 'cluster=cluster2', 'flag=scsi'],
-		[TestAction.delete_volume, 'volume2'],
+		[TestAction.delete_volume, 'volume3'],
 		[TestAction.delete_vm_backup, 'vm1-backup2'],
 		[TestAction.destroy_vm, 'vm1'],
 		[TestAction.expunge_vm, 'vm1'],
 		[TestAction.expunge_volume, 'volume1'],
-		[TestAction.add_image, 'image3', 'root', os.environ.get('isoForVmUrl')],
-		[TestAction.create_vm_by_image, 'image3', 'iso', 'vm4', 'cluster=cluster1'],
-		[TestAction.attach_volume, 'vm3', 'volume3'],
-		[TestAction.start_vm, 'vm3'],
-		[TestAction.create_volume_backup, 'volume3', 'volume3-backup3'],
-		[TestAction.stop_vm, 'vm3'],
-		[TestAction.detach_volume, 'volume3'],
+		[TestAction.create_vm_by_image, 'image1', 'iso', 'vm4', 'cluster=cluster1'],
+		[TestAction.start_vm, 'vm2'],
+		[TestAction.create_volume_backup, 'volume2', 'volume2-backup3'],
+		[TestAction.stop_vm, 'vm2'],
 		[TestAction.start_vm, 'vm3'],
 		[TestAction.migrate_vm, 'vm3'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
@@ -54,12 +51,12 @@ def path():
 The final status:
 Running:['vm3']
 Stopped:['vm4', 'vm2']
-Enadbled:['volume3-backup3', 'vm2-backup4', 'image2', 'image3']
-attached:[]
-Detached:['volume3']
-Deleted:['volume2', 'vm2-backup1', 'vm1-backup2']
-Expunged:['vm1', 'volume1', 'image1']
+Enadbled:['volume2-backup3', 'vm2-backup4', 'volume2-backup4', 'image1']
+attached:['volume2']
+Detached:[]
+Deleted:['volume3', 'vm2-backup1', 'vm1-backup2']
+Expunged:['vm1', 'volume1', 'image2']
 Ha:[]
 Group:
-	vm_backup1:['vm2-backup4']---vm2@
+	vm_backup1:['vm2-backup4', 'volume2-backup4']---vm2@volume2
 '''

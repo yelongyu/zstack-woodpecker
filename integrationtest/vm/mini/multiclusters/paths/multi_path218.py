@@ -42,8 +42,8 @@ def path():
 		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.add_image, 'image2', 'root', os.environ.get('isoForVmUrl')],
 		[TestAction.create_vm_by_image, 'image2', 'iso', 'vm5', 'cluster=cluster1'],
-		[TestAction.create_vm_backup, 'vm5', 'vm5-backup4'],
-		[TestAction.create_image_from_volume, 'vm2', 'vm2-image3'],
+		[TestAction.create_vm_backup, 'vm4', 'vm4-backup4'],
+		[TestAction.create_image_from_volume, 'vm5', 'vm5-image3'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
 		[TestAction.use_vm_backup, 'vm2-backup3'],
 ])
@@ -54,14 +54,14 @@ def path():
 '''
 The final status:
 Running:['vm3']
-Stopped:['vm2', 'vm4', 'vm5']
-Enadbled:['volume1-backup1', 'vm2-backup3', 'vm5-backup4', 'image2', 'vm2-image3']
+Stopped:['vm2', 'vm5', 'vm4']
+Enadbled:['volume1-backup1', 'vm2-backup3', 'vm4-backup4', 'image2', 'vm5-image3']
 attached:['volume3']
 Detached:['volume4', 'volume1']
 Deleted:['vm2-backup2']
 Expunged:['vm1', 'volume2', 'image1']
 Ha:[]
 Group:
-	vm_backup2:['vm5-backup4']---vm5@
+	vm_backup2:['vm4-backup4']---vm4@
 	vm_backup1:['vm2-backup3']---vm2@
 '''

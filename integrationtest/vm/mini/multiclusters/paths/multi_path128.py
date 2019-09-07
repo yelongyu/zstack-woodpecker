@@ -41,7 +41,7 @@ def path():
 		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.destroy_vm, 'vm2'],
 		[TestAction.recover_vm, 'vm2'],
-		[TestAction.attach_volume, 'vm3', 'volume1'],
+		[TestAction.attach_volume, 'vm4', 'volume1'],
 		[TestAction.create_volume_backup, 'volume1', 'volume1-backup4'],
 		[TestAction.detach_volume, 'volume1'],
 		[TestAction.create_image_from_volume, 'vm2', 'vm2-image3'],

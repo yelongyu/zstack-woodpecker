@@ -8,7 +8,7 @@ def path():
 		[TestAction.reboot_vm, 'vm1'],
 		[TestAction.create_vm_backup, 'vm1', 'vm1-backup1'],
 		[TestAction.create_mini_vm, 'vm2', 'cpu=random', 'cluster=cluster2'],
-		[TestAction.resize_volume, 'vm2', 5*1024*1024],
+		[TestAction.resize_volume, 'vm1', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
 		[TestAction.create_volume, 'volume1', 'cluster=cluster2', 'flag=scsi'],
 		[TestAction.attach_volume, 'vm2', 'volume1'],

@@ -43,7 +43,7 @@ def path():
 		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.destroy_vm, 'vm1'],
 		[TestAction.create_vm_backup, 'vm3', 'vm3-backup4'],
-		[TestAction.resize_volume, 'vm2', 5*1024*1024],
+		[TestAction.resize_volume, 'vm3', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
 		[TestAction.attach_volume, 'vm3', 'volume1'],
 		[TestAction.use_volume_backup, 'volume1-backup1'],

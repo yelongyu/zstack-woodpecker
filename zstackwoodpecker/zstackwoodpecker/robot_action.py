@@ -783,7 +783,7 @@ def create_vm_by_image(robot_test_obj, args):
     robot_test_obj.default_config['PS'] = root_volume.get_volume().primaryStorageUuid
     robot_test_obj.default_config['HOST'] = vm.get_vm().hostUuid
 
-    if image_format == "iso":
+    if image_format == "iso" and test_lib.ROBOT:
         host = test_lib.lib_get_vm_host(vm.get_vm())
         test_lib.lib_install_testagent_to_host(host)
         test_lib.lib_set_vm_host_l2_ip(vm.get_vm())
@@ -1474,7 +1474,7 @@ def create_volume(robot_test_obj, args):
     if "cluster" in arg_dict:
         cluster_name = arg_dict['cluster']
         cond = res_ops.gen_query_conditions("name", "=", cluster_name)
-        cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, cond)
+        cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, cond)[0].uuid
 
     volume_creation_option = test_util.VolumeOption()
     volume_creation_option.set_name(target_volume_name)

@@ -37,8 +37,10 @@ def path():
 		[TestAction.create_image_from_volume, 'vm3', 'vm3-image2'],
 		[TestAction.create_volume, 'volume3', 'size=random', 'cluster=cluster1', 'flag=scsi'],
 		[TestAction.delete_volume, 'volume2'],
-		[TestAction.create_vm_backup, 'vm3', 'vm3-backup3'],
-		[TestAction.delete_vm_backup, 'vm3-backup3'],
+		[TestAction.start_vm, 'vm2'],
+		[TestAction.create_vm_backup, 'vm2', 'vm2-backup3'],
+		[TestAction.delete_vm_backup, 'vm2-backup3'],
+		[TestAction.stop_vm, 'vm2'],
 		[TestAction.start_vm, 'vm2'],
 		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.change_vm_ha, 'vm2'],
@@ -58,7 +60,7 @@ Stopped:['vm3']
 Enadbled:['volume1-backup1', 'volume2-backup2', 'vm3-backup4', 'vm3-image2', 'vm3-image3']
 attached:[]
 Detached:['volume1', 'volume3']
-Deleted:['vm3-backup3']
+Deleted:['vm2-backup3']
 Expunged:['vm1', 'volume2', 'image1']
 Ha:['vm2']
 Group:

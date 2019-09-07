@@ -16,15 +16,15 @@ def path():
 		[TestAction.delete_volume, 'volume2'],
 		[TestAction.recover_volume, 'volume2'],
 		[TestAction.add_image, 'image1', 'root', 'http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2'],
-		[TestAction.start_vm, 'vm2'],
-		[TestAction.create_vm_backup, 'vm2', 'vm2-backup2'],
-		[TestAction.delete_vm_backup, 'vm2-backup2'],
-		[TestAction.stop_vm, 'vm2'],
+		[TestAction.start_vm, 'vm1'],
+		[TestAction.create_vm_backup, 'vm1', 'vm1-backup2'],
+		[TestAction.delete_vm_backup, 'vm1-backup2'],
+		[TestAction.stop_vm, 'vm1'],
 		[TestAction.delete_image, 'image1'],
 		[TestAction.expunge_image, 'image1'],
-		[TestAction.start_vm, 'vm2'],
-		[TestAction.create_vm_backup, 'vm2', 'vm2-backup3'],
-		[TestAction.stop_vm, 'vm2'],
+		[TestAction.start_vm, 'vm1'],
+		[TestAction.create_vm_backup, 'vm1', 'vm1-backup4'],
+		[TestAction.stop_vm, 'vm1'],
 		[TestAction.start_vm, 'vm2'],
 		[TestAction.reboot_vm, 'vm2'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
@@ -34,18 +34,19 @@ def path():
 		[TestAction.attach_volume, 'vm1', 'volume3'],
 		[TestAction.detach_volume, 'volume3'],
 		[TestAction.create_volume, 'volume4', 'cluster=cluster1', 'flag=thick,scsi'],
-		[TestAction.delete_vm_backup, 'vm2-backup3'],
+		[TestAction.delete_vm_backup, 'vm1-backup4'],
 		[TestAction.create_mini_vm, 'vm4', 'cluster=cluster1'],
+		[TestAction.stop_vm, 'vm4'],
 		[TestAction.start_vm, 'vm4'],
 		[TestAction.delete_volume, 'volume4'],
 		[TestAction.expunge_volume, 'volume4'],
 		[TestAction.reboot_vm, 'vm3'],
-		[TestAction.attach_volume, 'vm4', 'volume2'],
-		[TestAction.create_volume_backup, 'volume2', 'volume2-backup4'],
-		[TestAction.detach_volume, 'volume2'],
+		[TestAction.start_vm, 'vm1'],
+		[TestAction.create_volume_backup, 'auto-volume1', 'auto-volume1-backup6'],
+		[TestAction.stop_vm, 'vm1'],
 		[TestAction.migrate_vm, 'vm4'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
-		[TestAction.delete_volume_backup, 'volume2-backup4'],
+		[TestAction.delete_volume_backup, 'auto-volume1-backup1'],
 ])
 
 
@@ -55,10 +56,10 @@ def path():
 The final status:
 Running:['vm3', 'vm4']
 Stopped:['vm1', 'vm2']
-Enadbled:['auto-volume1-backup1']
+Enadbled:['auto-volume1-backup6']
 attached:['auto-volume1']
-Detached:['volume3', 'volume2']
-Deleted:['vm2-backup2', 'vm2-backup3', 'volume2-backup4']
+Detached:['volume2', 'volume3']
+Deleted:['vm1-backup2', 'auto-volume1-backup2', 'vm1-backup4', 'auto-volume1-backup4', 'auto-volume1-backup1']
 Expunged:['volume4', 'image1']
 Ha:[]
 Group:

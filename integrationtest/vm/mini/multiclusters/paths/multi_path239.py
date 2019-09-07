@@ -29,7 +29,8 @@ def path():
 		[TestAction.delete_volume, 'volume3'],
 		[TestAction.delete_vm_backup, 'vm2-backup2'],
 		[TestAction.create_mini_vm, 'vm3', 'network=random', 'cluster=cluster1'],
-		[TestAction.expunge_volume, 'volume2'],
+		[TestAction.delete_volume, 'volume4'],
+		[TestAction.expunge_volume, 'volume4'],
 		[TestAction.add_image, 'image3', 'root', os.environ.get('isoForVmUrl')],
 		[TestAction.create_vm_by_image, 'image3', 'iso', 'vm4', 'cluster=cluster1'],
 		[TestAction.start_vm, 'vm1'],
@@ -50,9 +51,9 @@ Running:['vm3', 'vm4']
 Stopped:['vm2', 'vm1']
 Enadbled:['auto-volume1-backup1', 'auto-volume1-backup3', 'auto-volume1-backup4', 'image3']
 attached:['auto-volume1']
-Detached:['volume4']
-Deleted:['volume3', 'vm2-backup2', 'vm2-image1']
-Expunged:['volume2', 'image2']
+Detached:[]
+Deleted:['volume2', 'volume3', 'vm2-backup2', 'vm2-image1']
+Expunged:['volume4', 'image2']
 Ha:[]
 Group:
 '''

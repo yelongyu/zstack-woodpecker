@@ -8,7 +8,7 @@ def path():
 		[TestAction.create_mini_vm, 'vm2', 'cluster=cluster1'],
 		[TestAction.create_vm_backup, 'vm2', 'vm2-backup1'],
 		[TestAction.create_mini_vm, 'vm3', 'cpu=random', 'cluster=cluster1'],
-		[TestAction.resize_volume, 'vm2', 5*1024*1024],
+		[TestAction.resize_volume, 'vm3', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
 		[TestAction.create_volume, 'volume1', 'cluster=cluster2', 'flag=scsi'],
 		[TestAction.attach_volume, 'vm1', 'volume1'],
@@ -38,8 +38,8 @@ def path():
 		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.create_mini_vm, 'vm6', 'cluster=cluster2'],
 		[TestAction.create_vm_backup, 'vm6', 'vm6-backup4'],
-		[TestAction.start_vm, 'vm3'],
-		[TestAction.migrate_vm, 'vm3'],
+		[TestAction.start_vm, 'vm2'],
+		[TestAction.migrate_vm, 'vm2'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
 		[TestAction.start_vm, 'vm4'],
 		[TestAction.create_volume_backup, 'volume1', 'volume1-backup5'],
@@ -52,8 +52,8 @@ def path():
 
 '''
 The final status:
-Running:['vm3']
-Stopped:['vm2', 'vm5', 'vm6', 'vm4']
+Running:['vm2']
+Stopped:['vm3', 'vm5', 'vm6', 'vm4']
 Enadbled:['vm2-backup1', 'vm1-backup3', 'vm6-backup4']
 attached:['volume1']
 Detached:['volume3']

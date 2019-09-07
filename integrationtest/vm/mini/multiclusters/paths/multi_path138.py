@@ -30,7 +30,7 @@ def path():
 		[TestAction.detach_volume, 'volume1'],
 		[TestAction.change_vm_ha, 'vm3'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
-		[TestAction.resize_volume, 'vm3', 5*1024*1024],
+		[TestAction.resize_volume, 'vm2', 5*1024*1024],
 		[TestAction.attach_volume, 'vm2', 'volume1'],
 		[TestAction.detach_volume, 'volume1'],
 		[TestAction.recover_volume, 'volume2'],
@@ -60,7 +60,7 @@ def path():
 '''
 The final status:
 Running:['vm3']
-Stopped:['vm1', 'vm2']
+Stopped:['vm2', 'vm1']
 Enadbled:['vm1-backup1', 'vm3-backup2', 'volume1-backup3', 'volume1-backup4', 'image1']
 attached:[]
 Detached:['volume1']

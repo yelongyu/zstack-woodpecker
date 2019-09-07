@@ -18,16 +18,16 @@ def path():
 		[TestAction.delete_volume, 'volume3'],
 		[TestAction.add_image, 'image2', 'root', 'http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2'],
 		[TestAction.delete_volume_backup, 'volume1-backup1'],
-		[TestAction.delete_image, 'vm2-image1'],
 		[TestAction.delete_image, 'image2'],
-		[TestAction.expunge_image, 'image2'],
+		[TestAction.delete_image, 'vm2-image1'],
+		[TestAction.expunge_image, 'vm2-image1'],
 		[TestAction.start_vm, 'vm2'],
 		[TestAction.create_vm_backup, 'vm2', 'vm2-backup2'],
 		[TestAction.stop_vm, 'vm2'],
 		[TestAction.start_vm, 'vm2'],
 		[TestAction.reboot_vm, 'vm2'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
-		[TestAction.resize_volume, 'vm2', 5*1024*1024],
+		[TestAction.resize_volume, 'vm1', 5*1024*1024],
 		[TestAction.create_volume, 'volume4', 'size=random', 'cluster=cluster1', 'flag=scsi'],
 		[TestAction.create_volume, 'volume5', 'cluster=cluster2', 'flag=thick,scsi'],
 		[TestAction.delete_vm_backup, 'vm2-backup2'],
@@ -36,10 +36,12 @@ def path():
 		[TestAction.delete_volume, 'volume4'],
 		[TestAction.expunge_volume, 'volume4'],
 		[TestAction.create_mini_vm, 'vm3', 'data_volume=true', 'cluster=cluster2'],
-		[TestAction.create_volume_backup, 'auto-volume3', 'auto-volume3-backup3'],
+		[TestAction.start_vm, 'vm1'],
+		[TestAction.create_volume_backup, 'volume2', 'volume2-backup3'],
+		[TestAction.stop_vm, 'vm1'],
 		[TestAction.resize_data_volume, 'volume2', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
-		[TestAction.delete_volume_backup, 'auto-volume3-backup3'],
+		[TestAction.delete_volume_backup, 'volume2-backup3'],
 ])
 
 
@@ -52,8 +54,8 @@ Stopped:['vm2', 'vm1', 'vm3']
 Enadbled:[]
 attached:['volume2', 'auto-volume3']
 Detached:['volume1', 'volume5']
-Deleted:['volume3', 'volume1-backup1', 'vm2-backup2', 'auto-volume3-backup3', 'vm2-image1']
-Expunged:['volume4', 'image2']
+Deleted:['volume3', 'volume1-backup1', 'vm2-backup2', 'volume2-backup3', 'image2']
+Expunged:['volume4', 'vm2-image1']
 Ha:[]
 Group:
 '''
