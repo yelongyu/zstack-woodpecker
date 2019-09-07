@@ -93,6 +93,7 @@ class ZstackTestVm(vm_header.TestVm):
             while status != 'Running':
                 vm_inv = test_lib.lib_get_vm_by_uuid(self.vm.uuid)
                 status = vm_inv.state
+                self.vm = vm_inv
             self.set_state(vm_header.RUNNING)
 
     def suspend(self, session_uuid = None):
@@ -185,6 +186,13 @@ class ZstackTestVm(vm_header.TestVm):
                     self.set_state(vm_header.STOPPED)
                 if host and host.state == "Maintenance":
                     self.set_state(vm_header.STOPPED)
+                if ha_ops.get_vm_instance_ha_level(self.vm.uuid) and test_lib.lib_get_ha_enable() == "true":
+                    status = self.vm.state
+                    while status != 'Running':
+                        vm_inv = test_lib.lib_get_vm_by_uuid(self.vm.uuid)
+                        status = vm_inv.state
+                        self.vm = vm_inv
+                    self.set_state(vm_header.RUNNING)
             else:
                 self.set_state(vm_header.EXPUNGED)
             return self.vm

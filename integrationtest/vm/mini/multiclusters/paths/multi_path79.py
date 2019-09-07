@@ -32,25 +32,25 @@ def path():
 		[TestAction.create_image_from_volume, 'vm4', 'vm4-image3'],
 		[TestAction.create_volume, 'volume3', 'size=random', 'cluster=cluster2', 'flag=scsi'],
 		[TestAction.create_volume, 'volume4', 'cluster=cluster1', 'flag=thick,scsi'],
-		[TestAction.attach_volume, 'vm2', 'volume1'],
+		[TestAction.attach_volume, 'vm4', 'volume1'],
 		[TestAction.use_volume_backup, 'volume1-backup2'],
 		[TestAction.detach_volume, 'volume1'],
-		[TestAction.destroy_vm, 'vm3'],
-		[TestAction.expunge_vm, 'vm3'],
-		[TestAction.delete_volume, 'volume3'],
-		[TestAction.expunge_volume, 'volume3'],
+		[TestAction.destroy_vm, 'vm2'],
+		[TestAction.expunge_vm, 'vm2'],
+		[TestAction.delete_volume, 'volume2'],
+		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.destroy_vm, 'vm4'],
-		[TestAction.attach_volume, 'vm2', 'volume1'],
-		[TestAction.start_vm, 'vm2'],
-		[TestAction.create_volume_backup, 'volume1', 'volume1-backup3'],
-		[TestAction.stop_vm, 'vm2'],
-		[TestAction.detach_volume, 'volume1'],
-		[TestAction.resize_data_volume, 'volume2', 5*1024*1024],
+		[TestAction.attach_volume, 'vm3', 'volume4'],
+		[TestAction.start_vm, 'vm3'],
+		[TestAction.create_volume_backup, 'volume4', 'volume4-backup3'],
+		[TestAction.stop_vm, 'vm3'],
+		[TestAction.detach_volume, 'volume4'],
+		[TestAction.resize_data_volume, 'volume3', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
-		[TestAction.start_vm, 'vm2'],
-		[TestAction.create_vm_backup, 'vm2', 'vm2-backup4'],
-		[TestAction.stop_vm, 'vm2'],
-		[TestAction.use_vm_backup, 'vm2-backup4'],
+		[TestAction.start_vm, 'vm3'],
+		[TestAction.create_vm_backup, 'vm3', 'vm3-backup4'],
+		[TestAction.stop_vm, 'vm3'],
+		[TestAction.use_vm_backup, 'vm3-backup4'],
 ])
 
 
@@ -59,13 +59,13 @@ def path():
 '''
 The final status:
 Running:[]
-Stopped:['vm2']
-Enadbled:['volume1-backup2', 'volume1-backup3', 'vm2-backup4', 'image2', 'vm4-image3']
+Stopped:['vm3']
+Enadbled:['volume1-backup2', 'volume4-backup3', 'vm3-backup4', 'image2', 'vm4-image3']
 attached:[]
-Detached:['volume2', 'volume4', 'volume1']
+Detached:['volume3', 'volume1', 'volume4']
 Deleted:['vm1', 'vm4', 'vm2-backup1']
-Expunged:['vm3', 'volume3', 'image1']
+Expunged:['vm2', 'volume2', 'image1']
 Ha:[]
 Group:
-	vm_backup1:['vm2-backup4']---vm2@
+	vm_backup1:['vm3-backup4']---vm3@
 '''

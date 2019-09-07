@@ -1582,7 +1582,7 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
     if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
         vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
         for ip in vm_ip_list:
-            cmd = "wget http://172.20.1.27/mirror/mini/MegaCli64 -O /opt/MegaRAID/MegaCli/MegaCli64;chmod a+x /opt/MegaRAID/MegaCli/MegaCli64"
+            cmd = "mkdir -p /opt/MegaRAID/MegaCli/;wget http://172.20.1.27/mirror/mini/MegaCli64 -O /opt/MegaRAID/MegaCli/MegaCli64;chmod a+x /opt/MegaRAID/MegaCli/MegaCli64"
             ssh.execute(cmd, ip, 'root', 'password')
             cmd = "wget http://172.20.1.27/mirror/mini/smartctl -O /usr/sbin/smartctl;chmod a+x /usr/sbin/smartctl"
             ssh.execute(cmd, ip, 'root', 'password')

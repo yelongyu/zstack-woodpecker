@@ -25,7 +25,7 @@ def path():
 		[TestAction.poweroff_only, 'cluster=cluster1'],
 		[TestAction.create_image_from_volume, 'vm1', 'vm1-image4'],
 		[TestAction.create_volume, 'volume4', 'cluster=cluster1', 'flag=scsi'],
-		[TestAction.attach_volume, 'vm3', 'volume4'],
+		[TestAction.attach_volume, 'vm1', 'volume4'],
 		[TestAction.detach_volume, 'volume4'],
 		[TestAction.create_volume, 'volume5', 'cluster=cluster1', 'flag=thick,scsi'],
 		[TestAction.use_volume_backup, 'auto-volume1-backup1'],
@@ -46,7 +46,7 @@ def path():
 '''
 The final status:
 Running:['vm5', 'vm2']
-Stopped:['vm1', 'vm3', 'vm4']
+Stopped:['vm4', 'vm1', 'vm3']
 Enadbled:['auto-volume1-backup1', 'vm2-backup2', 'vm1-backup3', 'auto-volume1-backup3', 'vm5-backup5', 'vm2-image1', 'image3', 'vm1-image4']
 attached:['auto-volume1']
 Detached:['volume4', 'volume5']

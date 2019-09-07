@@ -5,6 +5,7 @@ zstack KVM Host class
 '''
 import zstackwoodpecker.header.host as host_header
 import zstackwoodpecker.operations.host_operations as host_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_util as test_util
 
 MAINTAIN_EVENT = 'maintain'
@@ -61,3 +62,10 @@ class ZstackTestKvmHost(host_header.TestHost):
 
     def reconnect(self):
         host_ops.reconnect_host(self.host.uuid)
+
+    def update(self):
+        cond =  res_ops.gen_query_conditions("uuid", "=", self.host.uuid)
+        host_inv = res_ops.query_resource(res_ops.HOST, cond)[0]
+        self.host = host_inv
+        self.state = host_inv.state
+

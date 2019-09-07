@@ -16,10 +16,10 @@ def path():
 		[TestAction.create_volume, 'volume2', 'cluster=cluster2', 'flag=thick,scsi'],
 		[TestAction.add_image, 'image2', 'root', 'http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2'],
 		[TestAction.delete_vm_backup, 'vm1-backup1'],
-		[TestAction.delete_image, 'image2'],
-		[TestAction.recover_image, 'image2'],
-		[TestAction.delete_image, 'image2'],
-		[TestAction.expunge_image, 'image2'],
+		[TestAction.delete_image, 'image1'],
+		[TestAction.recover_image, 'image1'],
+		[TestAction.delete_image, 'image1'],
+		[TestAction.expunge_image, 'image1'],
 		[TestAction.start_vm, 'vm2'],
 		[TestAction.create_vm_backup, 'vm2', 'vm2-backup2'],
 		[TestAction.stop_vm, 'vm2'],
@@ -33,6 +33,7 @@ def path():
 		[TestAction.create_volume, 'volume4', 'cluster=cluster1', 'flag=thin,scsi'],
 		[TestAction.delete_vm_backup, 'vm2-backup2'],
 		[TestAction.create_mini_vm, 'vm3', 'cluster=cluster1'],
+		[TestAction.stop_vm, 'vm3'],
 		[TestAction.start_vm, 'vm3'],
 		[TestAction.delete_volume, 'volume3'],
 		[TestAction.expunge_volume, 'volume3'],
@@ -52,11 +53,11 @@ def path():
 The final status:
 Running:['vm1', 'vm3', 'vm4']
 Stopped:['vm2']
-Enadbled:['image1']
+Enadbled:['image2']
 attached:[]
 Detached:['volume1', 'volume2', 'volume4']
 Deleted:['vm1-backup1', 'vm2-backup2', 'vm2-backup3']
-Expunged:['volume3', 'image2']
+Expunged:['volume3', 'image1']
 Ha:[]
 Group:
 '''

@@ -44,7 +44,7 @@ def path():
 		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.create_mini_vm, 'vm6', 'cluster=cluster1'],
 		[TestAction.destroy_vm, 'vm6'],
-		[TestAction.attach_volume, 'vm3', 'volume1'],
+		[TestAction.attach_volume, 'vm5', 'volume1'],
 		[TestAction.create_volume_backup, 'volume1', 'volume1-backup3'],
 		[TestAction.detach_volume, 'volume1'],
 		[TestAction.create_mini_vm, 'vm7', 'cluster=cluster1'],

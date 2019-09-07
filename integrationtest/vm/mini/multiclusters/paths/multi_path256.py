@@ -21,13 +21,15 @@ def path():
 		[TestAction.stop_vm, 'vm1'],
 		[TestAction.delete_image, 'image1'],
 		[TestAction.expunge_image, 'image1'],
+		[TestAction.attach_volume, 'vm1', 'volume3'],
 		[TestAction.start_vm, 'vm1'],
-		[TestAction.create_volume_backup, 'auto-volume1', 'auto-volume1-backup4'],
+		[TestAction.create_volume_backup, 'volume3', 'volume3-backup4'],
 		[TestAction.stop_vm, 'vm1'],
+		[TestAction.detach_volume, 'volume3'],
 		[TestAction.create_mini_vm, 'vm3', 'cluster=cluster2'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
 		[TestAction.create_mini_vm, 'vm4', 'cluster=cluster1'],
-		[TestAction.resize_volume, 'vm4', 5*1024*1024],
+		[TestAction.resize_volume, 'vm1', 5*1024*1024],
 		[TestAction.create_volume, 'volume4', 'size=random', 'cluster=cluster1', 'flag=scsi'],
 		[TestAction.create_volume, 'volume5', 'cluster=cluster1', 'flag=thin,scsi'],
 		[TestAction.use_vm_backup, 'vm1-backup1'],
@@ -36,16 +38,18 @@ def path():
 		[TestAction.delete_volume, 'volume4'],
 		[TestAction.expunge_volume, 'volume4'],
 		[TestAction.change_vm_ha, 'vm3'],
-		[TestAction.attach_volume, 'vm4', 'volume3'],
-		[TestAction.create_volume_backup, 'volume3', 'volume3-backup5'],
-		[TestAction.detach_volume, 'volume3'],
+		[TestAction.attach_volume, 'vm3', 'auto-volume1'],
+		[TestAction.create_volume_backup, 'auto-volume1', 'auto-volume1-backup5'],
+		[TestAction.detach_volume, 'auto-volume1'],
 		[TestAction.migrate_vm, 'vm3'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
-		[TestAction.attach_volume, 'vm4', 'auto-volume1'],
-		[TestAction.stop_vm, 'vm4'],
-		[TestAction.use_volume_backup, 'auto-volume1-backup4'],
-		[TestAction.start_vm, 'vm4'],
-		[TestAction.detach_volume, 'auto-volume1'],
+		[TestAction.attach_volume, 'vm3', 'volume3'],
+		[TestAction.change_vm_ha, 'vm3'],
+		[TestAction.stop_vm, 'vm3'],
+		[TestAction.use_volume_backup, 'volume3-backup4'],
+		[TestAction.start_vm, 'vm3'],
+		[TestAction.change_vm_ha, 'vm3'],
+		[TestAction.detach_volume, 'volume3'],
 ])
 
 
@@ -53,11 +57,11 @@ def path():
 
 '''
 The final status:
-Running:['vm3', 'vm4']
+Running:['vm4', 'vm3']
 Stopped:[]
-Enadbled:['vm1-backup1', 'auto-volume1-backup1', 'auto-volume1-backup4', 'volume3-backup5']
+Enadbled:['vm1-backup1', 'auto-volume1-backup1', 'volume3-backup4', 'auto-volume1-backup5']
 attached:[]
-Detached:['volume5', 'volume3', 'auto-volume1']
+Detached:['volume5', 'auto-volume1', 'volume3']
 Deleted:['volume2', 'auto-volume1-backup3']
 Expunged:['vm2', 'vm1', 'volume4', 'image1']
 Ha:['vm3']

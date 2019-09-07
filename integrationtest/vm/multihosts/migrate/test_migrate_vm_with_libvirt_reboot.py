@@ -14,6 +14,14 @@ test_stub = test_lib.lib_get_specific_stub()
 
 def test():
     global vm
+
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for i in ps:
+        if i.type == inventory.CEPH_BACKUP_STORAGE_TYPE:
+            break
+        else:
+            test_util.test_skip('Skip test on non-Ceph PS')
+
     cmd = 'service libvirtd restart'
     vm = test_stub.create_vr_vm('migrate_vm', 'imageName_s', 'l3VlanNetwork2')
     vm.check()

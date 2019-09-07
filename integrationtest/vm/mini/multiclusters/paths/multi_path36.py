@@ -36,21 +36,19 @@ def path():
 		[TestAction.detach_volume, 'volume3'],
 		[TestAction.delete_volume, 'volume3'],
 		[TestAction.recover_volume, 'volume3'],
-		[TestAction.attach_volume, 'vm2', 'volume2'],
-		[TestAction.create_volume_backup, 'volume2', 'volume2-backup4'],
+		[TestAction.create_volume_backup, 'volume1', 'volume1-backup4'],
 		[TestAction.stop_vm, 'vm2'],
-		[TestAction.use_volume_backup, 'volume2-backup4'],
+		[TestAction.use_volume_backup, 'volume1-backup4'],
 		[TestAction.start_vm, 'vm2'],
-		[TestAction.detach_volume, 'volume2'],
 		[TestAction.start_vm, 'vm1'],
-		[TestAction.delete_volume, 'volume1'],
-		[TestAction.expunge_volume, 'volume1'],
+		[TestAction.delete_volume, 'volume2'],
+		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.add_image, 'image3', 'root', os.environ.get('isoForVmUrl')],
 		[TestAction.create_vm_by_image, 'image3', 'iso', 'vm3', 'cluster=cluster1'],
 		[TestAction.create_vm_backup, 'vm1', 'vm1-backup5'],
 		[TestAction.create_image_from_volume, 'vm1', 'vm1-image4'],
 		[TestAction.poweroff_only, 'cluster=cluster1'],
-		[TestAction.delete_vm_backup, 'vm2-backup1'],
+		[TestAction.delete_vm_backup, 'vm1-backup2'],
 ])
 
 
@@ -60,14 +58,14 @@ def path():
 The final status:
 Running:['vm1']
 Stopped:['vm2', 'vm3']
-Enadbled:['vm1-backup2', 'vm1-backup3', 'volume2-backup4', 'vm1-backup5', 'vm2-image2', 'image3', 'vm1-image4']
-attached:[]
-Detached:['volume3', 'volume2']
-Deleted:['vm2-backup1']
-Expunged:['volume1', 'image1']
+Enadbled:['vm2-backup1', 'vm1-backup3', 'volume1-backup4', 'vm1-backup5', 'vm2-image2', 'image3', 'vm1-image4']
+attached:['volume1']
+Detached:['volume3']
+Deleted:['vm1-backup2']
+Expunged:['volume2', 'image1']
 Ha:[]
 Group:
-	vm_backup2:['vm1-backup2']---vm1@
 	vm_backup3:['vm1-backup3']---vm1@
+	vm_backup1:['vm2-backup1']---vm2@
 	vm_backup4:['vm1-backup5']---vm1@
 '''

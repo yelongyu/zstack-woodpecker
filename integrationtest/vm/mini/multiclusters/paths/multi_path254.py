@@ -33,14 +33,14 @@ def path():
 		[TestAction.migrate_vm, 'vm3'],
 		[TestAction.create_volume, 'volume3', 'size=random', 'cluster=cluster1', 'flag=scsi'],
 		[TestAction.create_volume, 'volume4', 'cluster=cluster2', 'flag=thick,scsi'],
-		[TestAction.attach_volume, 'vm3', 'volume2'],
-		[TestAction.create_volume_backup, 'volume2', 'volume2-backup4'],
-		[TestAction.delete_volume_backup, 'volume2-backup4'],
-		[TestAction.detach_volume, 'volume2'],
+		[TestAction.attach_volume, 'vm3', 'volume4'],
+		[TestAction.create_volume_backup, 'volume4', 'volume4-backup4'],
+		[TestAction.delete_volume_backup, 'volume4-backup4'],
+		[TestAction.detach_volume, 'volume4'],
 		[TestAction.destroy_vm, 'vm2'],
 		[TestAction.expunge_vm, 'vm2'],
-		[TestAction.delete_volume, 'volume3'],
-		[TestAction.expunge_volume, 'volume3'],
+		[TestAction.delete_volume, 'volume2'],
+		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.create_mini_vm, 'vm4', 'cluster=cluster1'],
 		[TestAction.destroy_vm, 'vm4'],
 		[TestAction.create_mini_vm, 'vm5', 'cluster=cluster1'],
@@ -59,9 +59,9 @@ Running:['vm3']
 Stopped:['vm5']
 Enadbled:['vm2-backup1', 'vm3-backup2', 'vm2-backup3', 'vm5-backup5']
 attached:[]
-Detached:['volume1', 'volume4', 'volume2']
-Deleted:['vm4', 'volume2-backup4']
-Expunged:['vm1', 'vm2', 'volume3', 'image1']
+Detached:['volume1', 'volume3', 'volume4']
+Deleted:['vm4', 'volume4-backup4']
+Expunged:['vm1', 'vm2', 'volume2', 'image1']
 Ha:[]
 Group:
 	vm_backup2:['vm3-backup2']---vm3@

@@ -22,7 +22,7 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_one_pf.py::vm1_ha_vm2_noha_two_vpc</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_one_pf.py::vm1_ha_classic_vm2_vpc</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_one_pf.py::vm1_ha_vm2_noha_upgrade_two_vpc</case>
-        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_one_pf.py::vm1_ha_vm2_ha_one_vpc_1vlan_1vxlan</case>
+        <case timeout='3600' repeat='1' noparallel='True'>test_vpc_ha_one_pf.py::vm1_ha_vm2_ha_one_vpc_1vlan_1vxlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_update_monitorIP.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_two_vm_connection.py::vm1_vm2_one_l3_vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_two_vm_connection.py::vm1_vm2_one_l3_vxlan</case>

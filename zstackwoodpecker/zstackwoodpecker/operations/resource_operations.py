@@ -87,6 +87,7 @@ MONITOR_TRIGGER_ACTION = 'MonitorTriggerAction'
 PXE_SERVER = 'PxeServer'
 CHASSIS = 'Chassis'
 HWINFO = 'HardwareInfo'
+PRECONFIGURATION_TEMPLATE = 'PreconfigurationTemplat'
 BAREMETAL_INS = 'BaremetalInstance'
 LONGJOB = 'LongJob'
 ALARM = 'Alarm'
@@ -577,6 +578,8 @@ def _gen_query_action(resource, condition=None):
         action = api_actions.QueryBaremetalChassisAction()
     elif resource == HWINFO:
         action = api_actions.QueryBaremetalHardwareInfoAction()
+    elif resource == PRECONFIGURATION_TEMPLATE:
+        action = api_actions.QueryPreconfigurationTemplateAction()
     elif resource == BAREMETAL_INS:
         action = api_actions.QueryBaremetalInstanceAction()
     elif resource == LONGJOB:

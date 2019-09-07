@@ -17,7 +17,7 @@ def path():
 		[TestAction.delete_volume, 'volume2'],
 		[TestAction.add_image, 'image2', 'root', 'http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2'],
 		[TestAction.recover_volume, 'volume2'],
-		[TestAction.attach_volume, 'vm3', 'volume2'],
+		[TestAction.attach_volume, 'vm2', 'volume2'],
 		[TestAction.create_volume_backup, 'volume2', 'volume2-backup2'],
 		[TestAction.delete_volume_backup, 'volume2-backup2'],
 		[TestAction.detach_volume, 'volume2'],
@@ -28,25 +28,23 @@ def path():
 		[TestAction.start_vm, 'vm4'],
 		[TestAction.create_vm_backup, 'vm4', 'vm4-backup3'],
 		[TestAction.stop_vm, 'vm4'],
-		[TestAction.reboot_vm, 'vm3'],
+		[TestAction.reboot_vm, 'vm2'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
 		[TestAction.create_image_from_volume, 'vm3', 'vm3-image3'],
 		[TestAction.attach_volume, 'vm3', 'volume1'],
 		[TestAction.create_volume, 'volume3', 'cluster=cluster2', 'flag=thick,scsi'],
-		[TestAction.attach_volume, 'vm3', 'volume2'],
-		[TestAction.start_vm, 'vm3'],
+		[TestAction.attach_volume, 'vm4', 'volume2'],
+		[TestAction.start_vm, 'vm4'],
 		[TestAction.create_volume_backup, 'volume2', 'volume2-backup4'],
 		[TestAction.delete_volume_backup, 'volume2-backup4'],
-		[TestAction.stop_vm, 'vm3'],
+		[TestAction.stop_vm, 'vm4'],
 		[TestAction.detach_volume, 'volume2'],
 		[TestAction.create_mini_vm, 'vm5', 'cluster=cluster2', 'flag=thin'],
-		[TestAction.delete_volume, 'volume3'],
-		[TestAction.expunge_volume, 'volume3'],
+		[TestAction.delete_volume, 'volume1'],
+		[TestAction.expunge_volume, 'volume1'],
 		[TestAction.start_vm, 'vm4'],
 		[TestAction.reboot_vm, 'vm4'],
-		[TestAction.start_vm, 'vm2'],
-		[TestAction.create_vm_backup, 'vm2', 'vm2-backup5'],
-		[TestAction.stop_vm, 'vm2'],
+		[TestAction.create_vm_backup, 'vm5', 'vm5-backup5'],
 		[TestAction.resize_data_volume, 'volume2', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
 		[TestAction.delete_vm_backup, 'vm4-backup3'],
@@ -58,14 +56,14 @@ def path():
 '''
 The final status:
 Running:['vm4']
-Stopped:['vm3', 'vm2', 'vm5']
-Enadbled:['vm2-backup1', 'vm2-backup5', 'vm4-image1', 'vm3-image3']
-attached:['volume1']
-Detached:['volume2']
+Stopped:['vm2', 'vm3', 'vm5']
+Enadbled:['vm2-backup1', 'vm5-backup5', 'vm4-image1', 'vm3-image3']
+attached:[]
+Detached:['volume3', 'volume2']
 Deleted:['vm1', 'volume2-backup2', 'volume2-backup4', 'vm4-backup3']
-Expunged:['volume3', 'image2']
+Expunged:['volume1', 'image2']
 Ha:[]
 Group:
-	vm_backup3:['vm2-backup5']---vm2@
+	vm_backup3:['vm5-backup5']---vm5@
 	vm_backup1:['vm2-backup1']---vm2@
 '''

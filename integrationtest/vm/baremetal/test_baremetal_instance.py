@@ -7,9 +7,13 @@ import zstackwoodpecker.operations.baremetal_operations as baremetal_operations
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.cluster_operations as cluster_ops
 import zstackwoodpecker.operations.net_operations as net_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
+import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+from vncdotool import api
+import zstacklib.utils.ssh as ssh
 import test_stub
 import time
 import os
@@ -43,7 +47,9 @@ def test():
         pxe_uuid = test_stub.create_pxe(dhcp_interface = interface, hostname = pxe_ip, zoneUuid = zone_uuid).uuid
         baremetal_operations.attach_pxe_to_cluster(pxe_uuid, baremetal_cluster_uuid)
     else:
+        print 'xcy'
         pxe_uuid = pxe_servers[0].uuid
+    
  
     test_util.test_dsc('Create a vm to simulate baremetal host')
     #mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
@@ -53,7 +59,13 @@ def test():
     host_ip = host.managementIp
     cond = res_ops.gen_query_conditions('hypervisorType', '=', 'KVM')
     cluster_uuid = res_ops.query_resource(res_ops.CLUSTER, cond)[0].uuid
-    vm = test_stub.create_vm(host_uuid = host_uuid, cluster_uuid = cluster_uuid)
+    root_disk_size = 10737418240
+    disk_offering_option = test_util.DiskOfferingOption()
+    disk_offering_option.set_name('root-disk-iso')
+    disk_offering_option.set_diskSize(root_disk_size)
+    root_disk_offering = vol_ops.create_volume_offering(disk_offering_option)
+    root_disk_uuid = root_disk_offering.uuid
+    vm = test_stub.create_vm(host_uuid = host_uuid, cluster_uuid = cluster_uuid, root_disk_offering_uuid=root_disk_uuid)
 
     test_util.test_dsc('Create chassis')
     test_stub.create_vbmc(vm, host_ip, 623)
@@ -66,13 +78,38 @@ def test():
 	reset vm unable to enable boot options, power off/on then reset is worked')
     baremetal_operations.inspect_chassis(chassis_uuid)
     baremetal_operations.power_off_baremetal(chassis_uuid)
-    time.sleep(10)
+    time.sleep(3)
     baremetal_operations.power_on_baremetal(chassis_uuid)
     time.sleep(30)
     baremetal_operations.inspect_chassis(chassis_uuid)
+    time.sleep(2)
+    console = test_lib.lib_get_vm_console_address(vm.get_vm().uuid)
+    display = str(int(console.port)-5900)
+    client = api.connect(console.hostIp+":"+display)
+    client.keyPress('esc')
+    client.keyPress('4')
     hwinfo = test_stub.check_hwinfo(chassis_uuid)
     if not hwinfo:
         test_util.test_fail('Fail to get hardware info during the first inspection')
+
+    test_util.test_dsc('Add zstack image')
+    img_option = test_util.ImageOption()
+    image_name = 'zstack'
+    img_option.set_name(image_name)
+    bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [], None)[0].uuid
+    img_option.set_backup_storage_uuid_list([bs_uuid])
+    img_option.set_format('iso')
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    base_url = 'http://172.20.198.234/mirror/zstack_enterprise_iso_c74_master/latest/'
+    cmd = "curl %s | grep iso | awk '{print $6}' |awk -F'>' '{print $1}' | awk -F'\"' '{print $2}' | tail -n1" % base_url
+    (retcode, output, erroutput) = ssh.execute(cmd, mn_ip, 'root', 'password') 
+    iso_url = base_url + output
+    img_option.set_url(iso_url)
+    image_inv = img_ops.add_root_volume_template(img_option)
+    image = test_image.ZstackTestImage()
+    image.set_image(image_inv)
+    image.set_creation_option(img_option)
+    test_obj_dict.add_image(image)
 
     test_util.test_dsc('Create baremetal instance')
     #Hack iso ks file to support unattended installation
@@ -81,7 +118,9 @@ def test():
     cond = res_ops.gen_query_conditions('name', '=', os.environ.get('imageName_iso')) 
     image_uuid = res_ops.query_resource(res_ops.IMAGE, cond)[0].uuid
     time.sleep(30)
-    baremetal_ins = test_stub.create_baremetal_ins(image_uuid, chassis_uuid)
+    cond = res_ops.gen_query_conditions('distribution', '=', 'centos-x86_64')
+    template = res_ops.query_resource(res_ops.PRECONFIGURATION_TEMPLATE, cond)[0]
+    baremetal_ins = test_stub.create_baremetal_ins(image_uuid, chassis_uuid, template.uuid, 'root', 'password')
     baremetal_ins_uuid = baremetal_ins.uuid
     ins_status = test_stub.check_baremetal_ins(baremetal_ins_uuid, 'password', \
 	baremetal_ins.managementIp, host_ip, chassis_uuid, os.environ.get('ipmiaddress'))

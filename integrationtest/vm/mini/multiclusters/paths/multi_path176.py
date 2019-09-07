@@ -37,12 +37,8 @@ def path():
 		[TestAction.create_volume, 'volume4', 'cluster=cluster1', 'flag=scsi'],
 		[TestAction.resize_data_volume, 'volume4', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
-		[TestAction.attach_volume, 'vm1', 'volume1'],
-		[TestAction.change_vm_ha, 'vm1'],
-		[TestAction.stop_vm, 'vm1'],
+		[TestAction.attach_volume, 'vm3', 'volume1'],
 		[TestAction.use_volume_backup, 'volume1-backup3'],
-		[TestAction.start_vm, 'vm1'],
-		[TestAction.change_vm_ha, 'vm1'],
 		[TestAction.detach_volume, 'volume1'],
 ])
 

@@ -465,6 +465,25 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
 
     return vip
 
+def create_vip_with_ip(vip_name=None, l3_uuid=None, required_ip=None, session_uuid = None):
+    if not vip_name:
+        vip_name = 'test vip'
+    if not l3_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    vip_creation_option = test_util.VipOption()
+    vip_creation_option.set_name(vip_name)
+    vip_creation_option.set_l3_uuid(l3_uuid)
+    vip_creation_option.set_requiredIp(required_ip)
+    vip_creation_option.set_session_uuid(session_uuid)
+
+    vip = zstack_vip_header.ZstackTestVip()
+    vip.set_creation_option(vip_creation_option)
+    vip.create()
+
+    return vip
+
 def attach_mount_volume(volume, vm, mount_point):
     volume.attach(vm)
     import tempfile

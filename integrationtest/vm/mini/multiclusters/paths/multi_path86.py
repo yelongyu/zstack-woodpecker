@@ -7,8 +7,9 @@ def path():
 		[TestAction.create_mini_vm, 'vm1', 'data_volume=true', 'cluster=cluster2'],
 		[TestAction.create_volume_backup, 'auto-volume1', 'auto-volume1-backup1'],
 		[TestAction.create_mini_vm, 'vm2', 'cluster=cluster2'],
+		[TestAction.stop_vm, 'vm2'],
 		[TestAction.start_vm, 'vm2'],
-		[TestAction.create_image_from_volume, 'vm2', 'vm2-image1'],
+		[TestAction.create_image_from_volume, 'vm1', 'vm1-image1'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
 		[TestAction.create_mini_vm, 'vm3', 'cluster=cluster1'],
 		[TestAction.create_volume, 'volume2', 'cluster=cluster1', 'flag=scsi'],
@@ -18,8 +19,8 @@ def path():
 		[TestAction.use_volume_backup, 'auto-volume1-backup1'],
 		[TestAction.delete_image, 'image2'],
 		[TestAction.recover_image, 'image2'],
-		[TestAction.delete_image, 'vm2-image1'],
-		[TestAction.expunge_image, 'vm2-image1'],
+		[TestAction.delete_image, 'image2'],
+		[TestAction.expunge_image, 'image2'],
 		[TestAction.start_vm, 'vm1'],
 		[TestAction.create_vm_backup, 'vm1', 'vm1-backup2'],
 		[TestAction.stop_vm, 'vm1'],
@@ -54,11 +55,11 @@ def path():
 The final status:
 Running:['vm4']
 Stopped:['vm1']
-Enadbled:['auto-volume1-backup1', 'auto-volume1-backup4', 'image2']
+Enadbled:['auto-volume1-backup1', 'auto-volume1-backup4', 'vm1-image1']
 attached:['auto-volume1']
 Detached:['volume3']
 Deleted:['vm3', 'vm2', 'volume2', 'vm1-backup2', 'auto-volume1-backup2']
-Expunged:['volume4', 'vm2-image1']
+Expunged:['volume4', 'image2']
 Ha:[]
 Group:
 '''
