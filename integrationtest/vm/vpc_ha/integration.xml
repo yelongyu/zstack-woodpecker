@@ -50,5 +50,16 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_two_vm_connection.py::vm1_ha_vlan_vm2_ha_vxlan_hostreconnect</case>
 	<case timeout='2100' repeat='1' noparallel='True'>test_vpc_ha_2_pub_nic_vrouter_route_table.py</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_ha_check_snat_state.py</case>
+        <case timeout='2100' repeat='1' noparallel='True'>test_vpc_ha_one_eip_two_vm.py::vm1_vm2_one_vpc_1vlan</case>
+        <case timeout='2100' repeat='1' noparallel='True'>test_vpc_ha_one_eip_two_vm.py::vm1_vm2_one_vpc_2vlan</case>
+        <case timeout='2100' repeat='1' noparallel='True'>test_vpc_ha_one_eip_two_vm.py::vm1_vm2_two_vpc</case>
+        <case timeout='2100' repeat='1' noparallel='True'>test_vpc_ha_one_eip_two_vm.py::vm1_classic_vm2_vpc</case>
+        <case timeout='2100' repeat='1' noparallel='True'>test_vpc_ha_two_eip_two_vm_connection.py::vm1_vm2_one_vpc_1vlan</case>
+        <case timeout='2100' repeat='1' noparallel='True'>test_vpc_ha_two_eip_two_vm_connection.py::vm1_vm2_one_vpc_2vlan</case>
+        <case timeout='2100' repeat='1' noparallel='True'>test_vpc_ha_two_eip_two_vm_connection.py::vm1_vm2_two_vpc</case>
+        <case timeout='2100' repeat='1' noparallel='True'>test_vpc_ha_two_eip_two_vm_connection.py::vm1_classic_vm2_vpc</case>
+        <case timeout='4200' repeat='1' noparallel='True'>test_vpc_ha_disable_enable_snat_10_times.py::vm1_l3_vlan_vm2_l3_vlan</case>
+        <case timeout='4200' repeat='1' noparallel='True'>test_vpc_ha_disable_enable_snat_10_times.py::vm1_l3_vxlan_vm2_l3_vxlan</case>
+        <case timeout='4200' repeat='1' noparallel='True'>test_vpc_ha_disable_enable_snat_10_times.py::vm1_l3_vlan_vm2_l3_vxlan</case>
     </suite>
 </integrationTest>
