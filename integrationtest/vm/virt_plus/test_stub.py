@@ -447,7 +447,7 @@ def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, \
     eip.create(vm_obj)
     return eip
 
-def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
+def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=None):
     if not vip_name:
         vip_name = 'test vip'
     if not l3_uuid:
@@ -458,6 +458,7 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
     vip_creation_option.set_name(vip_name)
     vip_creation_option.set_l3_uuid(l3_uuid)
     vip_creation_option.set_session_uuid(session_uuid)
+    vip_creation_option.set_requiredIp(required_ip)
 
     vip = zstack_vip_header.ZstackTestVip()
     vip.set_creation_option(vip_creation_option)
