@@ -1251,9 +1251,11 @@ class Longjob(object):
         self.vol_list = []
         self.thread_list = []
 
-    def create_vm(self, l3_name=None, host_uuid=None):
+    def create_vm(self, l3_name=None, host_uuid=None, check=True):
         self.vm = create_basic_vm(l3_name=l3_name, host_uuid=host_uuid)
-        self.vm.check()
+        if check:
+            time.sleep(50)
+            # self.vm.check()
         return self.vm
 
     def create_data_volume(self, ceph_pool=None, scsi=False):
@@ -1317,7 +1319,9 @@ class Longjob(object):
                 job = res_ops.query_resource(res_ops.LONGJOB, cond_longjob)[0]
                 if job.state == 'Failed':
                     test_util.test_fail("jobResult: %s" % job.jobResult)
-                continue
+                    break
+                else:
+                    continue
             else:
                 progress = progress_inv[0].content
                 progress_set.add(progress)
@@ -1463,13 +1467,13 @@ class Longjob(object):
             thrd.start()
         time.sleep(5)
 
-    def live_migrate_vm(self, vm=None, allow_unknown=False, join_thread=False):
+    def live_migrate_vm(self, vm=None, host_uuid=None, allow_unknown=False, join_thread=False):
         if not vm:
             vm = self.vm
         name = 'longjob_live_migrate_vm'
         #For MINI
         if allow_unknown:
-            job_data = '{"name"="%s", "vmInstanceUuid"="%s", "allowUnknown"="true", "migrateFromDestination"="true"}' % (name, vm.get_vm().uuid)
+            job_data = '{"name"="%s", "vmInstanceUuid"="%s", "allowUnknown"="true", "migrateFromDestination"="true", "hostUuid"="%s"}' % (name, vm.get_vm().uuid, host_uuid)
         else:
             job_data = '{"name"="%s", "vmInstanceUuid"="%s"}' % (name, vm.get_vm().uuid)
         self.submit_longjob(job_data, name, job_type='live_migration')

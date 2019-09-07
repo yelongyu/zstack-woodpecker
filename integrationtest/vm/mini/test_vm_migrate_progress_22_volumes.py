@@ -29,7 +29,7 @@ def test():
     ssh.execute(cmd_touch, longjob.vm.get_vm().vmNics[0].ip, 'root', 'password')
 
     longjob.live_migrate_vm()
-    time.sleep(30)
+    # time.sleep(30)
     longjob.vm.check()
 
     cmd_check = 'ls /mnt/test'

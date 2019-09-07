@@ -22,7 +22,7 @@ def test():
     longjob.create_vm()
 
     longjob.live_migrate_vm()
-    time.sleep(30)
+    # time.sleep(30)
     longjob.vm.check()
     test_util.test_pass('VM Live Migration with Progress Checking Test Success')
 

@@ -22,8 +22,8 @@ def test():
     longjob.create_vm(l3_name=os.environ.get('l3PublicNetworkName'))
 
     longjob.add_stress()
-    longjob.live_migrate_vm(join_thread=True)
-    time.sleep(30)
+    longjob.live_migrate_vm()
+    # time.sleep(30)
     longjob.vm.check()
 
     longjob.check_data_integrity()
