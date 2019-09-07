@@ -3,6 +3,7 @@ import json
 import os
 import random
 import time
+import threading
 
 import apibinding.inventory as inventory
 import urllib3
@@ -13,10 +14,10 @@ import zstackwoodpecker.operations.backupstorage_operations as bs_ops
 import zstackwoodpecker.operations.config_operations as conf_ops
 import zstackwoodpecker.operations.datamigrate_operations as datamigr_ops
 import zstackwoodpecker.operations.ha_operations as ha_ops
-import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
+import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.resource_stack as resource_stack_ops
 import zstackwoodpecker.operations.scenario_operations as sce_ops
 import zstackwoodpecker.operations.stack_template as stack_template_ops
@@ -2357,76 +2358,75 @@ def delete_vm_snapshot(robot_test_obj, args):
     batch_delete_volume_snapshot(robot_test_obj, [snapshot_name_list], real=False)
 
 
-def poweron_only(robot_test_obj, args, auto=None):
+def poweron_only(robot_test_obj, args, all_hosts=None, response_url=None):
     def wait_host_up(timeout, hosts):
         timeout_max = timeout
-        while timeout:
+        while timeout > 0:
             _hosts = []
             for host in hosts:
                 try:
-                    _host = test_lib.lib_find_host_by_HostIp(host.managementIp)
+                    host_inv = test_lib.lib_find_host_by_HostIp(host.managementIp)[0]
+                    if host_inv.status == "Connected":
+                        test_util.test_logger('%s is up and Connected' % (host.managementIp))
+                        _hosts.append(host)
+                        test_util.test_logger('reconnecting host finished')
+                    if host_inv.status == "Disconnected":
+                        t = threading.Thread(target=host_ops.reconnect_host, args=(host_inv.uuid,))
+                        t.start()
+                        test_util.test_logger('host: {} is disconnected we need reconnect it'.format(host_inv.name))
                 except:
-                    timeout -= 15
                     if timeout == 0:
                         test_util.test_fail('%s is not up in %s seconds after start' % (host.managementIp, timeout_max))
-                    time.sleep(15)
-                    continue
-                if _host[0].status == "Connected":
-                    test_util.test_logger('%s is up and Connected' % (host.managementIp))
-                    _hosts.append(host)
-                    test_util.test_logger('reconnecting host finished')
-                    continue
-                else:
-                    timeout -= 15
-                    if timeout == 0:
-                        test_util.test_fail('%s is not up in %s seconds after start' % (host.managementIp, timeout_max))
-                    time.sleep(15)
             for host in _hosts:
                 hosts.remove(host)
             if not hosts:
                 test_util.test_logger('all the hosts are up and Connected')
                 break
+            timeout -= 15
+            time.sleep(15)
+
+    timeout = 1200
 
     zstack_management_ip = os.environ.get('zstackManagementIp')
     test_util.test_logger('@@DEBUG-zstack-management-ip:{}@@'.format(zstack_management_ip))
-    hosts = []
-    host_names = []
-    timeout = 1200
-    cluster_name = "cluster2"
-    arg_dict = parser_args(args)
-    if 'cluster' in arg_dict:
-        cluster_name = arg_dict['cluster']
-
     test_util.test_logger("@@DEBUG-name,host\n {}@@".format(robot_test_obj.test_dict.host.items()))
-    if not auto:
-        cond = res_ops.gen_query_conditions('cluster.name', '=', cluster_name)
-        for host in res_ops.query_resource(res_ops.HOST, cond):
-            host_names.append(host.name)
+
     if not len(robot_test_obj.test_dict.host.items()):
-        test_util.test_fail("No Host")
+        test_util.test_fail("No Host to power on")
+
     for name, host in robot_test_obj.test_dict.host.items():
-        if auto or name in host_names and host.host.state == 'PowerOff':
+        if host.host.state == 'PowerOff':
             test_util.test_logger("@@DEBUG-host-state@@Host{}:{}".format(name, host.host.state))
-            hosts.append(host.host)
             cond = res_ops.gen_query_conditions('vmNics.ip', '=', host.host.managementIp)
             vm_uuid = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0].uuid
             sce_ops.start_vm(zstack_management_ip, vm_uuid)
-    hosts = res_ops.query_resource(res_ops.HOST)
-    wait_host_up(timeout, hosts)
-    for host in hosts:
-        if host.status == "Connected":
-            host.state = "Enabled"
-        else:
-            test_util.test_fail("Host[{}] status is not 'Connected'".format(host.uuid))
+
+    # wait for mn up
+    pool = urllib3.PoolManager(timeout=300, retries=urllib3.util.retry.Retry(30))
+    try:
+        response = pool.urlopen('GET', response_url)
+    except urllib3.exceptions.MaxRetryError as e:
+        test_util.test_logger("300s 15times MN not up")
+
+    # wait for host connected
+    wait_host_up(timeout, all_hosts)
+
+    for _, host in robot_test_obj.test_dict.host.items():
+        host.update()
+
+    for _, vm in robot_test_obj.test_dict.vm.items():
+        vm_inv = vm.update()
+        vm.set_state(vm_inv.state)
 
 
 def poweroff_only(robot_test_obj, args):
+    # 210s : 0.254 running -> stopped -> start_vm
+    # 300s : wait for mn service up
+    # 1200s: wait for host connectting
     host_uuids = []
     host_names = []
-    fail_uuids = []
     admin_password = hashlib.sha512(os.environ.get('hostPassword')).hexdigest()
-    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
-    mn_flag = None
+    all_hosts = res_ops.query_resource(res_ops.HOST)
     cluster_name = "cluster2"
 
     arg_dict = parser_args(args)
@@ -2444,25 +2444,9 @@ def poweroff_only(robot_test_obj, args):
             host_off.set_host(host)
             host_off.host.state = 'PowerOff'
             robot_test_obj.test_dict.add_host(host.name, host_off)
-            if host.managementIp == mn_ip:
-                mn_flag = 1
-    if mn_flag:
-        power_off(robot_test_obj, host_uuids, admin_password)
-    else:
-        off_ret = host_ops.poweroff_host(host_uuids, admin_password, mn_flag).results
-        test_util.test_logger("@@DEBUG-off_ret@@:{}".format(off_ret))
-        if len(off_ret):
-            for ret in off_ret:
-                if not ret.success:
-                    fail_uuids.append(ret.uuid)
-        test_util.test_logger("@@Fail_uuids:{}@@".format(fail_uuids))
-        if len(fail_uuids):
-            test_util.test_fail("Power off hosts{} failed".format(fail_uuids))
-        test_util.test_logger("@@PowerOffFlowDone@@")
-        test_util.test_logger("@@DEBUG@@:updating host state finished, wake up")
-        test_util.test_logger("@@Auto PowerOn Start@@")
-    time.sleep(180)
-    poweron_only(robot_test_obj, args, auto=1)
+
+    response_url = power_off(robot_test_obj, host_uuids, admin_password)
+    poweron_only(robot_test_obj, args, all_hosts=all_hosts, response_url=response_url)
 
 
 def power_off(robot_test_obj, host_uuids, admin_password):
@@ -2492,10 +2476,15 @@ def power_off(robot_test_obj, host_uuids, admin_password):
         pass
 
     test_util.test_logger(response.data)
-    hosts_dict = robot_test_obj.test_dict.host.items()
-    ips = [host.host.managementIp for _, host in hosts_dict]
+    time.sleep(60)
+
+    ips = []
+    for _, host in robot_test_obj.test_dict.host.items():
+        if host.host.state == 'PowerOff':
+            ips.append(host.host.managementIp)
+
     temp = 15
-    while temp == 0:
+    while temp > 0:
         _ips = []
         for ip in ips:
             cond = res_ops.gen_query_conditions('vmNics.ip', '=', ip)
@@ -2505,11 +2494,13 @@ def power_off(robot_test_obj, host_uuids, admin_password):
         for ip in _ips:
             ips.remove(ip)
         if len(ips) == 0:
+            test_util.test_logger("%s vm is Stopped in 0.254" % ','.join(_ips))
             break
         time.sleep(10)
         temp -= 1
     if temp == 0:
         test_util.test_logger("%s vm is not Stopped in 0.254" % ','.join(ips))
+    return json.loads(response.data)["location"]
 
 
 action_dict = {
