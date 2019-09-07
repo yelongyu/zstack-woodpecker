@@ -3,6 +3,7 @@
                 <case timeout='600' repeat='1'>test_check_gateway_ip_conflict.py</case>
                 <case timeout='600' repeat='1'>eip/test_create_eip_vm_ip_leak.py</case>
                 <case timeout='900' repeat='1'>eip/test_create_eip_vm_reattach_l3.py</case>
+                <case timeout='600' repeat='1'>eip/test_eip_attach_to_flat_vm.py</case>
                 <case timeout='600' repeat='1'>test_create_vm.py</case>
                 <case timeout='600' repeat='1' noparallel='True'>test_create_vm_with_userdata.py</case>
                 <case timeout='600' repeat='1' noparallel='True'>test_create_vm_with_userdata_and_sshkey.py</case>
