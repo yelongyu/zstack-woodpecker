@@ -1,6 +1,7 @@
 <integrationTest>
         <suite name="virt plus test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
                 <case timeout='600' repeat='1'>test_check_gateway_ip_conflict.py</case>
+                <case timeout='600' repeat='1'>test_delete_eip_enhance.py</case>
                 <case timeout='600' repeat='1'>eip/test_create_eip_vm_ip_leak.py</case>
                 <case timeout='900' repeat='1'>eip/test_create_eip_vm_reattach_l3.py</case>
                 <case timeout='600' repeat='1'>eip/test_eip_attach_to_flat_vm.py</case>
