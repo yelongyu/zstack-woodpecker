@@ -34,6 +34,7 @@
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_vm2_one_vpc_2vlan</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_vm2_two_vpc</case>
         <case timeout='1200' repeat='1' noparallel='True'>test_vpc_one_eip_two_vm.py::vm1_classic_vm2_vpc</case>
+        <case timeout='1200' repeat='1' noparallel='True'>test_vpc_migrate_vm_with_eip.py</case>
         <case timeout='2400' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_ops</case>
         <case timeout='2400' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_migrate</case>
         <case timeout='2400' repeat='1' noparallel='True'>test_vpc_6vm_mixed_system.py::vm_snapshot</case>
