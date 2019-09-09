@@ -36,11 +36,10 @@ def path():
 		[TestAction.attach_volume, 'vm3', 'volume4'],
 		[TestAction.create_volume_backup, 'volume4', 'volume4-backup4'],
 		[TestAction.delete_volume_backup, 'volume4-backup4'],
-		[TestAction.detach_volume, 'volume4'],
 		[TestAction.destroy_vm, 'vm2'],
 		[TestAction.expunge_vm, 'vm2'],
-		[TestAction.delete_volume, 'volume2'],
-		[TestAction.expunge_volume, 'volume2'],
+		[TestAction.delete_volume, 'volume1'],
+		[TestAction.expunge_volume, 'volume1'],
 		[TestAction.create_mini_vm, 'vm4', 'cluster=cluster1'],
 		[TestAction.destroy_vm, 'vm4'],
 		[TestAction.create_mini_vm, 'vm5', 'cluster=cluster1'],
@@ -58,10 +57,10 @@ The final status:
 Running:['vm3']
 Stopped:['vm5']
 Enadbled:['vm2-backup1', 'vm3-backup2', 'vm2-backup3', 'vm5-backup5']
-attached:[]
-Detached:['volume1', 'volume3', 'volume4']
+attached:['volume4']
+Detached:['volume2', 'volume3']
 Deleted:['vm4', 'volume4-backup4']
-Expunged:['vm1', 'vm2', 'volume2', 'image1']
+Expunged:['vm1', 'vm2', 'volume1', 'image1']
 Ha:[]
 Group:
 	vm_backup2:['vm3-backup2']---vm3@

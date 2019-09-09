@@ -17,13 +17,10 @@ def path():
 		[TestAction.recover_volume, 'volume1'],
 		[TestAction.add_image, 'image2', 'root', 'http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2'],
 		[TestAction.delete_vm_backup, 'vm1-backup1'],
-		[TestAction.delete_image, 'image1'],
 		[TestAction.delete_image, 'image2'],
 		[TestAction.expunge_image, 'image2'],
 		[TestAction.create_vm_backup, 'vm3', 'vm3-backup2'],
-		[TestAction.recover_image, 'image1'],
 		[TestAction.create_vm_by_image, 'image1', 'iso', 'vm4', 'cluster=cluster2'],
-		[TestAction.delete_image, 'image1'],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
 		[TestAction.start_vm, 'vm4'],
 		[TestAction.migrate_vm, 'vm4'],
@@ -34,13 +31,13 @@ def path():
 		[TestAction.delete_volume, 'volume2'],
 		[TestAction.expunge_volume, 'volume2'],
 		[TestAction.destroy_vm, 'vm5'],
-		[TestAction.start_vm, 'vm2'],
-		[TestAction.create_vm_backup, 'vm2', 'vm2-backup3'],
-		[TestAction.stop_vm, 'vm2'],
-		[TestAction.resize_volume, 'vm2', 5*1024*1024],
+		[TestAction.create_vm_backup, 'vm4', 'vm4-backup3'],
+		[TestAction.resize_volume, 'vm4', 5*1024*1024],
 		[TestAction.poweroff_only, 'cluster=cluster2'],
-		[TestAction.create_volume_backup, 'volume1', 'volume1-backup4'],
-		[TestAction.delete_volume_backup, 'volume1-backup4'],
+		[TestAction.create_volume, 'volume3', 'cluster=cluster1', 'flag=scsi'],
+		[TestAction.attach_volume, 'vm3', 'volume3'],
+		[TestAction.create_volume_backup, 'volume3', 'volume3-backup4'],
+		[TestAction.delete_volume_backup, 'volume3-backup4'],
 ])
 
 
@@ -50,12 +47,12 @@ def path():
 The final status:
 Running:['vm3']
 Stopped:['vm1', 'vm2', 'vm4']
-Enadbled:['vm2-backup3']
-attached:['volume1']
+Enadbled:['vm4-backup3', 'image1']
+attached:['volume1', 'volume3']
 Detached:[]
-Deleted:['vm5', 'vm1-backup1', 'vm3-backup2', 'volume1-backup4', 'image1']
+Deleted:['vm5', 'vm1-backup1', 'vm3-backup2', 'volume3-backup4']
 Expunged:['volume2', 'image2']
 Ha:[]
 Group:
-	vm_backup1:['vm2-backup3']---vm2@
+	vm_backup1:['vm4-backup3']---vm4@
 '''

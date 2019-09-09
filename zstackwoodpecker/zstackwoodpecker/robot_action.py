@@ -2420,7 +2420,7 @@ def poweron_only(robot_test_obj, args, all_hosts=None, response_url=None):
 
 
 def poweroff_only(robot_test_obj, args):
-    # 210s : 0.254 running -> stopped -> start_vm
+    # 360s : 0.254 running -> stopped -> start_vm
     # 300s : wait for mn service up
     # 1200s: wait for host connectting
     host_uuids = []
@@ -2483,7 +2483,7 @@ def power_off(robot_test_obj, host_uuids, admin_password):
         if host.host.state == 'PowerOff':
             ips.append(host.host.managementIp)
 
-    temp = 15
+    temp = 30
     while temp > 0:
         _ips = []
         for ip in ips:
