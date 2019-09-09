@@ -1,9 +1,5 @@
 # -*- coding:utf-8 -*-
 
-import zstackwoodpecker.test_util as test_util
-import zstackwoodpecker.test_lib as test_lib
-
-test_stub = test_lib.lib_get_test_stub()
 from test_stub import *
 
 
@@ -61,36 +57,33 @@ class VM(MINI):
         self.delete(vm_name, 'vm', view=view, expunge=True, details_page=details_page)
 
     def vm_ops(self, vm_name, action='stop', details_page=False):
+        action = 'enable' if action == 'start' else action
         self.navigate('vm')
         vm_list = []
         if isinstance(vm_name, types.ListType):
             vm_list = vm_name
         else:
             vm_list.append(vm_name)
-        ops_dic = {'start': u'启动',
-                   'stop': u'停止',
-                   'reboot': u'重启'
-                   }
         test_util.test_logger('VM (%s) execute action[%s]' % (' '.join(vm_list), action))
         if not details_page:
             for vm in vm_list:
                 vm_elem = self.get_res_element(vm)
                 vm_elem.get_element(CHECKBOX).click()
         if action == 'reboot':
-            self.more_operate(ops_dic[action], vm_list, res_type='vm', details_page=details_page)
+            self.more_operate(action, vm_list, res_type='vm', details_page=details_page)
             self.click_ok()
         else:
             if details_page:
-                self.more_operate(ops_dic[action], vm_list, res_type='vm', details_page=True)
+                self.more_operate(action, vm_list, res_type='vm', details_page=True)
             else:
-                self.click_button(ops_dic[action])
+                self.click_button(action)
         self.wait_for_element(MESSAGETOAST, timeout=300, target='disappear')
 
     def set_ha_level(self, vm_name, ha=True, details_page=False):
         test_util.test_logger('Set [%s] ha leval [%s]' % (vm_name, ha))
         check_list = []
         self.navigate('vm')
-        self.more_operate(u'高可用', res_type='vm', res_name=vm_name, details_page=details_page)
+        self.more_operate('ha', res_type='vm', res_name=vm_name, details_page=details_page)
         if ha:
             check_list.append('NeverStop')
         else:
@@ -110,7 +103,7 @@ class VM(MINI):
     def set_qga(self, vm_name, qga=True, details_page=False):
         test_util.test_logger('Set [%s] QGA [%s]' % (vm_name, qga))
         self.navigate('vm')
-        self.more_operate('QGA', res_type='vm', res_name=vm_name, details_page=details_page)
+        self.more_operate('qga', res_type='vm', res_name=vm_name, details_page=details_page)
         if qga and (self.get_element('ant-switch-inner').text == u"关闭"):
             self.get_element("button[id='qga']").click()
         elif not qga and (self.get_element('ant-switch-inner').text == u"打开"):
@@ -118,12 +111,12 @@ class VM(MINI):
         self.click_ok()
         # check
         if not qga:
-            self.check_menu_item_disabled(vm_name, 'vm', u'修改云主机密码')
+            self.check_menu_item_disabled(vm_name, 'vm', 'changeVmPassword')
 
     def change_vm_password(self, vm_name, account='root', password='123456', details_page=False):
         test_util.test_logger('Change the password of [%s] to %s' % (vm_name, password))
         self.navigate('vm')
-        self.more_operate(u'修改云主机密码', vm_name, res_type='vm', details_page=details_page)
+        self.more_operate('changeVmPassword', vm_name, res_type='vm', details_page=details_page)
         self.get_element('#account').input(account)
         self.get_element('#password').input(password)
         self.click_ok()
@@ -132,7 +125,7 @@ class VM(MINI):
         test_util.test_logger('Live migrate VM')
         self.navigate('vm')
         old_host = self.get_detail_info(vm_name, 'vm', u'所在物理机:')
-        self.more_operate(u'迁移', res_type='vm', res_name=vm_name, details_page=details_page)
+        self.more_operate('liveMigrate', res_type='vm', res_name=vm_name, details_page=details_page)
         self.click_ok()
         new_host = self.get_detail_info(vm_name, 'vm', u'所在物理机:')
         test_util.test_logger('Live migrate [%s] from host[%s] to host[%s] Successful' % (vm_name, old_host, new_host))
@@ -144,7 +137,7 @@ class VM(MINI):
         input_dict = {'name': image_name,
                       'description': dsc,
                       'platform': platform}
-        self.more_operate(u'创建镜像', vm_name, res_type='vm', details_page=True)
+        self.more_operate('createImage', vm_name, res_type='vm', details_page=True)
         for k, v in input_dict.iteritems():
             if v is not None:
                 self.input(k, v)
@@ -177,34 +170,34 @@ class VM(MINI):
     def set_console_password(self, vm_name, password='123456', details_page=False, end_action='confirm'):
         test_util.test_logger('Set the console password of [%s]' % vm_name)
         self.navigate('vm')
-        self.more_operate(u'设置控制台密码', vm_name, res_type='vm', details_page=details_page)
+        self.more_operate('setConsolePassword', vm_name, res_type='vm', details_page=details_page)
         self.get_element('#newpassword').input(password)
         self.get_element('#confirmpassword').input(password)
         self.get_elements(CHECKBOX)[-1].click()
         self.end_action(end_action)
         # check
         if end_action == 'confirm':
-            self.check_menu_item_disabled(vm_name, 'vm', u'设置控制台密码')
+            self.check_menu_item_disabled(vm_name, 'vm', 'setConsolePassword')
 
     def cancel_console_password(self, vm_name, details_page=False, end_action='confirm'):
         test_util.test_logger('Cancel the console password of [%s]' % vm_name)
         self.navigate('vm')
-        self.more_operate(u'取消控制台密码', vm_name, res_type='vm', details_page=details_page)
+        self.more_operate('deleteConsolePassword', vm_name, res_type='vm', details_page=details_page)
         self.end_action(end_action)
         # check
         if end_action == 'confirm':
-            self.check_menu_item_disabled(vm_name, 'vm', u'取消控制台密码')
+            self.check_menu_item_disabled(vm_name, 'vm', 'deleteConsolePassword')
 
     def set_boot_order(self, vm_name, cd_first=True, details_page=False):
         test_util.test_logger('Set the boot order of [%s]' % vm_name)
         self.navigate('vm')
-        self.more_operate(u'设置启动顺序', vm_name, res_type='vm', details_page=details_page)
+        self.more_operate('setBootOrder', vm_name, res_type='vm', details_page=details_page)
         boot_order = u'光盘，硬盘' if cd_first else u'硬盘，光盘'
         self.input('bootOrder', boot_order)
         self.get_elements(CHECKBOX)[-1].click()
         self.click_ok()
         # check
-        self.more_operate(u'设置启动顺序', vm_name, res_type='vm', details_page=details_page)
+        self.more_operate('setBootOrder', vm_name, res_type='vm', details_page=details_page)
         assert boot_order in self.get_element(INPUTROW).text
         self.click_cancel()
 
@@ -217,7 +210,7 @@ class VM(MINI):
         check_list = [cpu, mem]
         checker.vm_check(check_list=check_list)
         test_util.test_logger('Modify the cpu num and mem size of [%s] from [%s 核, %s] to [%s 核, %s]' % (vm_name, cpu, mem, new_cpu, new_mem))
-        self.more_operate(u'修改配置', res_type='vm', res_name=vm_name, details_page=details_page)
+        self.more_operate('editConfig', res_type='vm', res_name=vm_name, details_page=details_page)
         self.input('cpuNum', new_cpu)
         self.input('memorySize', new_mem.split())
         self.click_ok()
@@ -237,11 +230,9 @@ class VM(MINI):
         test_util.test_logger('VM[%s] attach volume (%s)' % (vm_name, ' '.join(volume_list)))
         self.navigate('vm')
         self.enter_details_page('vm', vm_name)
-        self.switch_tab(u'配置信息')
-        while not self.get_elements('ant-dropdown'):
-            self.get_elements(MOREOPERATIONBTN)[-1].click()
-            time.sleep(0.5)
-        self.operate(u'加载')
+        self.switch_tab('setting')
+        self.get_element('#btn-operation-sub').click()
+        self.click_button('loadVolume')
         self.get_table_row(volume_list)
         self.end_action(end_action)
         if end_action == 'confirm':
@@ -256,12 +247,10 @@ class VM(MINI):
         test_util.test_logger('VM[%s] detach volume (%s)' % (vm_name, ' '.join(volume_list)))
         self.navigate('vm')
         self.enter_details_page('vm', vm_name)
-        self.switch_tab(u'配置信息')
+        self.switch_tab('setting')
         self.get_table_row(volume_list)
-        while not self.get_elements('ant-dropdown'):
-            self.get_elements(MOREOPERATIONBTN)[-1].click()
-            time.sleep(0.5)
-        self.operate(u'卸载')
+        self.get_element('#btn-operation-sub').click()
+        self.click_button('unloadVolume')
         self.end_action(end_action)
         if end_action == 'confirm':
             self.check_res_item(volume_list, target='notDisplayed')
@@ -269,8 +258,8 @@ class VM(MINI):
     def check_vm_network(self, vm_name, network_list):
         test_util.test_logger("Check if the network[%s] attached to vm[%s]" % (', '.join(network_list), vm_name))
         self.enter_details_page('vm', vm_name)
-        self.switch_tab(u"配置信息")
-        self.switch_radio_btn(u"网卡")
+        self.switch_tab('setting')
+        self.click_button('subtab-nic')
         self.get_table_row(network_list)
         # recover
         self.navigate('vm')

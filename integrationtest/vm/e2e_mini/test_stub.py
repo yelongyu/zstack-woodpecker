@@ -25,20 +25,21 @@ CARDCONTAINER = 'ant-card|ant-table-row'
 MODALCONTENT = 'ant-modal-content'
 PRIMARYBTN = 'ant-btn-primary'
 BTN = 'ant-btn'
+CONFIRMBTN = '#modal-btn-confirm'
+CANCELBTN = '#modal-btn-cancel'
+CRTADDBTN = '#btn-create|#btn-add'
 EXITBTN = 'ant-modal-close-x'
-MOREOPERATIONBTN = 'ant-dropdown-trigger'
 ICONBTN = 'iconButton___2NyZB'
 TABLEROW = 'ant-table-row ant-table-row-level-0'
 CHECKBOX = 'input[type="checkbox"]'
 FORMEXPLAIN = 'ant-form-explain'
 SPINCONTAINER = 'ant-spin-container'
 CONFIRMITEM = 'confirmItem___1ZEQE'
-MENUSETTING = 'ant-menu-horizontal'
+MENUSETTING = '#avatar'
 OPS_ONGOING = '#operationhint_ongoing'
 OPS_SUCCESS = '#operationhint_success'
 OPS_FAIL = '#operationhint_fail'
 ANTITEM = 'ant-dropdown-menu-item|ant-menu-item'
-VMACTIONSCONTAINER = 'actionsContainer___1Ce9C'
 INPUTROW = 'ant-row ant-form-item'
 PRIMARYBTNNUM = 2
 
@@ -54,8 +55,6 @@ MENUDICT = {'homepage': 'a[href="/web/"]',
             'alarm': 'a[href="/web/alarmMessage"]',
             'eip': 'a[href="/web/eip"]',
             'log': 'a[href="/web/operationLog"]'}
-
-VIEWDICT = {'card': 1, 'list': 2}
 
 
 def get_mn_ip():
@@ -112,19 +111,20 @@ class MINI(E2E):
         test_util.test_logger('Log in normally')
         self.get_element('#account').input('admin')
         self.get_element('#password').input(password)
-        self.click_ok()
+        self.get_element('#btn-login').click()
+        time.sleep(1)
 
     def logout(self):
         test_util.test_logger('Log out')
         self.get_element(MENUSETTING).move_cursor_here()
-        self.operate(u'退出登录')
-        if not self.wait_for_element('#password'):
-            test_util.test_fail('Fail to Logout')
+        self.get_element('#nav-logout')
+        if not self.wait_for_element('#btn-login'):
+            test_util.test_fail('Failed to Logout')
 
     def change_mini_password(self, password='123456'):
         test_util.test_logger('Change the MINI password to [%s]' % password)
         self.get_element(MENUSETTING).move_cursor_here()
-        self.operate(u'修改密码')
+        self.get_element('#nav-password').click()
         self.get_element('#newPassword').input(password)
         self.get_element('#confirmPassword').input(password)
         self.click_ok()
@@ -137,7 +137,7 @@ class MINI(E2E):
         self.get_element('ant-input-suffix').click()
         passwordInput.input('password')
         assert passwordInput.get_attribute('type') == 'text'
-        self.click_ok()
+        self.get_element('#btn-login').click()
 
     def login_without_account_or_password(self, with_account=False, with_password=False):
         test_util.test_logger('Log in without account or password')
@@ -146,7 +146,7 @@ class MINI(E2E):
         if with_password:
             self.get_element('#password').input('password')
         # Login button
-        self.get_element('button', 'tag name').click()
+        self.get_element('#btn-login').click()
         time.sleep(1)
         # check
         if not with_account or not with_password:
@@ -170,7 +170,7 @@ class MINI(E2E):
         else:
             self.get_element('#password').input('password')
         # Login button
-        self.get_element('button', 'tag name').click()
+        self.get_element('#btn-login').click()
         self.wait_for_element(FORMEXPLAIN)
         assert self.get_element(FORMEXPLAIN).text == u'账户名或密码错误'
 
@@ -187,19 +187,19 @@ class MINI(E2E):
                 test_util.test_fail("Err: page image is not fully loaded")
 
     def switch_view(self, view='card'):
-        test_util.test_logger('switch the view to %s' % view)
-        self.get_elements('square___3vP_2')[VIEWDICT[view]].click()
+        if view == 'card':
+            btn_id = '#btn-cardview'
+        else:
+            btn_id = '#btn-tableview'
+        test_util.test_logger('Switch view mode to [%s]' % view.capitalize())
+        self.get_element(btn_id).click()
         time.sleep(1)
 
     def switch_tab(self, tab_name):
-        test_util.test_logger('Switch to tab [%s]' % tab_name.encode('utf-8'))
+        tab_id = '#nav-%s|#tab-%s' % (tab_name, tab_name)
+        test_util.test_logger('Switch to tab [%s]' % tab_name.capitalize())
         self.wait_for_page_render()
-        for tab in self.get_elements('ant-tabs-tab|tab___3GRDV|tab___euX4A'):
-            if tab_name in tab.text:
-                tab.click()
-                break
-        else:
-            test_util.test_fail("Fail to switch the tab to %s" % tab_name.encode('utf-8'))
+        self.get_element(tab_id).click()
         time.sleep(1)
 
     def switch_radio_btn(self, btn_name):
@@ -225,7 +225,7 @@ class MINI(E2E):
     def click_ok(self, assure_success=True, not_check=False):
         test_util.test_logger('Click OK button')
         self.wait_for_page_render()
-        self.get_elements(PRIMARYBTN)[-1].click()
+        self.get_element(CONFIRMBTN).click()
         if not_check:
             time.sleep(1)
             return
@@ -248,7 +248,7 @@ class MINI(E2E):
 
     def click_cancel(self):
         test_util.test_dsc('Click cancel button')
-        self.get_elements(BTN)[-1].click()
+        self.get_element(CANCELBTN).click()
         if not self.wait_for_element(MODALCONTENT, target='disappear'):
             test_util.test_fail("Fail to click cancel btn")
 
@@ -258,7 +258,7 @@ class MINI(E2E):
         if not self.wait_for_element(MODALCONTENT, target='disappear'):
             test_util.test_fail("Fail to click close btn")
 
-    def more_operate(self, op_name, res_name, res_type=None, details_page=False):
+    def more_operate(self, btn_id, res_name, res_type=None, details_page=False):
         test_util.test_logger('Start more operate')
         res_list = []
         self.wait_for_element(CARDCONTAINER)
@@ -278,9 +278,9 @@ class MINI(E2E):
                 if not elem.get_element(CHECKBOX).selected:
                     test_util.test_logger('Select [%s]' % res.encode('utf-8'))
                     elem.get_element(CHECKBOX).click()
-        self.get_element(MOREOPERATIONBTN).click()
+        self.click_button('more')
         time.sleep(1)
-        self.operate(op_name)
+        self.click_button(btn_id)
         test_util.test_logger('Finish more operate')
 
     def enter_details_page(self, res_type, name):
@@ -311,7 +311,7 @@ class MINI(E2E):
 
     def create(self, para_dict, res_type, view, priority_dict=None):
         self.navigate(res_type)
-        self.get_elements(PRIMARYBTN)[-1].click()
+        self.get_element(CRTADDBTN).click()
         time.sleep(1)
         for _elem in self.get_element(MODALCONTENT).get_elements('span', 'tag name'):
             if _elem.text == u'高级':
@@ -386,7 +386,7 @@ class MINI(E2E):
         if details_page:
             self.navigate(res_type)
         if res_type not in ['network', 'eip']:
-            self.switch_tab(u'已删除')
+            self.switch_tab('#nav-deleted')
         if isExpunge:
             self.check_res_item(res_list, target='notDisplayed')
             return True
@@ -407,7 +407,7 @@ class MINI(E2E):
         else:
             res_list.append(res_name)
         self.navigate(res_type)
-        self.switch_tab(u'已删除')
+        self.switch_tab('deleted')
         self.switch_view(view)
         test_util.test_logger('Resume %s [name: (%s)]' % (res_type, ' '.join(res_list)))
         for res in res_list:
@@ -422,11 +422,11 @@ class MINI(E2E):
             else:
                 _elem.get_element(CHECKBOX).click()
         else:
-            self.click_button(u'恢复')
+            self.click_button('recovery')
             self.click_ok()
             self.wait_for_element(MESSAGETOAST, timeout=30, target='disappear')
         self.navigate(res_type)
-        self.switch_tab(u'已有')
+        self.switch_tab('available')
         self.check_res_item(res_list)
 
     def input(self, label, content):
@@ -556,21 +556,15 @@ class MINI(E2E):
             else:
                 test_util.test_fail('%s should to be confirmed' % res)
 
-    def check_menu_item_disabled(self, name, res_type, op_name):
+    def check_menu_item_disabled(self, name, res_type, btn_id):
         self.navigate(res_type)
         elem = self.get_res_element(name)
         if not elem.get_element(CHECKBOX).selected:
             elem.get_element(CHECKBOX).click()
-        self.get_element(MOREOPERATIONBTN).click()
-        _elem = self.get_elements(VMACTIONSCONTAINER)
-        for op in _elem[0].get_elements('span', 'tag name') if _elem else self.get_elements(ANTITEM):
-            if op.text == op_name:
-                if _elem:
-                    assert op.get_attribute('class') == 'actionDisabled___1Bze5'
-                else:
-                    assert op.enabled == False
-                # recover
-                self.get_element(MOREOPERATIONBTN).click()
+        self.click_button('more')
+        assert 'disabled' in self.get_element(btn_id).get_attribute('class')
+        self.get_element(btn_id).click()
+        assert not self.get_elements(btn_id)
 
     def check_browser_console_log(self):
         errors = []
@@ -625,7 +619,7 @@ class MINI(E2E):
                         elem.get_element('left-part').click()
                         time.sleep(1)
                     break
-            self.get_element(MOREOPERATIONBTN).click()
+            self.click_button('more')
             time.sleep(1)
             self.operate(u'修改信息')
         else:
@@ -643,7 +637,7 @@ class MINI(E2E):
             self.input('description', new_dsc)
         self.click_ok()
 
-    def search(self, value, search_by=u'名称', res_type='vm', tab_name=u'已有', not_null=False):
+    def search(self, value, search_by=u'名称', res_type='vm', tab_name='available', not_null=False):
         test_util.test_logger('Search %s by %s' % (value.encode('utf-8'), search_by.encode('utf-8')))
         self.navigate(res_type)
         self.switch_tab(tab_name)
@@ -690,9 +684,9 @@ class MINI(E2E):
         test_util.test_logger('%s[%s] create backup[%s]' % (res_type.upper(), name, backup_name))
         self.navigate(res_type)
         self.enter_details_page(res_type, name)
-        self.switch_tab(u'备份数据')
-        self.get_elements(MOREOPERATIONBTN)[-1].click()
-        self.operate(u'创建备份')
+        self.switch_tab('backup')
+        self.get_element('#btn-operation-sub').click()
+        self.click_button('createBackup')
         self.input('name', backup_name)
         if backup_dsc is not None:
             self.input('description', backup_dsc)
@@ -711,10 +705,10 @@ class MINI(E2E):
         test_util.test_logger('%s[%s] delete backup (%s)' % (res_type.upper(), name, ' '.join(backup_list)))
         self.navigate(res_type)
         self.enter_details_page(res_type, name)
-        self.switch_tab(u'备份数据')
+        self.switch_tab('backup')
         self.get_table_row(backup_list)
-        self.get_elements(MOREOPERATIONBTN)[-1].click()
-        self.operate(u'删除备份')
+        self.get_element('#btn-operation-sub').click()
+        self.click_button('deleteBackup')
         self.end_action(end_action)
         if end_action == 'confirm':
             self.check_res_item(backup_list, target='notDisplayed')
@@ -726,12 +720,12 @@ class MINI(E2E):
         if res_type == 'vm':
             checker.vm_check(ops='stop')
         self.enter_details_page(res_type, name)
-        self.switch_tab(u'备份数据')
+        self.switch_tab('backup')
         backup_list = []
         backup_list.append(backup_name)
         self.get_table_row(backup_list)
-        self.get_elements(MOREOPERATIONBTN)[-1].click()
-        self.operate(u'恢复备份')
+        self.get_element('#btn-operation-sub').click()
+        self.click_button('revertBackup')
         self.end_action(end_action)
         image_name = 'for-recover-volume-from-backup-' + str(get_inv(backup_name, 'backup').uuid)
         image_list = []
@@ -768,7 +762,7 @@ class MINI(E2E):
     def check_about_page(self):
         test_util.test_logger('Check about page')
         self.get_element(MENUSETTING).move_cursor_here()
-        self.operate(u'关于')
+        self.click_button('about')
         mn_ip_list = []
         mn_ip_1, mn_ip_2 = get_mn_ip()
         mn_ip_list.append(mn_ip_1)
@@ -781,13 +775,13 @@ class MINI(E2E):
     def check_config_page(self):
         test_util.test_logger('Check config page')
         self.get_element(MENUSETTING).move_cursor_here()
-        self.operate(u'设置')
-        self.get_elements(PRIMARYBTN)[-1].click()
-        self.wait_for_element(MODALCONTENT)
+        self.click_button('setting')
+        self.click_button('add')
+        self.wait_for_element('name')
         self.click_cancel()
-        self.switch_tab(u"邮箱服务器")
-        self.get_elements(PRIMARYBTN)[-1].click()
-        self.wait_for_element(MODALCONTENT)
+        self.switch_tab('server')
+        self.click_button('add')
+        self.wait_for_element('name')
         # if don't wait 1s, will fail to click close btn
         time.sleep(1)
         self.click_close()

@@ -7,7 +7,7 @@ vm = test_lib.lib_get_specific_stub('e2e_mini/vm', 'vm')
 
 vm_ops = None
 vm_name = 'vm-' + vm.get_time_postfix()
-op_list = {u'重启', u'高可用', u'修改信息'}
+op_list = {'reboot', 'ha', 'edit'}
 
 def test():
     global vm_ops

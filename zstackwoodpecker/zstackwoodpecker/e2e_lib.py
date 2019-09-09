@@ -183,12 +183,18 @@ class E2E(object):
         return True
 
     def click_button(self, btn_name):
-        elements = self.get_elements('button', 'tag name', check_result=True)
-        for element in elements:
-            if element.text == btn_name and element.displayed():
-                if element.click():
-                    time.sleep(1)
-                    return True
+        btn_id = '#nav-%s|#btn-%s|#%s' % (btn_name, btn_name, btn_name)
+        try:
+            self.get_element(btn_id).click()
+        except:
+            test_util.test_fail('The button with id [%s] was not found!' % btn_id)
+        time.sleep(1)
+#         elements = self.get_elements('button', 'tag name', check_result=True)
+#         for element in elements:
+#             if element.text == btn_name and element.displayed():
+#                 if element.click():
+#                     time.sleep(1)
+#                     return True
 
     @property
     def window_handle(self):

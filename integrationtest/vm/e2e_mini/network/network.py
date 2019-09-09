@@ -1,10 +1,6 @@
 # -*- coding:utf-8 -*-
 
-import zstackwoodpecker.test_util as test_util
-import zstackwoodpecker.test_lib as test_lib
-
-test_stub = test_lib.lib_get_test_stub()
-from test_stub import *
+from ..test_stub import *
 
 
 class NETWORK(MINI):
