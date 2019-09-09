@@ -57,6 +57,7 @@ import zstacktestagent.testagent as testagent
 from contextlib import contextmanager
 import functools
 from collections import defaultdict
+from paramiko.ssh_exception import  SSHException
 
 debug.install_runtime_tracedumper()
 test_stage = ts_header.TestStage
@@ -3452,6 +3453,10 @@ fi
         script_file.close()
 #        ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, host.username, os.environ.get('hostPassword'), port=22)
         try:
+            ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, 'root', os.environ.get('hostPassword'), port=22)
+        except SSHException as e:
+            test_util.test_logger('Error: %s, retry scp file' % e)
+            time.sleep(3)
             ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, 'root', os.environ.get('hostPassword'), port=22)
         except:
             ssh.scp_file(script_file.name, "/tmp/serial_log_gen.sh", host.managementIp, 'root', os.environ.get('hostPassword'), port=2222)
