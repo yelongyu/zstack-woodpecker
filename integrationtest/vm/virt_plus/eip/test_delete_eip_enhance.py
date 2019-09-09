@@ -13,6 +13,7 @@ Test step:
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
+import zstackwoodpecker.operations.net_operations as net_ops
 import os
 
 test_stub = test_lib.lib_get_test_stub()
@@ -41,20 +42,21 @@ def test():
     ip_range_option.set_gateway(gateway='172.24.0.1')
     ip_range_option.set_netmask(netmask='255.255.0.0')
     ip_range_option.set_name(name="test_iprange")
-    net_ops.add_ip_range(ip_range_option=ip_range_option)
+    ip_range = net_ops.add_ip_range(ip_range_option=ip_range_option)
+    print "debug ip_range.uuid : %s" % ip_range.uuid
 
     vm_nic = vm.vm.vmNics[0]
     vm_nic_uuid = vm_nic.uuid
-    vip = test_stub.create_vip('create_eip_test', pub_l3_uuid, required_ip='172.24.244.10')
+    vip = test_stub.create_vip('create_vip_test_1', pub_l3_uuid, required_ip='172.24.244.10')
     test_obj_dict.add_vip(vip)
-    eip = test_stub.create_eip('create eip test', vip_uuid=vip.get_vip().uuid, vnic_uuid=vm_nic_uuid, vm_obj=vm)
+    eip = test_stub.create_eip('create eip test 1', vip_uuid=vip.get_vip().uuid, vnic_uuid=vm_nic_uuid, vm_obj=vm)
     vip.attach_eip(eip)
     
     vm_nic_2 = vm_2.vm.vmNics[0]
     vm_nic_uuid_2 = vm_nic_2.uuid
-    vip_2 = test_stub.create_vip('create_eip_test', pub_l3_uuid, required_ip='172.24.244.100')
+    vip_2 = test_stub.create_vip('create_vip_test_2', pub_l3_uuid, required_ip='172.24.244.100')
     test_obj_dict.add_vip(vip_2)
-    eip_2 = test_stub.create_eip('create eip test', vip_uuid=vip.get_vip().uuid, vnic_uuid=vm_nic_uuid, vm_obj=vm)
+    eip_2 = test_stub.create_eip('create eip test 2', vip_uuid=vip_2.get_vip().uuid, vnic_uuid=vm_nic_uuid_2, vm_obj=vm_2)
     
     vip_2.attach_eip(eip_2)
 
@@ -73,6 +75,7 @@ def test():
     if test_lib.lib_check_directly_ping(vip.get_vip().ip):
         test_util.test_fail('not expected to be able to ping vip while it succeed')
 
+    net_ops.delete_ip_range(ip_range.uuid)
     eip.delete()
     vip.delete()
 
