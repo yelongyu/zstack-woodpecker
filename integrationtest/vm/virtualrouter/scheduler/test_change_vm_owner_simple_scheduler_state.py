@@ -77,11 +77,11 @@ def test():
     test_stub.sleep_util(except_start_time + 130)
  
     test_util.test_dsc('check scheduler state after changing the owner of vm')
-    check_scheduler_state(schd_job1, 'Disabled')
-    check_scheduler_state(schd_job2, 'Disabled')
-    if check_scheduler_msg('run scheduler for job: StopVmInstanceJob', except_start_time+30):
+    check_scheduler_state(schd_job1, 'Enabled')
+    check_scheduler_state(schd_job2, 'Enabled')
+    if not check_scheduler_msg('run scheduler for job: StopVmInstanceJob', except_start_time+30):
         test_util.test_fail('StopVmInstanceJob executed at unexpected timestamp range')
-    if check_scheduler_msg('run scheduler for job: StartVmInstanceJob', except_start_time+60):
+    if not check_scheduler_msg('run scheduler for job: StartVmInstanceJob', except_start_time+60):
         test_util.test_fail('StartVmInstanceJob executed at unexpected timestamp range')
 
     schd_ops.del_scheduler_job(schd_job1.uuid)

@@ -15,6 +15,7 @@ import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.zstack_test.zstack_test_image as zstack_image_header
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import apibinding.inventory as inventory
+import time
 
 vm = None
 test_stub = test_lib.lib_get_test_stub()
@@ -74,13 +75,28 @@ def test():
     new_image.delete()
     new_image.expunge()
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
-    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+    count = 0
+    while True:
         image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
-        if test_lib.lib_check_file_exist(host, image_cache_path):
+        if not test_lib.lib_check_file_exist(host, image_cache_path):
+            break
+        elif count > 5:
             test_util.test_fail('image cache is expected to be deleted')
-#    elif ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
-#    elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
-#    elif ps.type == 'SharedMountPoint':
+        test_util.test_logger('check %s times: image cache still exist' % (count))
+        time.sleep(5)
+        count += 1
+    
+    count = 0
+    while True:
+        image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
+        if not test_lib.lib_check_file_exist(host, image_cache_path):
+            break
+        elif count > 5:
+            test_util.test_fail('image cache is expected to be deleted')
+        test_util.test_logger('check %s times: image cache still exist' % (count))
+        time.sleep(5)
+        count += 1
+
 
     vm.destroy()
     test_util.test_pass('Migrate VM Test Success')

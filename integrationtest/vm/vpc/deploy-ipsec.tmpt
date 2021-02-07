@@ -1,0 +1,7 @@
+import ../deploy.tmpt
+
+secondZStackMnIp = 
+thirdZStackMnIp = 
+firstZStackCidrs = 
+secondZStackCidrs = 
+thirdZStackCidrs = 

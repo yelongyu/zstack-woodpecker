@@ -10,6 +10,7 @@ import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.host_operations as host_ops
+import zstackwoodpecker.operations.config_operations as config_ops
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.ha_operations as ha_ops
@@ -34,6 +35,7 @@ def test():
     global max_attempts
     global storagechecker_timeout
 
+    config_ops.change_global_config('localStoragePrimaryStorage', 'liveMigrationWithStorage.allow', 'true')
     allow_ps_list = [inventory.LOCAL_STORAGE_TYPE]
     test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
 
@@ -85,7 +87,7 @@ def test():
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_ha_self_start')
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
-    for i in range(0, 180):
+    for i in range(0, 300):
         vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
             test_stub.start_host(test_host, test_lib.all_scenario_config)
@@ -93,13 +95,13 @@ def test():
             break
         time.sleep(1)
     if vm_stop_time is None:
-        vm_stop_time = 180    
-    for i in range(vm_stop_time, 180):
+        vm_stop_time = 300    
+    for i in range(vm_stop_time, 300):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Starting":
             break
         time.sleep(1)
     else:
-        test_util.test_fail("vm has not been changed to running as expected within 180s.")
+        test_util.test_fail("vm has not been changed to running as expected within 300s.")
 
 
     vm.destroy()

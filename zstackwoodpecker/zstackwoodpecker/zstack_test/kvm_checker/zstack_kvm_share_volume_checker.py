@@ -44,6 +44,8 @@ class zstack_kvm_share_volume_file_checker(checker_header.TestChecker):
         #    self.check_file_exist(volume, volume_installPath, host)
         if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
             self.check_ceph(volume, volume_installPath, ps)
+        elif ps.type == 'SharedBlock':
+            self.check_sharedblock(volume, volume_installPath, ps)
         else:
             test_util.test_logger('Check result: [share volume] primary storage is only support ceph, other storage type is not supported.')
 
@@ -63,6 +65,10 @@ class zstack_kvm_share_volume_file_checker(checker_header.TestChecker):
                 ceph_host, username, password = \
                         test_lib.lib_get_ceph_info(os.environ.get(key))
                 break
+        else:
+            ceph_host = monHost
+            username = 'root'
+            password = 'password'
 
         volume_installPath = volume_installPath.split('ceph://')[1]
         command = 'rbd info %s' % volume_installPath
@@ -71,6 +77,19 @@ class zstack_kvm_share_volume_file_checker(checker_header.TestChecker):
             return self.judge(True)
         else:
             test_util.test_logger('Check result: [volume:] %s [file:] %s does NOT exist on ceph [host name:] %s .' % (volume.uuid, volume_installPath, ceph_host))
+            return self.judge(False)
+
+    def check_sharedblock(self, volume, volume_installPath, ps):
+        devPath = "/dev/" + volume_installPath.split("sharedblock://")[1]
+        cmd = 'lvscan'
+        conditions = res_ops.gen_query_conditions('primaryStorage.uuid', '=', ps.uuid)
+        cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
+        conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
+        host = res_ops.query_resource(res_ops.HOST, conditions)[0]
+        result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd)
+        if devPath in result:
+            return self.judge(True)
+        else:
             return self.judge(False)
 
     #def check_nfs(self, volume, volume_installPath):
@@ -110,11 +129,11 @@ class zstack_kvm_share_volume_attach_checker(checker_header.TestChecker):
             test_util.test_logger('Check result: [volume:] %s does NOT have vmInstanceUuid. It is not attached to any vm.' % volume.uuid)
             return self.judge(False)
 
-        if not self.test_obj.target_vm:
+        if not self.test_obj.sharable_target_vms:
             test_util.test_logger('Check result: test [volume:] %s does NOT have vmInstance record in test structure. Can not do furture checking.' % volume.uuid)
             return self.judge(False)
 
-        vm = self.test_obj.target_vm.vm
+        vm = self.test_obj.sharable_target_vms[0].vm
 
         volume_installPath = volume.installPath
         if not volume_installPath:
@@ -133,6 +152,9 @@ class zstack_kvm_share_volume_attach_checker(checker_header.TestChecker):
         #elif volume_installPath.startswith('ceph'):
         if volume_installPath.startswith('ceph'):
             volume_installPath = volume_installPath.split('ceph://')[1]
+        elif volume_installPath.startswith('sharedblock'):
+            volume_installPath = "/dev/" + volume_installPath.split('sharedblock://')[1]
+
 
         if volume_installPath in output:
             test_util.test_logger('Check result: [volume:] %s [file:] %s is found in [vm:] %s on [host:] %s .' % (volume.uuid, volume_installPath, vm.uuid, host.managementIp))
@@ -156,11 +178,17 @@ class zstack_kvm_virtioscsi_shareable_checker(checker_header.TestChecker):
         #sv_cond = res_ops.gen_query_conditions("volumeUuid", '=', volume.uuid)
         #share_volume_vm_uuids = res_ops.query_resource_fields(res_ops.SHARE_VOLUME, sv_cond, None, fields=['vmInstanceUuid'])
         #test_util.test_logger('share_volume_vm_uuids is %s' %share_volume_vm_uuids)
-	host = test_lib.lib_get_vm_host(test_lib.lib_get_vm_by_uuid(volume.vmInstanceUuid))
-	test_util.test_logger('vmInstanceUuid_host.ip is %s' %host.managementIp)
-        test_util.test_logger('vmInstanceUuid is %s' %volume.vmInstanceUuid)
+        print "volume_uuid= %s" %(volume.uuid)
+        sv_cond = res_ops.gen_query_conditions("volumeUuid", '=', volume.uuid)
+        volume_vmInstanceUuid = res_ops.query_resource_fields(res_ops.SHARE_VOLUME, sv_cond, None, fields=['vmInstanceUuid'])[0].vmInstanceUuid
+        pv_cond = res_ops.gen_query_conditions("volume.uuid", '=', volume.uuid)
+        volume_ps_type = res_ops.query_resource_fields(res_ops.PRIMARY_STORAGE, pv_cond, None, fields=['type'])[0].type
+
+        host = test_lib.lib_get_vm_host(test_lib.lib_get_vm_by_uuid(volume_vmInstanceUuid))
+        test_util.test_logger('vmInstanceUuid_host.ip is %s' %host.managementIp)
+        test_util.test_logger('vmInstanceUuid is %s' %volume_vmInstanceUuid)
         #xml = os.popen('virsh dumpxml %s' % volume.vmInstanceUuid)
-        xml = os.popen('sshpass -p password ssh root@%s -p %s "virsh dumpxml %s"' %(host.managementIp, host.sshPort, volume.vmInstanceUuid))
+        xml = os.popen('sshpass -p password ssh root@%s -p %s "virsh dumpxml %s"' %(host.managementIp, host.sshPort, volume_vmInstanceUuid))
         tree = ET.parse(xml)
         root = tree.getroot()
         for domain in root:
@@ -169,8 +197,12 @@ class zstack_kvm_virtioscsi_shareable_checker(checker_header.TestChecker):
                     if device.tag == "disk":
                        for disk in device:
                            if disk.tag == "source":
-                               if disk.get("name").find(volume.uuid) > 0:
-                                   has_volume = True
+                               if volume_ps_type == "Ceph":
+                                   if disk.get("name").find(volume.uuid) > 0:
+                                       has_volume = True
+                               if volume_ps_type == "SharedBlock":
+                                   if disk.get("file").find(volume.uuid) > 0:
+                                       has_volume = True
                            if disk.tag == "shareable":
                                    shareable = True
                            if has_volume and shareable:

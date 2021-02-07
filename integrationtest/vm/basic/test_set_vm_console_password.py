@@ -8,9 +8,9 @@ New Integration Test for Set VM console password.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.shell as shell
-import test_stub
 import zstackwoodpecker.operations.account_operations as acc_ops
-    
+
+test_stub = test_lib.lib_get_specific_stub()
 
 vm = None
 password1='111111'
@@ -67,7 +67,7 @@ def test():
         raise Exception()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(30)
-    
+
     try:
         client = api.connect(console.hostIp+":"+display, password1)
         client.keyPress('k')
@@ -83,3 +83,4 @@ def error_cleanup():
     global vm
     if vm:
         vm.destroy()
+

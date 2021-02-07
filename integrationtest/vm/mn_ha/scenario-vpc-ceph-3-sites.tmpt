@@ -1,0 +1,43 @@
+import ../scenario.tmpt
+import ./deploy-ceph-ps.tmpt
+cephStorageOfferingUuid = 123456
+vmName1 = jenkins_nightly_mevoco_ci_IP_RANGE93_11382_multihosts_11
+vmName2 = jenkins_nightly_mevoco_ci_IP_RANGE93_11382_multihosts_12
+vmName3 = jenkins_nightly_mevoco_ci_IP_RANGE93_11382_multihosts_13
+vmInstranceOfferingUuid2 = c1662e61eca24cd996e97fb50ab0757d
+imageUuid2 = da3af34934b74f229524a968d2c06e47
+volumeName = jenkins_nightly_mevoco_ci_IP_RANGE93_11382_multihosts_1
+
+scenvpcZoneUuid = 12345
+scenvpcVrouterName1 = vpc_vrouter_for_scenario_test
+scenvpcVrouterCleanPattern = vpc_vrouter_for_scenario_test
+virtualRouterOfferingUuid1 = 12345
+scenl2VlanNetworkName1 = vpc_vrouter_for_scenario_test
+scenl2NetworkPhysicalInterface = eth0
+scenl2Vlan1 = 3000
+scenl2Clusters = 12345,23456
+scenl3VPCNetworkName1 = vpc_vrouter_for_scenario_test
+scenL3VPCNetworkDomainName1 = zstack.org
+scenvpcIpRangeName1 = scenario_test
+scenvpcIpRangeStart1 = 192.168.1.2
+scenvpcIpRangeEnd1 = 192.168.1.128
+scenvpcIpRangeGateway1 = 192.168.1.1
+scenvpcIpRangeNetmask1 = 255.255.255.0
+
+scenl2VlanNetworkName2 = vpc_vrouter_for_scenario_test2
+scenl2Vlan2 = 3094
+scenl3VPCNetworkName2 = scenario_test2
+scenvpcIpRangeName2 = scenario_test2
+scenvpcIpRangeStart2 = 192.168.2.2
+scenvpcIpRangeEnd2 = 192.168.2.128
+scenvpcIpRangeGateway2 = 192.168.2.1
+scenvpcIpRangeNetmask2 = 255.255.255.0
+
+scenl2VlanNetworkName3 = vpc_vrouter_for_scenario_test3
+scenl2Vlan3 = 3095
+scenl3VPCNetworkName3 = scenario_test3
+scenvpcIpRangeName3 = scenario_test3
+scenvpcIpRangeStart3 = 10.0.1.2
+scenvpcIpRangeEnd3 = 10.0.1.128
+scenvpcIpRangeGateway3 = 10.0.1.1
+scenvpcIpRangeNetmask3 = 255.255.255.0

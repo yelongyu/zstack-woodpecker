@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-imagestore-cephps.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-imagestore-cephps.tmpt</scenarioConfigTemplate>
+</testConfig>

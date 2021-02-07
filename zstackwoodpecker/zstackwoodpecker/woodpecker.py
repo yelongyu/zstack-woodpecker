@@ -80,6 +80,7 @@ class TestCase(object):
     PASS = "pass"
     FAIL = "fail"
     SKIP = "skip"
+    ENV = "env"
     def __init__(self):
         self.id = None
         self.name = None
@@ -91,7 +92,9 @@ class TestCase(object):
         self.repeat = 1
         self.type = None
         #if test case is global safe for parallel execution. Default is True.
-        self.parallel = True 
+        self.parallel = True
+        self.noparallelkey = None
+        self.flavor = ''
 
 class WoodPecker(object):
     INTEGRATION_TEST_TAG = 'integrationTest'
@@ -194,6 +197,9 @@ class WoodPecker(object):
                     if case_config.has_key(test_case.NO_PARALLEL) and \
                             case_config[test_case.NO_PARALLEL]:
                         case.parallel = False
+                    if case_config.has_key(test_case.NO_PARALLEL_KEY) and \
+                            case_config[test_case.NO_PARALLEL_KEY]:
+                        case.noparallelkey = case_config[test_case.NO_PARALLEL_KEY]
 
     def get_case_log_path(self, case, suite_repeat, case_repeat):
         log_path = os.path.join(self.log_dir, case.suite.name + '.' + str(suite_repeat), case.name + '_id' + str(case.id) + '.' + str(case_repeat) + '.log')
@@ -242,6 +248,7 @@ class WoodPecker(object):
 
                 return
             case_log_path = self.get_case_log_path(case, suite_repeat, case_repeat)
+            os.environ['CASELOGPATH'] = case_log_path
             case_action_log_path = self.get_case_action_log_path(case, suite_repeat, case_repeat)
             max_case_name_len = self.case_name_max_len
             if case_repeat == 0:
@@ -270,9 +277,9 @@ class WoodPecker(object):
 
             try:
                 if case_name == 'suite_setup' or self.startDebugger == False:
-                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s' % (self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog)
+                    test_env_variables = 'WOODPECKER_PARALLEL=%s WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s CASE_FLAVOR=%s' % (parallel, self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, True, self.onlyActionLog, case.flavor)
                 else:
-                    test_env_variables = 'WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s WOODPECKER_START_DEBUGGER=%s' % (self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, self.startDebugger)
+                    test_env_variables = 'WOODPECKER_PARALLEL=%s WOODPECKER_SCENARIO_CONFIG_FILE=%s WOODPECKER_SCENARIO_FILE=%s WOODPECKER_SCENARIO_DESTROY=%s WOODPECKER_TEST_CONFIG_FILE=%s WOODPECKER_CASE_ACTION_LOG_PATH=%s WOODPECKER_NO_ERROR_CLEANUP=%s WOODPECKER_ONLY_ACTION_LOG=%s WOODPECKER_START_DEBUGGER=%s CASE_FLAVOR=%s' % (parallel, self.scenario_config, self.scenario_file, self.scenario_destroy, self._check_test_config(suite.test_config, case.path), case_action_log_path, self.noCleanup, self.onlyActionLog, self.startDebugger, case.flavor)
                 #self.info('\n test environment variables: %s \n' % test_env_variables)
                 #cmd = '%s /usr/bin/nosetests -s --exe %s 2>&1' % (test_env_variables, case.path)
                 case_dir = os.path.dirname(case.path)
@@ -347,6 +354,11 @@ class WoodPecker(object):
                         #ret = ' [ \033[93mskipped\033[0m ]'
                         ret = ' [ \033[93mskipped 0:00:00\033[0m ]'
 			result = "SKIP"
+                    elif process.returncode == 3:
+                        case.success[suite_repeat][case_repeat] = TestCase.ENV
+                        #ret = ' [ \033[93mskipped\033[0m ]'
+                        ret = ' [ \033[93menv 0:00:00\033[0m ]'
+			result = "ENV"
                     else:
                         case.success[suite_repeat][case_repeat] = TestCase.FAIL
                         #ret = ' [ \033[91mfailed\033[0m  ]'
@@ -378,13 +390,10 @@ class WoodPecker(object):
 
                     msg = fmt % case_name.ljust(max_case_name_len) + ret
                     self.info(msg)
-
-                if not self.dry_run and os.path.exists(POST_TEST_CASE_SCRIPT):
-                    os.system("bash %s" % POST_TEST_CASE_SCRIPT)
-
-                    
             finally:
                 logfd.close()
+                if not self.dry_run and os.path.exists(POST_TEST_CASE_SCRIPT):
+                    os.system("bash %s" % POST_TEST_CASE_SCRIPT)
 
             if self.stop_when_fail_match:
                 logfd = open(case_log_path, 'r')
@@ -393,6 +402,94 @@ class WoodPecker(object):
 		        self.stop_when_fail = True
 			break
 		logfd.close()
+
+
+        def run_cases_noparallelkey(cases, suite_repeat):
+            run_case_thread = dict()
+            def wait_for_queue(parallel=0):
+                while threading.active_count() > parallel + 1:
+                    time.sleep(0.5)
+
+            def add_to_dict(origin_dict, case):
+                for case in cases:
+                    for key in case.noparallelkey:
+                        if origin_dict.has_key(key):
+                            if case not in origin_dict[key]:
+                                origin_dict[key].append(case)
+                        else:
+                            origin_dict[key] = [ case ]
+                return origin_dict
+
+            def gen_dict(cases):
+                cases_dict = dict()
+                for case in cases:
+                    cases_dict = add_to_dict(cases_dict, case)
+                return cases_dict
+    
+            def count_from_dict(origin_dict):
+                count = 0
+                for key in origin_dict:
+                    count += len(origin_dict[key])
+                return count
+    
+            def remove_from_dict(origin_dict, value):
+                for key in origin_dict:
+                    if value in origin_dict[key]:
+                        origin_dict[key].remove(value)
+                return origin_dict
+
+            def clean_thread_from_dict(run_case_thread):
+                cases_to_remove = []
+                for case in run_case_thread:
+                    if not run_case_thread[case].isAlive():
+                        cases_to_remove.append(case)
+
+                for case in cases_to_remove:
+                    run_case_thread.pop(case, None)
+                return run_case_thread
+
+            def has_conflict_key(run_case_thread, case):
+                for key in case.noparallelkey:
+                    for case in run_case_thread:
+                        if key in case.noparallelkey:
+                            return True
+                return False
+
+            print cases
+            cases_dict = gen_dict(cases)
+
+            # For case with (parallel=True and noparallel != None) cannot run with other case right now and we cannot handle cross suite
+            wait_for_queue()
+            while count_from_dict(cases_dict) > 0:
+                if sig_flag:
+                    return
+
+                wait_for_queue(suite.parallel - 1)
+                for key in cases_dict:
+                    for case in cases_dict[key]:
+                        run_case_thread = clean_thread_from_dict(run_case_thread)
+                        if has_conflict_key(run_case_thread, case):
+                            continue
+                        if sig_flag:
+                            return
+
+                        wait_for_queue(suite.parallel - 1)
+                        if self.case_failure \
+                                and self.stop_when_fail:
+                            break
+                        # case_repeat not support for noparallelkey
+                        thread = threading.Thread(target=run_case, \
+                                args=(suite, case, suite_repeat, \
+                                0, suite.parallel, ))
+                        
+                        thread.start()
+                        run_case_thread[case] = thread
+                        cases_dict = remove_from_dict(cases_dict, case)
+
+                        break
+                time.sleep(0.1)
+            # Need to make sure all cases with (parallel=True and noparallel != None) completes
+            wait_for_queue()
         
         def run_suite(suite):
             def wait_for_queue(parallel=0):
@@ -408,15 +505,27 @@ class WoodPecker(object):
                     if sig_flag:
                         return
                     if self.case_failure and self.stop_when_fail:
+                        os.system("touch /tmp/woodpecker_setup_fail")
                         return
                     #self.info('running setup case: %s' % suite.setup_case.name)
                     run_case(suite, suite.setup_case, suite_repeat, 0)
                     if suite.setup_case.success[suite_repeat][0] != TestCase.PASS and not self.dry_run:
+                        os.system("touch /tmp/woodpecker_setup_fail")
                         self.info('setup_case[%s] in suite[%s] failed to execute, skipping test cases in this suite' % (suite.setup_case.name, suite.name + "_r" + str(suite_repeat)))
                         return
+                    os.system("rm -rf /tmp/woodpecker_setup_fail")
     
                 if suite.parallel != 0:
+                    case_noparallelkey = []
                     for case in suite.cases:
+                        if case.parallel and case.noparallelkey != None:
+                            case_noparallelkey.append(case)
+
+                    # 1. For case with (parallel=True and noparallel != None), we need run them in groups without conflict
+                    run_cases_noparallelkey(case_noparallelkey, suite_repeat)
+
+                    # 2. For case without (parallel=True and noparallel != None), we run them as usual
+                    for case in list(set(suite.cases) - set(case_noparallelkey)):
                         if self.case_failure and self.stop_when_fail:
                             break
                         if case.type == None:
@@ -516,6 +625,8 @@ class WoodPecker(object):
                         case.name = c.name__
                         case.timeout = c.timeout__
                         case.path = full_path(c.text_)
+                        if "::" in case.path:
+                            case.path, case.flavor = case.path.split('::')
                         if c.noparallel__ and c.noparallel__ != 'False':
                             case.parallel = False
                         if not case.name:
@@ -526,6 +637,8 @@ class WoodPecker(object):
                                 case.name = case.path[len(os.path.dirname(suite.setup_case.path))+1:][:-3]
                             else:
                                 case.name = '/'.join(case.path.split('/')[-2:])[:-3]
+                            if case.flavor:
+                                case.name = case.name + "::" + case.flavor
                         case.suite = suite
                         case_name_len = len(case.name)
                         if (c.repeat__ and c.repeat__.isdigit() and (string.atoi(c.repeat__) > 0)):
@@ -644,6 +757,7 @@ class WoodPecker(object):
         success = 0
         failure = 0
         timeout = 0
+        env = 0
 
         err_case = []
         report = ['\n']
@@ -651,7 +765,7 @@ class WoodPecker(object):
         equal_sign = '='*80 + '\n'
         minus_sign = '-'*80 + '\n'
         summary = '\nTest Summary:\n'
-        summary_title = " Test Case\t\t\t\t\tPass\tFail\tTMO\tSkip   \n" + minus_sign
+        summary_title = " Test Case\t\t\t\t\tPass\tFail\tTMO\tSkip\tEnv   \n" + minus_sign
         summary += equal_sign + summary_title
         for suite in self.suites.values():
 #            engine_log += "Test Suite: " + suite.name + "\n"
@@ -673,29 +787,32 @@ class WoodPecker(object):
                             case_name = case_show_name + '.' + str(case_repeat)
 
                         if case.success[suite_repeat][case_repeat] is None or case.success[suite_repeat][case_repeat] == TestCase.SKIP:
-                            summary += "    {0:44}0\t0\t0\t1\n".format(case_name)
+                            summary += "    {0:44}0\t0\t0\t1\t0\n".format(case_name)
                             skipped += 1
+                        elif case.success[suite_repeat][case_repeat] == TestCase.ENV:
+                            summary += "    {0:44}0\t0\t0\t0\t1\n".format(case_name)
+                            env += 1
                         elif case.success[suite_repeat][case_repeat] == TestCase.PASS:
-                            summary += "    {0:44}1\t0\t0\t0\n".format(case_name)
+                            summary += "    {0:44}1\t0\t0\t0\t0\n".format(case_name)
                             success += 1
                         elif case.success[suite_repeat][case_repeat] == TestCase.FAIL:
-                            summary += "    {0:44}0\t1\t0\t0\n".format(case_name)
+                            summary += "    {0:44}0\t1\t0\t0\t0\n".format(case_name)
                             failure += 1
                             case_log_path = self.get_case_log_path(case, suite_repeat, case_repeat)
                             err_case.append(case_log_path)
                         elif case.success[suite_repeat][case_repeat] == TestCase.TIMEOUT:
-                            summary += "    {0:44}0\t0\t1\t0\n".format(case_name)
+                            summary += "    {0:44}0\t0\t1\t0\t0\n".format(case_name)
                             timeout += 1
                             case_log_path = self.get_case_log_path(case, suite_repeat, case_repeat)
                             err_case.append(case_log_path)
 
-        total = success + failure + timeout + skipped
+        total = success + failure + timeout + skipped + env
         if total > 25:
             summary += minus_sign + summary_title
         else:
             summary += minus_sign
 
-        summary += " Total:\t%d\t\t\t\t\t%d\t%d\t%d\t%d\t\n" % (total, success, failure, timeout, skipped)
+        summary += " Total:\t%d\t\t\t\t\t%d\t%d\t%d\t%d\t%d\t\n" % (total, success, failure, timeout, skipped, env)
         summary += equal_sign
         self.write_file_a(self.summary_path, summary)
 

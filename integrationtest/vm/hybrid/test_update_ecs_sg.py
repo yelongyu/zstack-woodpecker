@@ -25,10 +25,13 @@ def test():
     test_util.test_pass('Update Security Group Test Success')
 
 def env_recover():
-    if hybrid.sg:
-        hybrid.del_sg()
+    hybrid.tear_down()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global test_obj_dict
+    try:
+        hybrid.del_sg()
+    except:
+        pass
     test_lib.lib_error_cleanup(test_obj_dict)

@@ -1,0 +1,1 @@
+../../multihosts/test_add_image_auto_format.py

@@ -85,8 +85,8 @@ def test():
 
     test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
 
-    test_util.test_logger("wait for 180 seconds")
-    time.sleep(180)
+    test_util.test_logger("wait for 240 seconds")
+    time.sleep(240)
 
     test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
     

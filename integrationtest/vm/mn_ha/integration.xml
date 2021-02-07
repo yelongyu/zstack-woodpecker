@@ -1,5 +1,5 @@
 <integrationTest>
-    <suite name="mn ha test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+    <suite name="mn ha test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
         <case timeout='960' noparallel='True'>test_migrate_mn_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_migrate_mn_10_times_create_vm.py</case>
         <case timeout='960' noparallel='True'>test_one_mn_host_network_down_create_vm.py</case>

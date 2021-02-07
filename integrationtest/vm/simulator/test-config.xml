@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy.xml</deployConfig>
-    <deployConfigTemplate>deploy.tmpt</deployConfigTemplate>
-    <pingTestTarget>www.google.com</pingTestTarget>
+    <deployConfigTemplate>../deploy.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>

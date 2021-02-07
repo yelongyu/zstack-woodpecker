@@ -2,5 +2,5 @@
     <deployConfig>deploy-vyos-vxlan.xml</deployConfig>
     <deployConfigTemplate>deploy-vyos-vxlan.tmpt</deployConfigTemplate>
     <!-- suite special test variables -->
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>

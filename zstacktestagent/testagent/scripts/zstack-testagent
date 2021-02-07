@@ -73,12 +73,12 @@ do_start() {
     if [ $? -eq 0 ]; then
     	chown -R vyos:users $HOMDIR
         chmod a+x $SERVER
-        su - vyos -c "nohup $SERVER -type vyos -ip $ETH0_IP -port 9393 -logfile $LOGFILE >$BOOTLOG 2>&1 < /dev/null &"
+        su - vyos -c "nohup $SERVER -type vyos -ip $ETH0_IP -port 9393 -logfile $LOGFILE -readtimeout 120 -writetimeout 120 >$BOOTLOG 2>&1 < /dev/null &"
 	pid=$!
 	iptables -I eth0.local 1 -d $ETH0_IP/32 -p tcp -m comment --comment "eth0.local-testagent" -m tcp --dport 9393 -j RETURN
     else
         chmod a+x $SERVER
-        nohup $SERVER -ip 0.0.0.0 -port 9393 -logfile $LOGFILE >$BOOTLOG 2>&1 < /dev/null &
+        nohup $SERVER -ip 0.0.0.0 -port 9393 -logfile $LOGFILE -readtimeout 172800 -writetimeout 172800 >$BOOTLOG 2>&1 < /dev/null &
         pid=$!
     fi
     echo ${pid} > /var/run/zstack/zstacktestagent.pid

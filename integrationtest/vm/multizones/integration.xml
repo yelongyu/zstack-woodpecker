@@ -1,6 +1,6 @@
 <integrationTest>
     <suite name="multi zones test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
-        <case timeout='300' repeat='4'>test_create_vm.py</case>
+        <case timeout='450' repeat='4'>test_create_vm.py</case>
         <case timeout='600' repeat='1'>resource/test_ps_ops.py</case>
         <case timeout='600' repeat='1'>resource/test_delete_host.py</case>
         <case timeout='600' repeat='1'>resource/test_delete_ip_range.py</case>

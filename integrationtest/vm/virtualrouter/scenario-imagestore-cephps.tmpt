@@ -1,0 +1,3 @@
+import ../scenario.tmpt
+import ./deploy-imagestore-cephps.tmpt
+volumeName = test_volume

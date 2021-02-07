@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-imagestore-nfs-q35.xml</deployConfig>
+    <deployConfigTemplate>deploy-imagestore-nfs.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

@@ -1,0 +1,30 @@
+import ../deploy.tmpt
+
+iscsiPrimaryStorageName = iscsi-ps1
+imageStoreBackupStorageName = imagestore1
+hostName = centos5
+hostIp = 10.1.101.44
+
+hostName2 = centos2
+hostIp2 = 10.1.101.41
+hostUsername2 = root
+hostPassword2 = password
+hostPort2 = 22
+
+hostName3 = centos3
+hostIp3 = 10.1.101.42
+hostUsername3 = root
+hostPassword3 = password
+hostPort3 = 22
+
+hostName4 = centos4
+hostIp4 = 10.1.101.43
+hostUsername4 = root
+hostPassword4 = password
+hostPort4 = 22
+
+hostName5 = ubuntu
+hostIp5 = 10.1.101.10
+hostUsername5 = root
+hostPassword5 = password
+hostPort5 = 22

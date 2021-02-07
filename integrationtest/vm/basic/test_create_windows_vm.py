@@ -7,9 +7,8 @@ New Integration Test for Creating Windows VM.
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
-import zstackwoodpecker.operations.resource_operations as res_ops
-import test_stub
-import os
+
+test_stub = test_lib.lib_get_specific_stub()
 
 vm = None
 

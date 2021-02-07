@@ -1,8 +1,0 @@
-import ../deploy.tmpt
-
-ipRangeName = host IP range
-ipRangeStartIp = 11.0.0.2
-ipRangeEndIp = 11.255.255.254
-ipRangeNetmask = 255.0.0.0
-ipRangeGateway = 11.0.0.1
-

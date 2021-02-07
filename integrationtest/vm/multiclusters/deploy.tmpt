@@ -6,6 +6,9 @@ nfsPrimaryStorageUrl2 = zstack:/home/nfs2
 imageName3 = centos
 imageUrl3 = http://zstack.yyk.net/image/centos_400m_140527.img
 
+imageStoreBackupStorageName = imagestore
+imageStoreBackupStorageName2 = imagestore2
+
 largeDiskOfferingName = largeDiskOffering
 largeDiskOfferingSize = 1G
 
@@ -40,6 +43,18 @@ hostIp5 = 10.1.101.10
 hostUsername5 = root
 hostPassword5 = password
 hostPort5 = 22
+
+hostName6 = ubuntu
+hostIp6 = 10.1.101.46
+hostUsername6 = root
+hostPassword6 = password
+hostPort6 = 22
+
+hostName7 = ubuntu
+hostIp7 = 10.1.101.46
+hostUsername7 = root
+hostPassword7 = password
+hostPort7 = 22
 
 l2VlanNetworkName4 = vlan-test4
 l2VlanNetworkName5 = vlan-test5

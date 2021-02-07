@@ -65,7 +65,11 @@ def test():
     vm.create()
     vm.check()
 
-    test_stub.ensure_host_has_no_vr(host_uuid)
+    vr_hosts = test_stub.get_host_has_vr()
+    mn_hosts = test_stub.get_host_has_mn()
+    nfs_hosts = test_stub.get_host_has_nfs()
+    if not test_stub.ensure_vm_not_on(vm.get_vm().uuid, vm.get_vm().hostUuid, vr_hosts+mn_hosts+nfs_hosts):
+        test_util.test_fail("Not find out a suitable host")
 
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_port = test_lib.lib_get_host_port(host_ip)
@@ -81,6 +85,7 @@ def test():
         test_util.test_fail('there is no host with ip %s in scenario file.' %(host_ip))
 
     test_stub.stop_host(test_host, test_lib.all_scenario_config)
+    test_stub.check_if_vm_starting_incorrectly_on_original_host(vm.get_vm().uuid, host_uuid, max_count=300)
 
     test_stub.start_host(test_host, test_lib.all_scenario_config)
     test_stub.recover_host_vlan(test_host, test_lib.all_scenario_config, test_lib.deploy_config)

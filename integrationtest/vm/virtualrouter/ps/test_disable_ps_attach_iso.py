@@ -28,6 +28,16 @@ host_uuid = None
 vr_uuid = None
 
 def test():
+    #skip ceph in c74
+    cmd = "cat /etc/redhat-release | grep '7.4'"
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    rsp = test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd, 180)
+    if rsp != False:
+        ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+        for i in ps:
+            if i.type == 'Ceph':
+                test_util.test_skip('cannot hotplug iso to the vm in ceph,it is a libvirt bug:https://bugzilla.redhat.com/show_bug.cgi?id=1541702.')
+
     global test_obj_dict
     global ps_uuid
     global host_uuid
@@ -50,8 +60,10 @@ def test():
     img_option = test_util.ImageOption()
     img_option.set_name('iso')
     img_option.set_backup_storage_uuid_list([bs_uuid])
-    os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso" % (os.environ.get('zstackInstallPath')))
-    img_option.set_url('http://%s:8080/zstack/static/test.iso' % (os.environ.get('node1Ip')))
+#    command = "echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso" % os.environ.get('zstackInstallPath')
+#    test_lib.lib_execute_ssh_cmd(os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'], 'root', 'password', command)
+#    img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']))
+    img_option.set_url(os.environ.get('imageServer')+'/iso/CentOS-x86_64-7.2-Minimal.iso')
     image_inv = img_ops.add_iso_template(img_option)
     image = test_image.ZstackTestImage()
     image.set_image(image_inv)
@@ -65,9 +77,10 @@ def test():
     img_ops.detach_iso(vm.vm.uuid)
 
 
-    ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
-    ps_uuid = ps.uuid
-    ps_ops.change_primary_storage_state(ps_uuid, 'disable')
+    #ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
+    #ps_uuid = ps.uuid
+    #ps_ops.change_primary_storage_state(ps_uuid, 'disable')
+    test_stub.disable_all_pss()
     if not test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, '22', 90):
         test_util.test_fail('VM is expected to running when PS change to disable state')
     vm.set_state(vm_header.RUNNING)
@@ -76,7 +89,8 @@ def test():
 
 
 
-    ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    #ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    test_stub.enable_all_pss()
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
     vm.destroy()

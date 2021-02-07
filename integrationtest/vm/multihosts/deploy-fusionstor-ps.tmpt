@@ -1,6 +1,6 @@
 import ./deploy.tmpt
 
-fusionstorPkg = /home/fusionstor-install-40333.bin
+fusionstorPkg = /home/fusionstor-install-40402.bin
 fusionstorPrimaryStorageName = fusionstor-ps
 fusionstorPrimaryStorageMonUrls = root:password@fusionstor1;root:password@fusionstor2;root:password@fusionstor3
 fusionstorPrimaryStorageDataVolumePoolName =

@@ -8,24 +8,25 @@ New Integration Test for Support VM boot option.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.shell as shell
-import test_stub
 import os
 import time
 import zstackwoodpecker.operations.account_operations as acc_ops
 from vncdotool import api
 
+test_stub = test_lib.lib_get_specific_stub()
+
 vm = None
 
 def test():
     global vm
- 
+
     import signal
     def handler(signum, frame):
         raise Exception()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(30)
     boot_option_picture = os.environ.get('bootOptionPicture')
-    
+
     vm = test_stub.create_vm()
     console = test_lib.lib_get_vm_console_address(vm.get_vm().uuid)
     test_util.test_logger('[vm:] %s console is on %s:%s' % (vm.get_vm().uuid, console.hostIp, console.port))
@@ -49,3 +50,4 @@ def error_cleanup():
     global vm
     if vm:
         vm.destroy()
+

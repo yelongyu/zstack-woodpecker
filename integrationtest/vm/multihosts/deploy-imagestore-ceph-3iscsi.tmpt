@@ -1,0 +1,20 @@
+import ./deploy.tmpt
+
+iscsiPrimaryStorageName = iscsi-ps1
+iscsiPrimaryStorageName2 = iscsi-ps2
+iscsiPrimaryStorageName3 = iscsi-ps3
+imageStoreBackupStorageName = imagestore1
+imageUrl_vdbench = http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2
+emptyimageUrl = http://172.20.1.28/mirror/diskimages/empty_disk.qcow2
+instanceOfferingMemory_l = 2G
+instanceOfferingCPU_l = 2
+
+cephPrimaryStorageName = ceph-ps
+cephPrimaryStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephPrimaryStorageDataVolumePoolName =
+cephPrimaryStorageRootVolumePoolName =
+cephPrimaryStorageImageCachePoolName =
+
+cephBackupStorageName = ceph-bs
+cephBackupStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephBackupStoragePoolName =

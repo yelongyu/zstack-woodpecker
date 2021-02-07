@@ -23,7 +23,7 @@ _config_ = {
 test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 new_ps_list = []
-VM_COUNT = 5
+VM_COUNT = 1
 DATA_VOLUME_NUMBER = 10
 
 record = dict()
@@ -32,7 +32,13 @@ record = dict()
 @test_stub.skip_if_have_local
 @test_stub.skip_if_only_one_ps
 def test():
+    ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+    for i in ps:
+        if i.type =='SharedBlock':
+            test_util.test_skip('Skip test on SharedBlock PS.')
 
+    ps_env = test_stub.PSEnvChecker()
+    
     mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
     conditions = res_ops.gen_query_conditions('status', '=', 'Connected', conditions)
@@ -43,8 +49,15 @@ def test():
     record['host_uuid'] = host.uuid
 
     test_util.test_dsc("Create {0} vm each with {1} datavolume".format(VM_COUNT, DATA_VOLUME_NUMBER))
-    vm_list = test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT,
-                                         data_volume_number=DATA_VOLUME_NUMBER, host_uuid=host.uuid)
+    if ps_env.is_sb_ceph_env:
+        ps_list = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+        ps = random.choice(ps_list)
+        ps_uuid = ps.uuid
+        vm_list = test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT,
+                                             data_volume_number=DATA_VOLUME_NUMBER, host_uuid=host.uuid, ps_uuid=ps_uuid, timeout=1800000, bs_type="ImageStoreBackupStorage" if ps.type == "SharedBlock" else "Ceph")
+    else:
+        vm_list = test_stub.create_multi_vms(name_prefix='test-', count=VM_COUNT,
+                                             data_volume_number=DATA_VOLUME_NUMBER, host_uuid=host.uuid, timeout=1800000)
 
     for vm in vm_list:
         test_obj_dict.add_vm(vm)

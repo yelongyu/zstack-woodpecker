@@ -44,3 +44,44 @@ def delete_ipsec_connection(uuid, session_uuid=None):
     test_util.action_logger('delete Ipsec Connection [uuid:] %s' % \
             (uuid))
     return evt
+
+def attach_l3network_to_ipsec_connection(l3network_uuids, ipsec_uuid, session_uuid=None):
+    action = api_actions.AttachL3NetworkToIPsecConnectionAction()
+    action.timeout = 30000
+    action.l3NetworkUuids = l3network_uuids
+    action.uuid = ipsec_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Attach L3Networks %s to Ipsec Connection [uuid:] %s' % \
+            (l3network_uuids, ipsec_uuid))
+    return evt
+
+def detach_l3network_from_ipsec_connection(l3network_uuids, ipsec_uuid, session_uuid=None):
+    action = api_actions.DetachL3NetworkFromIPsecConnectionAction()
+    action.timeout = 30000
+    action.l3NetworkUuids = l3network_uuids
+    action.uuid = ipsec_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Detach L3Networks %s From Ipsec Connection [uuid:] %s' % \
+            (l3network_uuids, ipsec_uuid))
+    return evt
+
+def attach_remote_cidr_to_ipsec_connection(peer_cidrs, ipsec_uuid, session_uuid=None):
+    action = api_actions.AttachRemoteCIDRToIPsecConnectionAction()
+    action.timeout = 30000
+    action.peerCidrs = peer_cidrs
+    action.uuid = ipsec_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Attach Peer CIDRs %s to Ipsec Connection [uuid:] %s' % \
+            (peer_cidrs, ipsec_uuid))
+    return evt
+
+def detach_remote_cidr_from_ipsec_connection(peer_cidrs, ipsec_uuid, session_uuid=None):
+    action = api_actions.DetachRemoteCIDRFromIPsecConnectionAction()
+    action.timeout = 30000
+    action.peerCidrs = peer_cidrs
+    action.uuid = ipsec_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Detach Peer CIDRs %s From Ipsec Connection [uuid:] %s' % \
+            (peer_cidrs, ipsec_uuid))
+    return evt
+

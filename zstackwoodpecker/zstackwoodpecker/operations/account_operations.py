@@ -10,15 +10,18 @@ import traceback
 import sys
 import zstackwoodpecker.test_util as test_util
 
+
 def login_as_admin():
     accountName = inventory.INITIAL_SYSTEM_ADMIN_NAME
     password = inventory.INITIAL_SYSTEM_ADMIN_PASSWORD
     return login_by_account(accountName, password)
 
-def login_by_account(name, password, timeout = 60000):
+def login_by_account(name, password, timeout = 160000, system_tags=None):
     login = api_actions.LogInByAccountAction()
     login.accountName = name
     login.password = password
+    if system_tags:
+        login.systemTags = system_tags
     #login.timeout = 15000
     #since system might be hang for a while, when archive system log in 00:00:00
     #, it is better to increase timeout time to 60000 to avoid of no response
@@ -37,13 +40,14 @@ def login_by_ldap(uid, password, timeout = 60000):
     session_uuid = login.run().inventory.uuid
     return session_uuid
 
-def logout(session_uuid):
+def logout(session_uuid, mn_flag=None):
+    if mn_flag: return
     logout = api_actions.LogOutAction()
-    logout.timeout = 60000
+    logout.timeout = 160000
     logout.sessionUuid = session_uuid
     logout.run()
 
-def execute_action_with_session(action, session_uuid):
+def execute_action_with_session(action, session_uuid, mn_flag=None):
     if session_uuid:
         action.sessionUuid = session_uuid
         evt = action.run()
@@ -56,7 +60,7 @@ def execute_action_with_session(action, session_uuid):
             traceback.print_exc(file=sys.stdout)
             raise e
         finally:
-            logout(session_uuid)
+            logout(session_uuid, mn_flag)
 
     return evt
 
@@ -158,4 +162,37 @@ def share_resources(account_uuid_list, resource_uuid_list, to_public = None, \
             (resource_uuid_list, account_uuid_list))
     return evt
 
+def revoke_resources(account_uuid_list,resource_uuid_list,session_uuid = None):
+		action = api_actions.RevokeResourceSharingAction()
+		action.accountUuids = account_uuid_list
+		action.resourceUuids = resource_uuid_list
+
+		evt = execute_action_with_session(action, session_uuid)
+		test_util.action_logger('Revoke [Resources]: %s from [Accounts]: %s' % \
+			   (resource_uuid_list, account_uuid_list))
+		return evt
+
+
+
+
+	
+def update_quota(identity_uuid,name,value,session_uuid=None):
+   action = api_actions.UpdateQuotaAction()
+   action.identityUuid = identity_uuid
+   action.name = name
+   action.value = value
+   action.timeout = 240000
+   evt = execute_action_with_session(action,session_uuid)
+   test_util.action_logger('Update resource [name:] %s value to %s of account [identityUuid] %s ' % (name,value,identity_uuid))
+   return evt.inventory	
+
 #result=create_account('c','password','Normal')
+
+def get_twofa_auth_secret(username, password, account_type = "account", session_uuid=None):
+    action = api_actions.GetTwoFactorAuthenticationSecretAction()
+    action.name = username
+    action.password = password
+    action.type = account_type
+    evt = execute_action_with_session(action,session_uuid)
+    test_util.action_logger('Get Twofa for account [name:] %s success' % username)
+    return evt.inventory

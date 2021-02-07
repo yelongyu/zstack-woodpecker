@@ -5,7 +5,7 @@ New Integration Test for creating image for image store feature.
 @author: Youyk
 '''
 import os
-import random 
+import random
 import time
 
 import apibinding.inventory as inventory
@@ -17,7 +17,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm
 
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 test_obj_dict = test_state.TestStateDict()
 image1_name = 'image1_name_%s' % random.random()
 image2_name = 'image2_name_%s' % random.random()
@@ -39,10 +39,10 @@ def test():
 
     image_creation_option.set_root_volume_uuid(vm1.vm.rootVolumeUuid)
     image_creation_option.set_name(image1_name)
-    #image_creation_option.set_platform('Linux')
-#     bs_type = backup_storage_list[0].type
-#     if bs_type == 'Ceph':
-#         origin_interval = conf_ops.change_global_config('ceph', 'imageCache.cleanup.interval', '1')
+    # image_creation_option.set_platform('Linux')
+    # bs_type = backup_storage_list[0].type
+    # if bs_type == 'Ceph':
+    #     origin_interval = conf_ops.change_global_config('ceph', 'imageCache.cleanup.interval', '1')
 
     image1 = test_image.ZstackTestImage()
     image1.set_creation_option(image_creation_option)
@@ -50,7 +50,7 @@ def test():
     #vm1.stop()
 
     image1.create()
-    image1.check()
+    # image1.check()
     test_obj_dict.add_image(image1)
     vm2 = test_stub.create_vm(image_name = image1_name)
     test_obj_dict.add_vm(vm2)
@@ -63,7 +63,7 @@ def test():
 
     image2.create()
     test_obj_dict.add_image(image2)
-    image2.check()
+    # image2.check()
     vm3 = test_stub.create_vm(image_name = image2_name)
     test_obj_dict.add_vm(vm3)
     vm2.check()
@@ -74,3 +74,4 @@ def test():
 #Will be called only if exception happens in test().
 def error_cleanup():
     test_lib.lib_error_cleanup(test_obj_dict)
+

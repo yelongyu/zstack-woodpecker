@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy-local-ps.xml</deployConfig>
     <deployConfigTemplate>deploy-local-ps.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>

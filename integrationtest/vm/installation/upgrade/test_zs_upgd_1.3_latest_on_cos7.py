@@ -37,7 +37,9 @@ def test():
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
 
     test_util.test_logger('Update MN IP')
-    test_stub.update_mn_ip(vm_ip, vm_ip, tmp_file)
+    test_stub.update_mn_hostname(vm_ip, tmp_file)
+    test_stub.update_hosts(vm_ip, tmp_file)
+    test_stub.update_mn_ip(vm_ip, tmp_file)
     test_stub.reset_rabbitmq_for_13(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
@@ -47,6 +49,7 @@ def test():
     test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
     test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
     test_stub.start_mn(vm_ip, tmp_file)
+    test_stub.check_mn_running(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
 
     os.system('rm -f %s' % tmp_file)

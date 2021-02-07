@@ -18,11 +18,14 @@ import zstackwoodpecker.header.security_group as sg_header
 import zstackwoodpecker.header.port_forwarding as test_pf_header
 import zstackwoodpecker.header.snapshot as sp_header
 import zstackwoodpecker.header.load_balancer as lb_header
+import zstackwoodpecker.header.vid as vid_header
 import zstackwoodpecker.zstack_test.kvm_checker.kvm_checker_factory as kvm_checker
 import zstackwoodpecker.zstack_test.sim_checker.sim_checker_factory as sim_checker
 import zstackwoodpecker.zstack_test.vcenter_checker.vcenter_checker_factory as vcenter_checker
 import zstackwoodpecker.zstack_test.zstack_checker.zstack_checker_factory as zstack_checker
+import zstackwoodpecker.zstack_test.vid_checker.vid_checker_factory as vid_checker
 import zstackwoodpecker.zstack_test.zstack_test_node as zstack_test_node
+import zstackwoodpecker.zstack_test.snap as robot_snapshot_header
 
 class CheckerFactory(checker.CheckerFactory):
     def create_checker(self, test_obj):
@@ -36,21 +39,21 @@ class CheckerFactory(checker.CheckerFactory):
         elif isinstance(test_obj, volume_header.TestVolume):
             checker_chain = VolumeCheckerFactory().create_checker(test_obj)
             obj_uuid = test_obj.get_volume().uuid
-            
+
         elif isinstance(test_obj, image_header.TestImage):
             checker_chain = ImageCheckerFactory().create_checker(test_obj)
         #elif isinstance(test_obj, sg_header.TestSecurityGroup):
         #    checker_chain = SecurityGroupCheckerFactory().create_checker(test_obj)
             obj_uuid = test_obj.get_image().uuid
-            
+
         elif isinstance(test_obj, sg_header.TestSecurityGroupVm):
             checker_chain = SecurityGroupCheckerFactory().create_checker(test_obj)
             obj_uuid = 'security group vm'
-            
+
         elif isinstance(test_obj, test_pf_header.TestPortForwarding):
             checker_chain = PortForwardingCheckerFactory().create_checker(test_obj)
             obj_uuid = test_obj.get_port_forwarding().uuid
-            
+
         elif isinstance(test_obj, zstack_test_node.ZstackTestNode):
             checker_chain = NodeCheckerFactory().create_checker(test_obj)
             obj_uuid = test_obj.get_test_node().uuid
@@ -80,9 +83,19 @@ class CheckerFactory(checker.CheckerFactory):
             else:
                 obj_uuid = volume_obj.uuid
 
+        elif isinstance(test_obj, robot_snapshot_header.ZstackSnapshotTree):
+            checker_chain = SnapshotTreeCheckerFactory().create_checker(test_obj)
+            volume_obj = test_obj.get_target_volume().get_volume()
+            obj_uuid = volume_obj.uuid
+
         elif isinstance(test_obj, lb_header.TestLoadBalancer):
             checker_chain = LoadBalancerCheckerFactory().create_checker(test_obj)
             obj_uuid = test_obj.get_load_balancer().uuid
+
+        elif isinstance(test_obj, vid_header.TestVid):
+            checker_chain = VidCheckerFactory().create_checker(test_obj)
+            virtual_id_obj = test_obj.get_vid()
+            obj_uuid = virtual_id_obj.uuid
 
         test_util.test_logger('Add checker for [%s:] %s. Checkers are: %s' % \
                 (test_obj.__class__.__name__, obj_uuid, checker_chain))
@@ -109,8 +122,8 @@ class VolumeCheckerFactory(checker.CheckerFactory):
         if not test_obj.volume:
             test_util.test_fail('test_obj.volume is None, can not create checker')
 
-        if not test_obj.target_vm:
-            #only check db. 
+        if not test_obj.target_vm and not test_obj.sharable_target_vms:
+            #only check db.
             return sim_checker.SimVolumeCheckerFactory().create_checker(test_obj)
         else:
             if test_lib.lib_is_sharable_volume(test_obj.volume):
@@ -159,12 +172,28 @@ class EipCheckerFactory(checker.CheckerFactory):
 
 class VipCheckerFactory(checker.CheckerFactory):
     def create_checker(self, test_obj):
-        return kvm_checker.VipCheckerFactory().create_checker(test_obj)
+        if not test_obj.isVcenter:
+	    return kvm_checker.VipCheckerFactory().create_checker(test_obj)
+        return vcenter_checker.VipCheckerFactory().create_checker(test_obj)
 
 class SnapshotCheckerFactory(checker.CheckerFactory):
     def create_checker(self, test_obj):
         return kvm_checker.SnapshotCheckerFactory().create_checker(test_obj)
 
+class SnapshotTreeCheckerFactory(checker.CheckerFactory):
+    def create_checker(self, test_obj):
+        return kvm_checker.SnapshotTreeCheckerFactory().create_checker(test_obj)
+
 class LoadBalancerCheckerFactory(checker.CheckerFactory):
     def create_checker(self, test_obj):
-        return kvm_checker.LoadBalancerCheckerFactory().create_checker(test_obj)
+        if not test_obj.isVcenter:
+	    return kvm_checker.LoadBalancerCheckerFactory().create_checker(test_obj)
+        return vcenter_checker.LoadBalancerCheckerFactory().create_checker(test_obj)
+
+class VidCheckerFactory(checker.CheckerFactory):
+    def create_checker(self, test_obj):
+        if test_obj.statements != []:
+            return vid_checker.VidPolicyCheckerFactory().create_checker(test_obj)
+        if test_obj.attributes != []:
+            return vid_checker.VidAttrCheckerFactory().create_checker(test_obj)
+

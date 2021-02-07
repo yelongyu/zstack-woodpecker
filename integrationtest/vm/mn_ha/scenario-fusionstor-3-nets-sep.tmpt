@@ -1,0 +1,15 @@
+import ../scenario.tmpt
+import ./deploy.tmpt
+fusionstorPkg = /home/fusionstor-install.bin
+vmName1 = debug_scenario1
+vmName2 = debug_scenario2
+vmName3 = debug_scenario3
+vmName4 = debug_scenario4
+vmInstranceOfferingUuid2 = 123456
+imageUuid2 = 123456
+fusionstorStorageOfferingUuid = 123456
+volumeName = test_volume
+fusionstorBackupStorageName = fstor_bs1
+fusionstorPrimaryStorageName = fstor_ps1
+vmStorageL3Uuid = 73392
+vmManageL3Uuid = 94f12

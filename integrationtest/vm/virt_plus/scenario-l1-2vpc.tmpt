@@ -1,0 +1,24 @@
+import ../scenario.tmpt
+scenvpcZoneUuid = 12345
+scenvpcVrouterName1 = vpc_vrouter_for_scenario_test
+scenvpcVrouterCleanPattern = vpc_vrouter_for_scenario_test
+virtualRouterOfferingUuid1 = 12345
+scenl2VlanNetworkName1 = vpc_vrouter_for_scenario_test
+scenl2NetworkPhysicalInterface = eth0
+scenl2Vlan1 = 3000
+scenl2Clusters = 12345,23456
+scenl3VPCNetworkName1 = vpc_vrouter_for_scenario_test
+scenL3VPCNetworkDomainName1 = zstack.org
+scenvpcIpRangeName1 = scenario_test
+scenvpcIpRangeStart1 = 192.168.123.2
+scenvpcIpRangeEnd1 = 192.168.123.253
+scenvpcIpRangeGateway1 = 192.168.123.1
+scenvpcIpRangeNetmask1 = 255.255.255.0
+scenl2VlanNetworkName2 = vpc_vrouter_for_scenario_test2
+scenl2Vlan2 = 3094
+scenl3VPCNetworkName2 = scenario_test2
+scenvpcIpRangeName2 = scenario_test2
+scenvpcIpRangeStart2 = 192.168.124.2
+scenvpcIpRangeEnd2 = 192.168.124.253
+scenvpcIpRangeGateway2 = 192.168.124.1
+scenvpcIpRangeNetmask2 = 255.255.255.0

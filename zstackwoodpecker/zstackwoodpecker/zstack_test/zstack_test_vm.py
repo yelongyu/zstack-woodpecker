@@ -6,11 +6,13 @@ zstack vm test class
 import zstackwoodpecker.header.header as zstack_header
 import zstackwoodpecker.header.vm as vm_header
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.tag_operations as tag_ops
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
+import zstackwoodpecker.operations.ha_operations as ha_ops
 
 class ZstackTestVm(vm_header.TestVm):
     def __init__(self):
@@ -19,6 +21,7 @@ class ZstackTestVm(vm_header.TestVm):
         self.changed_instance_offering_uuid = None
         self.delete_policy = test_lib.lib_get_delete_policy('vm')
         self.delete_delay_time = test_lib.lib_get_expunge_time('vm')
+        self.test_volumes = []
 
     def __hash__(self):
         return hash(self.vm.uuid)
@@ -63,6 +66,9 @@ class ZstackTestVm(vm_header.TestVm):
 
         return self.change_instance_offering_uuid
 
+    def change_vm_image(self, image_uuid, session_uuid = None):
+        vm_ops.change_vm_image(self.vm.uuid, image_uuid, session_uuid)
+
     def create(self):
         self.vm = vm_ops.create_vm(self.vm_creation_option)
         super(ZstackTestVm, self).create()
@@ -82,6 +88,13 @@ class ZstackTestVm(vm_header.TestVm):
     def stop(self, session_uuid = None):
         self.vm = vm_ops.stop_vm(self.vm.uuid, None, session_uuid)
         super(ZstackTestVm, self).stop()
+        if ha_ops.get_vm_instance_ha_level(self.vm.uuid) and test_lib.lib_get_ha_enable() == "true":
+            status = self.vm.state
+            while status != 'Running':
+                vm_inv = test_lib.lib_get_vm_by_uuid(self.vm.uuid)
+                status = vm_inv.state
+                self.vm = vm_inv
+            self.set_state(vm_header.RUNNING)
 
     def suspend(self, session_uuid = None):
         self.vm = vm_ops.suspend_vm(self.vm.uuid, session_uuid)
@@ -95,9 +108,9 @@ class ZstackTestVm(vm_header.TestVm):
         self.vm = vm_ops.reboot_vm(self.vm.uuid, session_uuid)
         super(ZstackTestVm, self).reboot()
 
-    def migrate(self, host_uuid, timeout = None, session_uuid = None):
+    def migrate(self, host_uuid, timeout = None, session_uuid = None, allowUnknown=False, migrateFromDestination=False):
         self.vm = vm_ops.migrate_vm(self.vm.uuid, host_uuid, timeout,\
-                session_uuid)
+                session_uuid, allowUnknown, migrateFromDestination)
         super(ZstackTestVm, self).migrate(host_uuid)
 
     def expunge(self, session_uuid = None):
@@ -111,8 +124,8 @@ class ZstackTestVm(vm_header.TestVm):
         '''
         vm_ops.reinit_vm(self.vm.uuid, session_uuid)
 
-    def clone(self, names, strategy = None, session_uuid = None):
-        new_vms = vm_ops.clone_vm(self.vm.uuid, names, strategy)
+    def clone(self, names, strategy = None, full = False, ps_uuid_for_root_volume = None, ps_uuid_for_data_volume = None, root_volume_systag = None, data_volume_systag = None, systemtag = None, session_uuid = None):
+        new_vms = vm_ops.clone_vm(self.vm.uuid, names, strategy, full, ps_uuid_for_root_volume, ps_uuid_for_data_volume, root_volume_systag, data_volume_systag, systemtag)
         new_vm_objs = []
         for new_vm in new_vms:
             new_vm = new_vm.inventory
@@ -134,6 +147,8 @@ class ZstackTestVm(vm_header.TestVm):
                 self.expunge()
             elif self.get_state() == vm_header.EXPUNGED:
                 pass
+            elif hasattr(self.vm, "applianceVmType") and (self.vm.applianceVmType == "vrouter" or self.vm.applianceVmType == "VirtualRouter"):
+                self.destroy()
             else:
                 self.destroy()
                 self.expunge()
@@ -169,6 +184,16 @@ class ZstackTestVm(vm_header.TestVm):
                 host = test_lib.lib_find_host_by_vm(updated_vm)
                 if not host and self.vm.state != vm_header.STOPPED:
                     self.set_state(vm_header.STOPPED)
+                if host and host.state == "Maintenance":
+                    self.set_state(vm_header.STOPPED)
+                elif self.vm.state not in ["Destroyed", "Pasued"] and ha_ops.get_vm_instance_ha_level(
+                            self.vm.uuid) and test_lib.lib_get_ha_enable() == "true":
+                        status = self.vm.state
+                        while status != 'Running':
+                            vm_inv = test_lib.lib_get_vm_by_uuid(self.vm.uuid)
+                            status = vm_inv.state
+                            self.vm = vm_inv
+                        self.set_state(vm_header.RUNNING)
             else:
                 self.set_state(vm_header.EXPUNGED)
             return self.vm
@@ -194,3 +219,15 @@ class ZstackTestVm(vm_header.TestVm):
     def set_delete_delay_time(self, delay_time):
         test_lib.lib_set_expunge_time(category = 'vm', value = delay_time)
         super(ZstackTestVm, self).set_delete_delay_time(delay_time)
+
+    def create_from(self, uuid):
+        self.vm = test_lib.lib_get_vm_by_uuid(uuid)
+        self.set_state(self.vm.state)
+        self.update()
+
+    def detach_volume(self):
+        data_vols = self.get_vm().allVolumes
+        vm_uuid = self.get_vm().uuid
+        data_vols = [vol for vol in data_vols if vol.type == 'Data']
+        for volume in data_vols:
+            vol_ops.detach_volume(volume.uuid, vm_uuid)

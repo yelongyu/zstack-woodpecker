@@ -18,19 +18,18 @@ hybrid = test_stub.HybridObject()
 def test():
     hybrid.create_ecs_instance(allocate_eip=True, connect=True)
     test_obj_dict.add_hybrid_obj(hybrid)
-    hybrid.get_eip(in_use=True)
-    hybrid.check_eip_accessibility()
+#     hybrid.get_eip(in_use=True)
+    hybrid.check_eip_accessibility(hybrid.ecs_instance.publicIpAddress)
+    time.sleep(300)
+    hybrid.del_ecs_instance()
     test_util.test_pass('Create Ecs Instance with Public IP Test Success')
 
 def env_recover():
-    hybrid.del_ecs_instance()
-    hybrid.del_eip()
+    hybrid.tear_down()
 
-    if hybrid.sg_create:
-        time.sleep(30)
-        hybrid.del_sg()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global test_obj_dict
+    hybrid.tear_down()
     test_lib.lib_error_cleanup(test_obj_dict)

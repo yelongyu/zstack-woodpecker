@@ -8,9 +8,12 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 import threading
-import test_stub
+import time
+import os
 
+test_stub = test_lib.lib_get_specific_stub()
 
 vm_num = 3
 
@@ -35,13 +38,21 @@ def test():
     global vms, ts, invs
     test_util.test_dsc('create VM with setting password')
 
+    image_name = "batch_test_image"
+    ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
+    if ps_type == 'MiniStorage':
+        image_name = os.environ.get(image_name)
+
     for (usr,passwd) in zip(users, passwds):
         test_util.test_dsc("user:%s; password:%s" %(usr, passwd))
 
         vms = []
         for i in range(vm_num):
-            vms.append(test_stub.create_vm(vm_name = 'c7-vm'+str(i), image_name = "batch_test_image"))
-        
+            vm = test_stub.create_vm(vm_name='c7-vm'+str(i), image_name=image_name)
+            vms.append(vm)
+            vm_ops.set_vm_qga_enable(vm.get_vm().uuid)
+
+        time.sleep(30)
         for vm in vms:
             t = threading.Thread(target=change_vm_password_wrapper, args=(vm.get_vm().uuid, usr, passwd))
             ts.append(t)

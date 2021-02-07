@@ -25,7 +25,9 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     test_util.test_dsc('Create test vm as utility vm')
-    vm1 = test_stub.create_windows_vm()
+    new_offering = test_lib.lib_create_instance_offering(cpuNum = 6, memorySize = 2048 * 1024 * 1024)
+    new_offering_uuid = new_offering.uuid
+    vm1 = test_stub.create_windows_vm_2(instance_offering_uuid = new_offering_uuid)
     test_obj_dict.add_vm(vm1)
     #this test will rely on live snapshot capability supporting
     host_inv = test_lib.lib_find_host_by_vm(vm1.get_vm())

@@ -68,10 +68,8 @@ def test():
         test_util.test_fail("management node VM runs on more than one host after its former host down")
 
     test_util.test_logger("wait for 5 minutes to see if management node starts again")
-    try:
-        node_ops.wait_for_management_server_start(300)
-    except:
-        test_util.test_fail("management node does not recover after recover one mn host")
+    #node_ops.wait_for_management_server_start(300)
+    test_stub.wrapper_of_wait_for_management_server_start(600)
 
     test_stub.ensure_hosts_connected()
     test_stub.ensure_bss_host_connected_from_stop(test_lib.scenario_file, test_lib.all_scenario_config, test_lib.deploy_config)

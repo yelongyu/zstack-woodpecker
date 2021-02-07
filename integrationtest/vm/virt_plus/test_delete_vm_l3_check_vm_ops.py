@@ -14,7 +14,7 @@ import zstackwoodpecker.header.vm as vm_header
 import os
 
 
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 test_obj_dict = test_state.TestStateDict()
 curr_deploy_conf = None
 l3_name = None
@@ -39,7 +39,7 @@ def test():
     #net_ops.detach_l3(vm_nic_uuid)
 
     vm.destroy()
-    vm.set_state(vm_header.DESTROYED) 
+    vm.set_state(vm_header.DESTROYED)
     vm.check()
 
     vm.recover()
@@ -63,7 +63,7 @@ def env_recover():
     global l3_name
     test_lib.lib_error_cleanup(test_obj_dict)
     net_ops.add_l3_resource(curr_deploy_conf, l3_name)
-    
+
 
 #Will be called only if exception happens in test().
 def error_cleanup():
@@ -77,3 +77,4 @@ def error_cleanup():
         except Exception as e:
             test_util.test_warn('Fail to recover [l3:] %s resource. It will impact later test case.' % l3_name)
             raise e
+

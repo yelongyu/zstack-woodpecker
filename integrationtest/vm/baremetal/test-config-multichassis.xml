@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-multichassis.xml</deployConfig>
+    <deployConfigTemplate>deploy-multichassis.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

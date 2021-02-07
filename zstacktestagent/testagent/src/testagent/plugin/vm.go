@@ -1,10 +1,10 @@
 package plugin
 
 import (
-	"testagent/server"
-	"testagent/utils"
 	"fmt"
 	"strings"
+	"testagent/server"
+	"testagent/utils"
 	"time"
 )
 
@@ -14,42 +14,40 @@ type VmStatusCheckCmd struct {
 
 type VmDiskQosCmd struct {
 	Uuid string `json:"vm_uuid"`
-	Dev string `json:"dev"`
+	Dev  string `json:"dev"`
 }
 
 type VmSshGuestVmCmd struct {
-	Ip string `json:"ip"`
-	Command string `json:"command"`
+	Ip       string `json:"ip"`
+	Command  string `json:"command"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Timeout int `json:"timeout"`
+	Timeout  int    `json:"timeout"`
 }
 
 type VmSshGuestVmRsp struct {
-	Success bool `json:"success"`
-	Error string `json:"error"`
-	Result string `json:"result"`
+	Success bool   `json:"success"`
+	Error   string `json:"error"`
+	Result  string `json:"result"`
 }
 
 type VmScpGuestVmCmd struct {
-	Ip string `json:"ip"`
+	Ip       string `json:"ip"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	SrcFile string `json:"src_file"`
-	DstFile string `json:"dst_file"`
-	Timeout int `json:"timeout"`
+	SrcFile  string `json:"src_file"`
+	DstFile  string `json:"dst_file"`
+	Timeout  int    `json:"timeout"`
 }
 
 type VmScpGuestVmRsp struct {
-	Success bool `json:"success"`
-	Error string `json:"error"`
+	Success bool   `json:"success"`
+	Error   string `json:"error"`
 }
-
 
 type VmDiskQosRsp struct {
 	VmDeviceIo string `json:"vm_device_io"`
 }
-
 
 type VmStatusCheckRsp struct {
 	Vm_status map[string]bool `json:"vm_status"`
@@ -68,23 +66,23 @@ type VmBlkStatusRsp struct {
 }
 
 const (
-	IS_VM_STOPPED_PATH  = "/vm/isvmstopped"
-	IS_VM_PAUSED_PATH  = "/vm/isvmpaused"
-	IS_VM_DESTROYED_PATH  = "/vm/isvmdestroyed"
-	IS_VM_RUNNING_PATH = "/vm/isvmrunning"
-	SSH_GUEST_VM_PATH = "/vm/sshguestvm"
-	SCP_GUEST_VM_PATH = "/vm/scpguestvm"
-	VM_STATUS = "/vm/vmstatus"
-	LIST_ALL_VM = "/vm/listallvm"
-	VM_BLK_STATUS = "/vm/vmblkstatus"
-	VM_ECHO_PATH = "/host/echo"
-	VM_DEVICE_QOS = "/vm/deviceqos"
+	IS_VM_STOPPED_PATH   = "/vm/isvmstopped"
+	IS_VM_PAUSED_PATH    = "/vm/isvmpaused"
+	IS_VM_DESTROYED_PATH = "/vm/isvmdestroyed"
+	IS_VM_RUNNING_PATH   = "/vm/isvmrunning"
+	SSH_GUEST_VM_PATH    = "/vm/sshguestvm"
+	SCP_GUEST_VM_PATH    = "/vm/scpguestvm"
+	VM_STATUS            = "/vm/vmstatus"
+	LIST_ALL_VM          = "/vm/listallvm"
+	VM_BLK_STATUS        = "/vm/vmblkstatus"
+	VM_ECHO_PATH         = "/host/echo"
+	VM_DEVICE_QOS        = "/vm/deviceqos"
 )
 
 const (
-	VM_STATUS_RUNNING = "running"
-	VM_STATUS_STOPPED = "shut off"
-	VM_STATUS_PAUSED = "paused"
+	VM_STATUS_RUNNING   = "running"
+	VM_STATUS_STOPPED   = "shut off"
+	VM_STATUS_PAUSED    = "paused"
 	VM_STATUS_DESTROYED = ""
 	VM_EXCEPTION_STATUS = "EXCEPTION_STATUS"
 )
@@ -102,7 +100,7 @@ func isVmStatus(vm_uuid string, status string) bool {
 func vmStatus(vm_uuid string) string {
 	bash := utils.Bash{
 		Command: fmt.Sprintf("virsh domstate %s", vm_uuid),
-		NoLog: true,
+		NoLog:   true,
 	}
 
 	retCode, o, _, err := bash.RunWithReturn()
@@ -110,6 +108,37 @@ func vmStatus(vm_uuid string) string {
 		return VM_EXCEPTION_STATUS
 	} else {
 		return strings.TrimSpace(o)
+	}
+}
+
+func vmSerialLog(vm_uuid string, status string) string {
+	if status != VM_STATUS_RUNNING {
+		_bash := utils.Bash{
+			Command: fmt.Sprintf("rm -rf /tmp/%s_serial.log", vm_uuid),
+			NoLog:   true,
+		}
+
+		_bash.Run()
+		return VM_EXCEPTION_STATUS
+	}
+
+	bash_pts := utils.Bash{
+		Command: fmt.Sprintf("grep pts /var/log/libvirt/qemu/%s.log | awk '{print $9}'", vm_uuid),
+		NoLog:   true,
+	}
+
+	_retCode, _o, _, _err := bash_pts.RunWithReturn()
+	if _err != nil || _retCode != 0 {
+		return VM_EXCEPTION_STATUS
+	} else {
+
+		bash_serial_log := utils.Bash{
+			Command: fmt.Sprintf("sh /tmp/serial_log_gen.sh %s_serial.log %s", vm_uuid, _o),
+			NoLog:   true,
+		}
+
+		bash_serial_log.Run()
+		return vm_uuid + "_serial.log"
 	}
 }
 
@@ -121,7 +150,7 @@ func vmIsVmStoppedHandler(ctx *server.CommandContext) interface{} {
 		vm_status[uuid] = isVmStatus(uuid, VM_STATUS_STOPPED)
 	}
 
-	return VmStatusCheckRsp{ Vm_status: vm_status }
+	return VmStatusCheckRsp{Vm_status: vm_status}
 }
 
 func vmIsVmSuspendedHandler(ctx *server.CommandContext) interface{} {
@@ -132,7 +161,7 @@ func vmIsVmSuspendedHandler(ctx *server.CommandContext) interface{} {
 		vm_status[uuid] = isVmStatus(uuid, VM_STATUS_PAUSED)
 	}
 
-	return VmStatusCheckRsp{ Vm_status: vm_status }
+	return VmStatusCheckRsp{Vm_status: vm_status}
 }
 
 func vmIsVmDestroyedHandler(ctx *server.CommandContext) interface{} {
@@ -143,7 +172,7 @@ func vmIsVmDestroyedHandler(ctx *server.CommandContext) interface{} {
 		vm_status[uuid] = isVmStatus(uuid, VM_STATUS_DESTROYED)
 	}
 
-	return VmStatusCheckRsp{ Vm_status: vm_status }
+	return VmStatusCheckRsp{Vm_status: vm_status}
 }
 
 func vmIsVmRunningHandler(ctx *server.CommandContext) interface{} {
@@ -154,7 +183,7 @@ func vmIsVmRunningHandler(ctx *server.CommandContext) interface{} {
 		vm_status[uuid] = isVmStatus(uuid, VM_STATUS_RUNNING)
 	}
 
-	return VmStatusCheckRsp{ Vm_status: vm_status }
+	return VmStatusCheckRsp{Vm_status: vm_status}
 }
 
 func vmSshGuestVmHandler(ctx *server.CommandContext) interface{} {
@@ -177,11 +206,11 @@ func vmSshGuestVmHandler(ctx *server.CommandContext) interface{} {
 	}()
 
 	select {
-		case rsp = <-timeout:
-		case <-time.After(time.Second * time.Duration(cmd.Timeout)):
-			rsp.Success = false
-			rsp.Error = fmt.Sprintf("ssh execution keeps failure, until timeout: %d", cmd.Timeout)
-			rsp.Result = ""
+	case rsp = <-timeout:
+	case <-time.After(time.Second * time.Duration(cmd.Timeout)):
+		rsp.Success = false
+		rsp.Error = fmt.Sprintf("ssh execution keeps failure, until timeout: %d", cmd.Timeout)
+		rsp.Result = ""
 	}
 
 	return rsp
@@ -209,15 +238,16 @@ func vmStatusHandler(ctx *server.CommandContext) interface{} {
 	vm_status := make(map[string]string)
 	for _, uuid := range cmd.Uuids {
 		vm_status[uuid] = vmStatus(uuid)
+		vm_status[uuid+"_log"] = vmSerialLog(uuid, vmStatus(uuid))
 	}
 
-	return VmStatusRsp{ Vm_status: vm_status }
+	return VmStatusRsp{Vm_status: vm_status}
 }
 
 func listAllVm() []string {
 	bash := utils.Bash{
 		Command: "virsh list --all",
-		NoLog: true,
+		NoLog:   true,
 	}
 
 	_, o, _, _ := bash.RunWithReturn()
@@ -228,13 +258,13 @@ func listAllVm() []string {
 func vmListAllVmHandler(ctx *server.CommandContext) interface{} {
 	vm_status := make(map[string][]string)
 	vm_status["vms"] = listAllVm()
-	return VmListAllVmRsp{ Vm_status : vm_status }
+	return VmListAllVmRsp{Vm_status: vm_status}
 }
 
-func vmBlkStatus(uuid string) map[string]string{
+func vmBlkStatus(uuid string) map[string]string {
 	bash := utils.Bash{
 		Command: fmt.Sprintf("virsh domblklist %s", uuid),
-		NoLog: true,
+		NoLog:   true,
 	}
 
 	_, o, _, _ := bash.RunWithReturn()
@@ -259,7 +289,7 @@ func vmBlkStatusHandler(ctx *server.CommandContext) interface{} {
 		vm_status[uuid] = vmBlkStatus(uuid)
 	}
 
-	return VmBlkStatusRsp{ Vm_status: vm_status }
+	return VmBlkStatusRsp{Vm_status: vm_status}
 }
 
 func vmEchoHandler(ctx *server.CommandContext) interface{} {
@@ -271,13 +301,13 @@ func vmDeviceQosHandler(ctx *server.CommandContext) interface{} {
 	ctx.GetCommand(cmd)
 	bash := utils.Bash{
 		Command: fmt.Sprintf("virsh blkdeviotune %s %s", cmd.Uuid, cmd.Dev),
-		NoLog: true,
+		NoLog:   true,
 	}
 
 	_, o, _, _ := bash.RunWithReturn()
 	bash.PanicIfError()
 
-	return VmDiskQosRsp{ VmDeviceIo: o }
+	return VmDiskQosRsp{VmDeviceIo: o}
 }
 
 func VmEntryPoint() {

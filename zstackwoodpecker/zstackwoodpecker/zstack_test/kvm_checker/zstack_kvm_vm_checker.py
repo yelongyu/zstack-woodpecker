@@ -15,14 +15,19 @@ import apibinding.inventory as inventory
 import zstacktestagent.plugins.vm as vm_plugin
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
+import time
 
 class zstack_kvm_vm_running_checker(checker_header.TestChecker):
     '''check kvm vm running status. If it is running, return self.judge(True). 
         If it is stopped, return self.judge(False)'''
     def check(self):
         super(zstack_kvm_vm_running_checker, self).check()
+
         vm = self.test_obj.vm
         host = test_lib.lib_get_vm_host(vm)
+        if test_lib.lib_gen_serial_script_for_vm(vm):
+            test_util.test_logger('Check [vm:] /tmp/serial_log_gen.sh is ready on [host:] %s [uuid:] %s.' % (host.name, host.uuid))
+
         test_lib.lib_install_testagent_to_host(host)
         test_lib.lib_set_vm_host_l2_ip(vm)
         cmd = vm_plugin.VmStatusCmd()
@@ -31,9 +36,27 @@ class zstack_kvm_vm_running_checker(checker_header.TestChecker):
         rspstr = http.json_dump_post(testagent.build_http_path(host.managementIp, vm_plugin.VM_STATUS), cmd)
         rsp = jsonobject.loads(rspstr)
         check_result = rsp.vm_status[vm.uuid].strip()
+        serial_log = rsp.vm_status[vm.uuid+"_log"].strip()
         if check_result  == vm_plugin.VmAgent.VM_STATUS_RUNNING :
             test_util.test_logger('Check result: [vm:] %s is RUNNING on [host:] %s .' % (vm.uuid, host.name))
-            return self.judge(True)
+            test_util.test_logger('Check [vm:] Start to check serial log for error for [vm:] %s on [host:] %s .' % (vm.uuid, host.name))
+            _cmd = "grep -Ei 'kernel panic|call trace|BUG.*NULL|general protection fault|watchdog detected|BUG.*soft lockup|watchdog timeout|fatal exception' /tmp/%s" % (serial_log)
+            _rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), _cmd)
+
+            if _rsp:
+                test_util.test_logger('Check result: [vm:] %s is somehow panic on [host:] %s .' % (vm.uuid, host.name))
+                _cmd = "cat /tmp/%s" % (serial_log)
+                _rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), _cmd)
+                test_util.test_logger('Check result: [vm:] %s serial output: %s .' % (vm.uuid, _rsp))
+                return self.judge(False)
+            else:
+                _cmd = "if [ ! -s /tmp/%s ]; then echo 'empty'; fi" % (serial_log)
+                _rsp = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), _cmd)
+                if _rsp and "empty" in _rsp:
+                    test_util.test_logger('Check [vm:] %s is windows or serial console is not enabled, skip the serial log check' % (vm.uuid))
+
+                test_util.test_logger('Check result: [vm:] %s serial log check is passed on [host:] %s .' % (vm.uuid, host.name))
+                return self.judge(True)
         else:
             test_util.test_logger('Check result: [vm:] %s is NOT RUNNING on [host:] %s . ; Expected status: %s ; Actual status: %s' % (vm.uuid, host.name, vm_plugin.VmAgent.VM_STATUS_RUNNING, check_result))
             return self.judge(False)
@@ -118,6 +141,7 @@ class zstack_kvm_vm_set_host_vlan_ip(checker_header.TestChecker):
         This is not a real checker. Its function is to assign an IP address for host vlan device.
     '''
     def check(self):
+        super(zstack_kvm_vm_set_host_vlan_ip, self).check()
         vm = self.test_obj.vm
         test_lib.lib_set_vm_host_l2_ip(vm)
         return self.judge(self.exp_result)
@@ -146,6 +170,14 @@ class zstack_kvm_vm_network_checker(checker_header.TestChecker):
             if not 'DHCP' in test_lib.lib_get_l3_service_type(nic.l3NetworkUuid):
                 test_util.test_logger("Skip [VR:] %s, since it doesn't provide DHCP service" % vr_vm.uuid)
                 continue
+            else:
+                break
+        else:
+            test_util.test_logger("Checker result FAILED: no DHCP in l3s")
+            return self.judge(False)
+
+        for vr_vm in vr_vms:
+            nic = test_lib.lib_get_vm_nic_by_vr(vm, vr_vm)
 
             guest_ip = nic.ip
             command = 'ping -c 5 -W 5 %s >/tmp/ping_result 2>&1; ret=$?; cat /tmp/ping_result; exit $ret' % guest_ip
@@ -256,8 +288,11 @@ class zstack_kvm_vm_ssh_no_vr_checker(checker_header.TestChecker):
         host = test_lib.lib_get_vm_host(vm)
         test_lib.lib_install_testagent_to_host(host)
         test_lib.lib_set_vm_host_l2_ip(vm)
-        nic = vm.vmNics[0]
+#        nic = vm.vmNics[0]
+        l3_uuid = vm.defaultL3NetworkUuid
+        nic = test_lib.lib_get_vm_nic_by_l3(vm, l3_uuid)
         ip = nic.ip
+        
 
         shell_command = 'exit 0'
         vm_cmd_result = test_lib.lib_ssh_vm_cmd_by_agent_with_retry(host.managementIp, ip, test_lib.lib_get_vm_username(vm), test_lib.lib_get_vm_password(vm), shell_command, self.exp_result)

@@ -1,0 +1,13 @@
+import ../scenario.tmpt
+import ./deploy-1-mini-cluster.tmpt
+import ./scenario.tmpt
+hostType = miniHost
+vmStorageL3Uuid = 3a21c6bf70894795829854bf8339642b
+vmName1 = jenkins_nightly_mevoco_fv_mini_IP_RANGE218_389_mn_ha2_vyos-ceph-ps1
+vmName2 = jenkins_nightly_mevoco_fv_mini_IP_RANGE218_389_mn_ha2_vyos-ceph-ps2
+vmName3 = jenkins_nightly_mevoco_fv_mini_IP_RANGE218_389_mn_ha2_vyos-ceph-ps3
+vmName4 = jenkins_nightly_mevoco_fv_mini_IP_RANGE218_389_mn_ha2_vyos-ceph-ps4
+vmInstranceOfferingUuid2 = c1662e61eca24cd996e97fb50ab0757d
+imageUuid2 = 08003efc82de46e8ab3146c8e7d55174
+cephStorageOfferingUuid = 8e5143273885410f96fd7955928c1a2d
+volumeName = jenkins_nightly_mevoco_fv_mini_IP_RANGE218_389_mn_ha2_vyos-ceph-ps

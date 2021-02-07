@@ -31,8 +31,14 @@ def test():
 
     test_lib.setup_plan.deploy_test_agent()
     test_lib.setup_plan.execute_plan_without_deploy_test_agent()
-    if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
-        os.system("bash %s" % EXTRA_SUITE_SETUP_SCRIPT)
+
+    if test_lib.scenario_config != None and test_lib.scenario_file != None and os.path.exists(test_lib.scenario_file):
+        mn_ips = deploy_operations.get_nodes_from_scenario_file(test_lib.all_scenario_config, test_lib.scenario_file, test_lib.deploy_config)
+        if os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
+            os.system("bash %s '%s'" % (EXTRA_SUITE_SETUP_SCRIPT, mn_ips))
+    elif os.path.exists(EXTRA_SUITE_SETUP_SCRIPT):
+        os.system("bash %s" % (EXTRA_SUITE_SETUP_SCRIPT))
+
     deploy_operations.deploy_initial_database(test_lib.deploy_config, test_lib.all_scenario_config, test_lib.scenario_file)
     for host in hosts:
         os.system("bash %s %s" % (EXTRA_HOST_SETUP_SCRIPT, host.managementIp_))
@@ -40,6 +46,6 @@ def test():
     if test_lib.lib_get_ha_selffencer_maxattempts() != None:
         test_lib.lib_set_ha_selffencer_maxattempts('60')
 	test_lib.lib_set_ha_selffencer_storagechecker_timeout('60')
-    test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
+    #test_lib.lib_set_primary_storage_imagecache_gc_interval(1)
     test_util.test_pass('Suite Setup Success')
 

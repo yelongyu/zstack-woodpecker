@@ -21,45 +21,132 @@ hostIp = 10.0.101.31
 
 hostName2 = centos2
 hostIp2 = 10.0.101.21
+hostUsername2 = root
+hostPassword2 = password
+hostPort2 = 22
 
 hostName3 = centos3
 hostIp3 = 10.0.101.22
+hostUsername3 = root
+hostPassword3 = password
+hostPort3 = 22
 
 hostName4 = centos4
 hostIp4 = 10.0.101.23
+hostUsername4 = root
+hostPassword4 = password
+hostPort4 = 22
+
+hostName5 = centos6
+hostIp5 = 10.1.101.41
+hostUsername5 = root
+hostPassword5 = password
+hostPort5 = 22
 
 
 serverName2 = mevoco2
 serverIp2 = 10.0.101.25
 
-imageName_s = MicroCore-Linux.ova
-imageUrl_s =
+image_dhcp_name = centos-dhcp
+image_centos_dhcp = http://192.168.200.100/mirror/diskimages/centos7-dhcp-good.vmdk
+image_static_name = centos-static
+image_centos_static = http://192.168.200.100/mirror/diskimages/centos7-good-all.vmdk
 
-imageName_net = MicroCore-Linux.ova
-imageUrl_net =
+vcenter = 
+vcenteruser = administrator@vsphere.local
+vcenterpwd = Testing%123
 
-vcenter1_name = VM-VCENTER1
-vcenter1_ip = 10.0.0.250
-vcenter1_domain_name = administrator@vsphere.local
-vcenter1_password = abc%123
-vcenter1_vm_pattern1 = vm-fingerprint1
-vcenter1_vm_pattern2 = vm-fingerprint2
-vcenter1_sync_image_name = sync-img-name
-vcenter1_template_exist = MicroCore-Linux.ova
-vcenter1_network_pattern1 = L3-250-net1
-vcenter1_sync_image_url = http://SERVER_NAME/mirror/iso/vmdk-image/sync-vm-start-stop-use-1.vmdk
+vcenterDefaultNetwork = L3-VM Network
+templatepath = http://192.168.200.100/mirror/diskimages/MicroCore-Linux.ova
+dswitch = dswitch0
+dportgroup = dportgroup0
+dportgroup1 = dportgroup1
+vcvm = vc-vm0
+vcvm2 = vc-vm2
+vcvm3 = vc-vm3
+vcenterDefaultmplate = MicroCore-Linux
 
-vcenter2_name = VM-VCENTER2
-vcenter2_ip = 10.0.0.251
-vcenter2_domain_name = administrator@vsphere.local
-vcenter2_password = abc%123
-vcenter2_sync_image_name = sync-img-name
-vcenter2_template_exist = MicroCore-Linux.ova
-vcenter2_network_pattern1 = L3-251-net1
-vcenter2_sync_vm_start_stop = sync-vm-start-stop-use
-vcenter2_sync_vm_create_delete = sync-vm-create-delete-use
-vcenter2_sync_image_url = http://SERVER_NAME/mirror/iso/vmdk-image/sync-vm-start-stop-use-1.vmdk
+vcdatacenterName = datacenter
+vcclusterName = cluster
+vcclusterName1 = cluster1
+vchostName = 172.20.197.51
+vchostUser = root
+vchostpwd = password
+vcsslthumbprint = 52:DF:8F:E5:37:43:57:7B:65:CC:BC:97:DE:EC:80:AE:96:FC:49:11
+vciscsitarget = 172.20.14.154
+vcvmfsdatastore = newdatastore
+vcvmfsdatastore1 = datastore1
+vcnasdatastore = nfs
+mountpointpath = /home/nfs
+vswitch0 = vSwitch0
+vswitch1 = vSwitch1
+portgroup0 = port_group0
+portgroup1 = port_group1
+portgroup2 = port_group2
+portgroup3 = port_group3
+vlanid0 = 0
+vlanid1 = 1
+dvlanid0 = 0
+dvlanid1 = 1
+vmName2 = 12345
+vmName3 = 12345
+vmName4 = 12345
+vmName5 = 12345
 
+vmInstranceOfferingUuid2 = 234567
+imageUuid2 = 234567
+volumeName = test_volume
+
+vCenterVirtualRouterImageName = vCenter-vr
+rootMediaType = RootVolumeTemplate
+vCenterVRImageUsername = vyos
+vCenterVRImagePassword = vyos
+vCenterVirtualRouterImageUrl = http://192.168.200.100/mirror/diskimages/zstack-vrouter-latest.vmdk
+
+l2vCenterPublicNetworkName = vCenter-public
+l2vCenterPublicNetworkInterface = vSwitch0
+l2vCenterNoVlanNetworkName = vCenter-noVlan
+
+l2vCenterPublicNetworkInterface1 = vSwitch1
+l2vCenterNoVlanNetworkName1 = vCenter-noVlan-1
+
+l2vCenterPublicNetworkInterface2 = dswitch0
+l2vCenterNoVlanNetworkName2 = vCenter-noVlan-2
+
+vCenterDNSServer = 172.20.0.1
+
+l3vCenterPublicNetworkName = public network vcenter
+
+l3vCenterNoVlanNetworkName = vCenter-noVlan-network
+vCenterNoVlanIpRangeName = vCenter-noVlan-ipRangeName
+vCenterNoVlanIpRangeStartIp = 192.168.0.100
+vCenterNoVlanIpRangeEndIp = 192.168.0.200
+vCenterNoVlanIpRangeGateway = 192.168.0.1
+vCenterNoVlanIpRangeNetmask = 255.255.255.0
+
+l3vCenterNoVlanNetworkName1 = vCenter-noVlan-network-1
+vCenterNoVlanIpRangeName1 = vCenter-noVlan-ipRangeName
+vCenterNoVlanIpRangeStartIp1 = 192.168.1.100
+vCenterNoVlanIpRangeEndIp1 = 192.168.1.200
+vCenterNoVlanIpRangeGateway1 = 192.168.1.1
+vCenterNoVlanIpRangeNetmask1 = 255.255.255.0
+
+l3vCenterNoVlanNetworkName2 = vCenter-noVlan-network-2
+vCenterNoVlanIpRangeName2 = vCenter-noVlan-ipRangeName
+vCenterNoVlanIpRangeStartIp2 = 192.168.2.100
+vCenterNoVlanIpRangeEndIp2 = 192.168.2.200
+vCenterNoVlanIpRangeGateway2 = 192.168.2.1
+vCenterNoVlanIpRangeNetmask2 = 255.255.255.0
+
+vCenterVirtualRouterOfferingName = vcenter_vrouter
+vCenterVirtualRouterOfferingMemory = 1024M
+vCenterVirtualRouterOfferingCpuSpeed = 512
+vCenterVirtualRouterOfferingCpuNum = 1
+
+zstackVirtualRouterImageName = zstack-vrouter
+zstackVrImageUsername = vyos
+zstackVrImagePassword = vrouter12#
+zstackVirtualRouterImageUrl = http://192.168.200.100/mirror/diskimages/zstack-vrouter-latest.qcow2
 
 l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = eth0
@@ -68,12 +155,53 @@ l3VlanNetworkName2 = l3VlanNetwork2
 
 #this var is used to overwrite original raw setting
 rootImageFormat = qcow2
+vcenterrootImageFormat = vmtx
 
 sshkeyImageName = vr
-sshkeyImageUrl = http://10.1.101.1/image/zstack-cloudinit.img
-sshkeyPubKey = 
-sshkeyPriKey_file = 
+sshkeyImageUrl = http://IMAGE_SERVER/diskimages/CentOS-7-x86_64-Cloudinit-8G-official.qcow2
+sshkeyPubKey =
+sshkeyPriKey_file =
 
 imageName_i_c7 = centos7-installation-test
-imageUrl_i_c7 = http://zstack/image/centos7-test.qcow2
+imageUrl_i_c7 = http://IMAGE_SERVER/diskimages/centos7-test.qcow2
 
+hostRecoverScript = /home/host_recover_script.sh
+hostForceStopScript = /home/host_force_stop_script.sh
+
+imageUrl_vdbench = http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2
+cephPrimaryStorageName = ceph-ps
+cephPrimaryStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephPrimaryStorageDataVolumePoolName =
+cephPrimaryStorageRootVolumePoolName =
+cephPrimaryStorageImageCachePoolName =
+
+cephBackupStorageName = ceph-bs
+cephBackupStorageMonUrls = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephBackupStoragePoolName =
+
+hostName2 = TARGET_IP
+hostIp2 = TARGET_IP
+#hostName = ubuntu
+#hostIp = 10.1.101.10
+#hostName = centos7
+#hostIp = 10.1.101.51
+hostUsername2 = root
+hostPassword2 = password
+
+cephPrimaryStorageName2 = ceph-ps-2
+cephPrimaryStorageMonUrls2 = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephPrimaryStorageDataVolumePoolName2 =
+cephPrimaryStorageRootVolumePoolName2 =
+cephPrimaryStorageImageCachePoolName2 =
+
+cephBackupStorageName2 = ceph-bs-2
+cephBackupStorageMonUrls2 = root:password@ceph01;root:password@ceph02;root:password@ceph03
+cephBackupStoragePoolName2 =
+
+cephStorageOfferingUuid = 123456
+
+imageStoreBackupStorageName = imagestore
+imageStoreBackupStorageName2 = imagestore2
+
+vCenteripRangeStartIp = IP_START_VCENTER
+vCenteripRangeEndIp = IP_END_VCENTER

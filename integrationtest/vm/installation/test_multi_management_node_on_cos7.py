@@ -27,7 +27,8 @@ def create_vm(image):
     l3_name = os.environ.get('l3PublicNetworkName')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     image_uuid = image.uuid
-    vm_name = 'zs_install_%s' % image.name
+    #vm_name = 'zs_install_multi_management_node_%s' % image.name
+    vm_name = os.environ.get('vmName')
     vm_instrance_offering_uuid = os.environ.get('instanceOfferingUuid')
 
     vm_creation_option = test_util.VmOption()
@@ -48,10 +49,10 @@ def test():
     upgrade_script_path = os.environ.get('upgradeScript')
     test_util.test_dsc('Create 3 CentOS7 vm to test multi management node installation')
 
-    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_20_mn'))
-    image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
-    
-    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_zstack'))
+    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_210_mn'))
+    #image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
+    image = sce_ops.query_resource(zstack_management_ip, res_ops.IMAGE, conditions)[0]
+    conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_21_ex'))
     image1 = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
 
     vm1_inv = create_vm(image) 

@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-imagestore-vyos-flat-dhcp-ceph.xml</deployConfig>
+    <deployConfigTemplate>deploy-ceph-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

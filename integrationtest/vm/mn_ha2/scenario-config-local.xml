@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-local.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario.tmpt</scenarioConfigTemplate>
+</testConfig>

@@ -23,7 +23,7 @@ host_ip = None
 max_attempts = None
 storagechecker_timeout = None
 test_stub = test_lib.lib_get_test_stub()
-max_time = 180
+max_time = 300
 
 def test():
     global vm

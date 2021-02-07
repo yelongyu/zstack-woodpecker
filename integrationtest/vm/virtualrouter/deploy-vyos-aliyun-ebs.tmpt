@@ -1,0 +1,8 @@
+import ./scenario.tmpt
+
+datacenterType = AliyunEBS
+aliyunEBSPrimaryStorageName = ebs
+aliyunEbsBackupStorageName = ebs-oss
+regionId = nasRegionID
+ebsOSSEndPoint = localhost
+ebsEndPoint = http://localhost:18080/ocean/api

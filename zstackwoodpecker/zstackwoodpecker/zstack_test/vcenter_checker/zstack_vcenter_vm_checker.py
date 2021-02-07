@@ -21,34 +21,49 @@ import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 import commands
 
+def get_obj(content, vimtype, name=None):
+    obj = None
+    container = content.viewManager.CreateContainerView(
+        content.rootFolder, vimtype, True)
+    if name:
+        for c in container.view:
+            if c.name == name:
+                obj = c
+                return obj
+    return container.view
 
 def get_vcenter_vm_status_by_vm_name(vm_name):
     """
-    This function is used for return vm status by invoking vsphere dcli
+    This function is used for return vm status by vmware sdk
     """
-    vcenter_password = os.environ['vcenter2_password']
-    vcenter_server = os.environ['vcenter2_ip']
-    vcenter_username = os.environ['vcenter2_domain_name']
-    vcenter_password = os.environ['vcenter2_password']
+    import ssl
+    from pyVmomi import vim
+    import atexit
+    from pyVim import connect
 
-    cmd = "sshpass -p " + vcenter_password + " dcli +server " + vcenter_server + " +skip-server-verification +username " + vcenter_username + " com vmware vcenter vm list"
-    status, output = commands.getstatusoutput(cmd)
-    print "#%s#" %(output)
+    vcenter_password = os.environ['vcenterpwd']
+    vcenter_server = os.environ['vcenter']
+    vcenter_username = os.environ['vcenteruser']
 
-    pysf_vm_real_status = None
-    for line in output.split('\n'):
-        if vm_name in line:
-            fields = line.split('|')
-            pysf_vm_real_status = fields[3].strip().replace('_', ' ')
-            break
-    else:
-        test_util.test_fail("%s is not found in vcenter %s" %(vm.name, vcenter_server))
-    
+    sslContext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+    sslContext.verify_mode = ssl.CERT_NONE
+    SI = connect.SmartConnect(host=vcenter_server, user=vcenter_username, pwd=vcenter_password, port=443, sslContext=sslContext)
+    if not SI:
+        test_util.test_fail("Unable to connect to the vCenter")
+    content = SI.RetrieveContent()
+
+    vm = get_obj(content, [vim.VirtualMachine], name=vm_name)
+    if not isinstance(vm, vim.VirtualMachine):
+        test_util.test_fail("%s is not found in vcenter %s" %(vm_name, vcenter_server))
+
+    pysf_vm_real_status = vm.summary.runtime.powerState
+
+    atexit.register(connect.Disconnect, SI)
     return pysf_vm_real_status
 
 
 class zstack_vcenter_vm_running_checker(checker_header.TestChecker):
-    '''check vcenter vm running status. If it is running, return self.judge(True). 
+    '''check vcenter vm running status. If it is running, return self.judge(True).
         If it is stopped, return self.judge(False)'''
     def check(self):
         super(zstack_vcenter_vm_running_checker, self).check()
@@ -69,8 +84,8 @@ class zstack_vcenter_vm_running_checker(checker_header.TestChecker):
         #pysf_vm_real_status = pysf_vm.get_status()
 
         pysf_vm_real_status = get_vcenter_vm_status_by_vm_name(vm.name)
-        
-        if pysf_vm_real_status == "POWERED ON" :
+
+        if pysf_vm_real_status == "poweredOn" :
             test_util.test_logger('Check result: [vm:] %s is RUNNING.' % (vm.uuid))
             return self.judge(True)
         else:
@@ -87,7 +102,7 @@ class zstack_vcenter_vm_destroyed_checker(checker_header.TestChecker):
 
         pysf_vm_real_status = get_vcenter_vm_status_by_vm_name(vm.name)
 
-        if pysf_vm_real_status == "POWERED OFF" :
+        if pysf_vm_real_status == "poweredOff" :
             test_util.test_logger('Check result: [vm:] %s is DESTROYED.' % (vm.uuid))
             return self.judge(True)
         else:
@@ -96,11 +111,11 @@ class zstack_vcenter_vm_destroyed_checker(checker_header.TestChecker):
 
 
 class zstack_vcenter_vm_stopped_checker(checker_header.TestChecker):
-    '''check vcenter vm stopped status. If it is stopped, return self.judge(True). 
+    '''check vcenter vm stopped status. If it is stopped, return self.judge(True).
         If it is stopped, return self.judge(False)
 
         This checker is deprecated, since the stopped VM will also removed from
-        host libvirt.         
+        host libvirt.
         '''
     def check(self):
         super(zstack_vcenter_vm_stopped_checker, self).check()
@@ -109,7 +124,7 @@ class zstack_vcenter_vm_stopped_checker(checker_header.TestChecker):
         pysf_vm_real_status = get_vcenter_vm_status_by_vm_name(vm.name)
 
         #if check_result == vm_plugin.VmAgent.VM_STATUS_STOPPED:
-        if pysf_vm_real_status == "POWERED OFF" :
+        if pysf_vm_real_status == "poweredOff" :
             test_util.test_logger('Check result: [vm:] %s is STOPPED.' % (vm.uuid))
             return self.judge(True)
         else:
@@ -118,7 +133,7 @@ class zstack_vcenter_vm_stopped_checker(checker_header.TestChecker):
 
 
 class zstack_vcenter_vm_suspended_checker(checker_header.TestChecker):
-    '''check vcenter vm suspended status. If it is suspended, return self.judge(True). 
+    '''check vcenter vm suspended status. If it is suspended, return self.judge(True).
         If it is not suspended, return self.judge(False)'''
     def check(self):
         super(zstack_vcenter_vm_suspended_checker, self).check()
@@ -127,7 +142,7 @@ class zstack_vcenter_vm_suspended_checker(checker_header.TestChecker):
         pysf_vm_real_status = get_vcenter_vm_status_by_vm_name(vm.name)
 
         #if check_result == vm_plugin.VmAgent.VM_STATUS_STOPPED:
-        if pysf_vm_real_status == "SUSPENDED" :
+        if pysf_vm_real_status == "suspended" :
             test_util.test_logger('Check result: [vm:] %s is SUSPENDED.' % (vm.uuid))
             return self.judge(True)
         else:
@@ -147,11 +162,11 @@ class zstack_vcenter_vm_set_host_vlan_ip(checker_header.TestChecker):
 
 
 class zstack_vcenter_vm_network_checker(checker_header.TestChecker):
-    '''check vcenter vm network connection status. If VM's network is reachable, 
+    '''check vcenter vm network connection status. If VM's network is reachable,
         return self.judge(True). If not, return self.judge(False)
-    
-        Only check the IP address behind of Virtual Router with DHCP service, 
-        as the other NIC's IP address might be not correctly set.  
+
+        Only check the IP address behind of Virtual Router with DHCP service,
+        as the other NIC's IP address might be not correctly set.
     '''
     def check(self):
         super(zstack_vcenter_vm_network_checker, self).check()
@@ -187,8 +202,8 @@ class zstack_vcenter_vm_network_checker(checker_header.TestChecker):
         return self.judge(True)
 
 class zstack_vcenter_vm_default_l3_checker(checker_header.TestChecker):
-    '''check vcenter vm default l3 setting, when vm has multi l3. 
-        if vm router is set correct default l3, 
+    '''check vcenter vm default l3 setting, when vm has multi l3.
+        if vm router is set correct default l3,
         return self.judge(True). If not, return self.judge(False)'''
     def check(self):
         super(zstack_vcenter_vm_default_l3_checker, self).check()
@@ -228,7 +243,7 @@ class zstack_vcenter_vm_default_l3_checker(checker_header.TestChecker):
             return self.judge(False)
 
 class zstack_vcenter_vm_dns_checker(checker_header.TestChecker):
-    '''check vcenter vm dns status. If VM's dns is set correctly, 
+    '''check vcenter vm dns status. If VM's dns is set correctly,
         return self.judge(True). If not, return self.judge(False)'''
     def check(self):
         super(zstack_vcenter_vm_dns_checker, self).check()
@@ -291,7 +306,7 @@ class zstack_vcenter_vm_ssh_no_vr_checker(checker_header.TestChecker):
         return self.judge(True)
 
 class zstack_vcenter_vm_dhcp_checker(checker_header.TestChecker):
-    '''check vcenter vm dhcp status. If VM's dhcp is set correctly, 
+    '''check vcenter vm dhcp status. If VM's dhcp is set correctly,
         return self.judge(True). If not, return self.judge(False)'''
     def check(self):
         super(zstack_vcenter_vm_dhcp_checker, self).check()
@@ -323,7 +338,7 @@ class zstack_vcenter_vm_dhcp_checker(checker_header.TestChecker):
             if not vr_cmd_result:
                 test_util.test_logger('Checker result: FAIL to execute shell commaond in [vm:] %s' % vr_vm.uuid)
                 return self.judge(False)
-            
+
             if vr_cmd_result == True:
                 test_util.test_logger('Checker result: FAIL to get ssh result in [vm:] %s' % vr_vm.uuid)
                 return self.judge(False)
@@ -402,7 +417,7 @@ class zstack_vcenter_vm_snat_checker(checker_header.TestChecker):
 
 
 class zstack_vcenter_vm_offering_checker(checker_header.TestChecker):
-    '''check vcenter vm instance offering config''' 
+    '''check vcenter vm instance offering config'''
     def check(self):
         def _do_check(value1, value2, key):
             if value1 != value2:
@@ -415,7 +430,7 @@ class zstack_vcenter_vm_offering_checker(checker_header.TestChecker):
 
         super(zstack_vcenter_vm_running_checker, self).check()
         vm = self.test_obj.vm
-        instance_offering_uuid = self.test_obj.get_instance_offering_uuid() 
+        instance_offering_uuid = self.test_obj.get_instance_offering_uuid()
         instance_offering = test_lib.lib_get_instance_offering_by_uuid(instance_offering_uuid)
         if not instance_offering:
             test_util.test_logger('Skip Test: not find vm instance offering by uuid: %s. It might because the instance offering is deleted. Skip test.' % vm.uuid)

@@ -1,0 +1,16 @@
+import ../scenario.tmpt
+import ./deploy.tmpt
+
+vmName1 = test_vm1
+vmName2 = test_vm2
+vmName3 = test_vm3
+vmName4 = test_vm4
+vmName5 = test_vm5
+vmInstranceOfferingUuid2 = 234567
+vmInstranceOfferingUuid0 = 511e20b16132466ebfdc4479d7676c8d
+imageUuid2 = 234567
+imageUuid3 = 234567
+imageUuid4 = 234567
+vcentername = esxi
+vmL3Uuid2 = 705a5c1938544ab0947cb344ab3c910e
+vmL3Uuid3 = 94f1272de8884d5f9a91986067670dcf

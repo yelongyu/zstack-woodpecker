@@ -1,0 +1,5 @@
+import ./deploy.tmpt
+
+VRouterImageUrl = http://172.20.198.234/mirror/zstack_vyos_image/latest/zstack-vrouter.qcow2
+vrImageUsername = vyos
+vrImagePassword = vrouter12#

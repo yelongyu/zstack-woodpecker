@@ -1,0 +1,12 @@
+import ../scenario.tmpt
+import ./deploy.tmpt
+import ./scenario.tmpt
+import ./scenario-xsky-ceph-ps.tmpt
+
+
+imageStoreBackupStorageName = imagestore1
+instanceOfferingMemory_l = 2G
+instanceOfferingCpuNum_l = 2
+emptyimageUrl = http://172.20.1.28/mirror/diskimages/empty_disk.qcow2
+imageUrl_vdbench = http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2
+

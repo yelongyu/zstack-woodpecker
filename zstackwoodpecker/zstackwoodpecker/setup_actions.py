@@ -401,7 +401,11 @@ class Plan(object):
         self.zstack_pkg = self._full_path(basic_config.zstackPkg.text_)
         self.zstack_install_script = \
                 self._full_path(basic_config.zstackInstallScript.text_)
-        if not os.path.exists(self.zstack_pkg):
+        try:
+            os.system('source /root/.bashrc')
+        except:
+            pass
+        if os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes" and not os.path.exists(self.zstack_pkg):
             raise ActionError('unable to find %s for ZStack binary' \
                     % self.zstack_pkg)
 
@@ -582,6 +586,8 @@ default one' % self.zstack_properties)
         for node in self.nodes:
             cmd = 'zstack-ctl configure --duplicate-to-remote=%s; zstack-ctl configure --host=%s management.server.ip=%s' % \
                     (node.ip_, node.ip_, node.ip_)
+            if os.environ.get('ZSTACK_SIMULATOR') == "yes":
+                cmd += '; zstack-ctl configure --host=%s ApplianceVm.agentPort=8080' % (node.ip_)
             if not linux.is_ip_existing(node.ip_):
                 ssh.execute(cmd, node1.ip_, node.username_, node.password_)
             else:
@@ -597,7 +603,15 @@ default one' % self.zstack_properties)
             else:
                 thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
                 thread.start()
-                self._wait_for_thread_completion('change management node ip', 60)
+                self._wait_for_thread_completion('change management node ip', 120)
+
+            cmd = 'zstack-ctl configure InfluxDB.startupTimeout=1200'
+            if not linux.is_ip_existing(node.ip_):
+                ssh.execute(cmd, node.ip_, node.username_, node.password_)
+            else:
+                thread = threading.Thread(target=shell_cmd_thread, args=(cmd,))
+                thread.start()
+                self._wait_for_thread_completion('InfluxDB startup time setting to 10 mins', 120)
 
     def _wait_for_thread_completion(self, msg, wait_time, raise_exception = True):
         end_time = wait_time
@@ -711,6 +725,14 @@ default one' % self.zstack_properties)
             #default will deploy all test hosts.
             exc_info = []
             for h in self.test_agent_hosts:
+                print('Enable ansible connection in host: [%s] \n' % h.managementIp_)
+
+                if hasattr(h, 'port_'):
+                    ansible.enable_ansible_connection(h.managementIp_, h.username_, h.password_, exc_info, h.port_)
+                else:
+                    ansible.enable_ansible_connection(h.managementIp_, h.username_, h.password_, exc_info, 22)
+
+            for h in self.test_agent_hosts:
                 print('Deploy test agent in host: [%s] \n' % h.managementIp_)
                 if h.username_ != 'root':
                     ansible_become_args = "ansible_become=yes become_user=root ansible_become_pass=%s" % (h.password_)
@@ -736,15 +758,8 @@ default one' % self.zstack_properties)
 
                 ansible_cmd = "testagent.yaml -e '%s'" % ansible_cmd_args
 
-                if hasattr(h, 'port_'):
-                    thread = threading.Thread(target=ansible.execute_ansible,\
-                        args=(h.managementIp_, h.username_, h.password_,\
-                        testagentdir, ansible_cmd, lib_files, exc_info, h.port_))
-                else:
-                    thread = threading.Thread(target=ansible.execute_ansible,\
-                        args=(h.managementIp_, h.username_, h.password_,\
-                        testagentdir, ansible_cmd, lib_files, exc_info))
-
+                thread = threading.Thread(target=ansible.do_ansible,\
+                     args=(testagentdir, ansible_cmd, lib_files, exc_info))
                 # Wrap up old zstack logs in /var/log/zstack/
                 #print('archive test log on host: [%s] \n' % h.managementIp_)
                 #try:
@@ -790,6 +805,28 @@ default one' % self.zstack_properties)
             if not linux.wait_callback_success(_wait_echo, target.managementIp, 5, 0.2):
                 raise ActionError('testagent is not start up in 5s on %s, after it is deployed by ansible.' % target.managementIp)
             
+    def _enable_jacoco_agent_cmd(self):
+        if os.path.exists('/home/jacocoagent.jar'):
+            print 'Inject jacoco agent into ctl.py'
+	    return 'zstack-ctl setenv CATALINA_OPTS=" -javaagent:/home/jacocoagent.jar=output=tcpserver,address=0.0.0.0,port=6300";'
+        else:
+            print 'Here is no jacocoagent.jar, skip to inject jacoco agent'
+	    return ''
+
+    def _enable_jacoco_dump(self):
+        woodpecker_ip = ''
+        import commands
+        (status, output) = commands.getstatusoutput("ip addr show zsn0 | sed -n '3p' | awk '{print $2}' | awk -F / '{print $1}'")
+        os.system('rm -rf /home/node_ips')
+        if output.startswith('172'):
+            woodpecker_ip = output
+
+        if woodpecker_ip != '':
+            os.system('echo %s >> /home/node_ips' % (woodpecker_ip))
+
+        for node in self.nodes:
+            os.system('echo %s >> /home/node_ips' % (node.ip_))
+
     def execute_plan_without_deploy_test_agent(self):
         if os.environ.get('ZSTACK_ALREADY_INSTALLED') != "yes":
             try:
@@ -808,8 +845,16 @@ default one' % self.zstack_properties)
             self._change_node_ip()
             self._install_management_nodes()
             self._set_extra_node_config()
-            
+        try:
+            with open('/root/.bashrc', 'a+') as bashrc:
+                bashrc.write('export ZSTACK_ALREADY_INSTALLED=yes\n')
+        except:
+            pass
+
         self._start_multi_nodes(restart=True)
+        #NOTE: Only one key pair will take effect
+        self._copy_sshkey_from_node()
+        self._enable_jacoco_dump()
 
     def execute_plan_ha(self):
 	self._install_zstack_nodes_ha()
@@ -875,14 +920,17 @@ default one' % self.zstack_properties)
                 #consider some zstack-server is running in vm, the server 
                 # startup speed is slow. Increase timeout to 180s.
                 if linux.is_ip_existing(node.ip_):
-                    cmd = 'zstack-ctl stop; nohup zstack-ctl start'
+                    if os.environ.get('ZSTACK_SIMULATOR') == "yes":
+                        cmd = 'zstack-ctl stop_node; %s zstack-ctl configure unitTestOn=true; zstack-ctl configure ThreadFacade.maxThreadNum=1000; nohup zstack-ctl start_node --simulator -DredeployDB=true; zstack-ctl stop_ui' % (self._enable_jacoco_agent_cmd())
+                    else:
+                        cmd = 'zstack-ctl stop_node; %s nohup zstack-ctl start_node; zstack-ctl stop_ui' % (self._enable_jacoco_agent_cmd())
                     thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 elif not linux.is_ip_existing(node1.ip_):
                     # when first node1 ip is not local, it usualy means woodpecker is running on hosts other than MN
-                    cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s --timeout=180' % (node.ip_, node.ip_)
+                    cmd = 'zstack-ctl stop_node --host=%s ; %s zstack-ctl start_node --host=%s; zstack-ctl stop_ui --host=%s' % (node.ip_, self._enable_jacoco_agent_cmd(), node.ip_, node.ip_)
                     thread = threading.Thread(target=ssh.execute, args=(cmd, node1.ip_, node1.username_, node1.password_, ))
                 else:
-                    cmd = 'zstack-ctl stop_node --host=%s ; zstack-ctl start_node --host=%s --timeout=180' % (node.ip_, node.ip_)
+                    cmd = 'zstack-ctl stop_node --host=%s ; %s zstack-ctl start_node --host=%s; zstack-ctl stop_ui --host=%s' % (node.ip_, self._enable_jacoco_agent_cmd(), node.ip_, node.ip_)
                     thread = threading.Thread(target=shell_cmd_thread, args=(cmd, True, ))
                 threads.append(thread)
             else:
@@ -898,7 +946,7 @@ default one' % self.zstack_properties)
         for thread in threads:
             thread.start()
 
-        self._wait_for_thread_completion('start management node', 200)
+        self._wait_for_thread_completion('start management node', 400)
         time.sleep(10)
 
         if node_exception:
@@ -929,6 +977,37 @@ default one' % self.zstack_properties)
         zstack_home = '%s/apache-tomcat/webapps/zstack/' % self.install_path
         cmd = 'zstack-ctl setenv ZSTACK_HOME=%s' % zstack_home
         shell.call(cmd)
+
+    def _copy_sshkey_from_node(self):
+        node = self.nodes[0]
+        if not node.dockerImage__:
+            print 'Copy sshkey from mn node'
+            #consider some zstack-server is running in vm, the server 
+            # startup speed is slow. Increase timeout to 180s.
+            private_key_path = '%s/webapps/zstack/WEB-INF/classes/ansible/rsaKeys/id_rsa' % self.catalina_home
+            public_key_path = '%s/webapps/zstack/WEB-INF/classes/ansible/rsaKeys/id_rsa.pub' % self.catalina_home
+            if linux.is_ip_existing(node.ip_):
+                cmd = 'scp %s /root/.ssh/id_rsa' % (private_key_path)
+                shell.call(cmd)
+                cmd = 'scp %s /root/.ssh/id_rsa.pub' % (public_key_path)
+                shell.call(cmd)
+            elif not linux.is_ip_existing(node.ip_):
+                import zstackwoodpecker.test_lib as test_lib
+                if test_lib.lib_wait_target_up(node.ip_, '22', 120):
+                    node_ip = node.ip_
+                else:
+                    node_ip = os.environ['zstackHaVip']
+                ssh.scp_file(private_key_path, "/root/.ssh/id_rsa", node_ip, node.username_, node.password_)
+                ssh.scp_file(public_key_path, "/root/.ssh/id_rsa.pub", node_ip, node.username_, node.password_)
+                cmd = 'scp %s /root/.ssh/id_rsa' % (private_key_path)
+                shell.call(cmd)
+                cmd = 'scp %s /root/.ssh/id_rsa.pub' % (public_key_path)
+                shell.call(cmd)
+            else:
+                cmd = 'scp %s /root/.ssh/id_rsa' % (private_key_path)
+                shell.call(cmd)
+                cmd = 'scp %s /root/.ssh/id_rsa.pub' % (public_key_path)
+                shell.call(cmd)
 
     def stop_node(self):
         print 'Begin to stop node ...'

@@ -1,0 +1,6 @@
+<testConfig>
+    <deployConfig>deploy-imagestore-flat-smp.xml</deployConfig>
+    <deployConfigTemplate>deploy-imagestore-flat-smp.tmpt</deployConfigTemplate>
+    <!-- suite special test variables -->
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

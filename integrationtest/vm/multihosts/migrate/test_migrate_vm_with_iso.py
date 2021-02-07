@@ -1,8 +1,8 @@
 '''
 
-New Integration test for testing vm migration between hosts when attch ISO. 
+New Integration test for testing vm migration between hosts when attch ISO.
 
-@author: ChenyuanXu 
+@author: ChenyuanXu
 '''
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
@@ -15,19 +15,32 @@ import apibinding.inventory as inventory
 import os
 
 vm = None
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():
+    #skip ceph in c74
+    cmd = "cat /etc/redhat-release | grep '7.4'"
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    rsp = test_lib.lib_execute_ssh_cmd(mn_ip, 'root', 'password', cmd, 180)
+    if rsp != False:
+        ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE)
+        for i in ps:
+            if i.type == 'Ceph':
+                test_util.test_skip('cannot hotplug iso to the vm in ceph,it is a libvirt bug:https://bugzilla.redhat.com/show_bug.cgi?id=1541702.')
+
     global vm
     vm = test_stub.create_vr_vm('migrate_vm', 'imageName_s', 'l3VlanNetwork2')
     vm.check()
+    ps = test_lib.lib_get_primary_storage_by_uuid(vm.get_vm().allVolumes[0].primaryStorageUuid)
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_skip('Skip test on localstorage PS')
 
     vm_inv = vm.get_vm()
     vm_uuid = vm_inv.uuid
 
     test_util.test_dsc('Add ISO Image')
-    #cond = res_ops.gen_query_conditions('name', '=', 'sftp') 
+    #cond = res_ops.gen_query_conditions('name', '=', 'sftp')
     bs_uuid = res_ops.query_resource(res_ops.BACKUP_STORAGE)[0].uuid
 
     img_option = test_util.ImageOption()

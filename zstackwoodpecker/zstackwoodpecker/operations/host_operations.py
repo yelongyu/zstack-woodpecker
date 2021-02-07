@@ -10,7 +10,10 @@ import zstackwoodpecker.test_util as test_util
 import account_operations
 import resource_operations
 import apibinding.inventory as inventory
+import zstacklib.utils.shell as shell
 import time
+import json
+import zstacklib.utils.jsonobject as jsonobject
 
 def add_kvm_host(host_option, session_uuid=None):
     action = api_actions.AddKVMHostAction()
@@ -22,6 +25,7 @@ def add_kvm_host(host_option, session_uuid=None):
     action.name = host_option.get_name()
     action.description = host_option.get_description()
     action.hostTags = host_option.get_host_tags()
+    action.systemTags = host_option.get_system_tags()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Add KVM Host [uuid:] %s with [ip:] %s' % \
             (evt.uuid, action.managementIp))
@@ -35,7 +39,7 @@ def delete_host(host_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def reconnect_host(host_uuid, session_uuid=None, timeout=120000):
+def reconnect_host(host_uuid, session_uuid=None, timeout=600000):
     action = api_actions.ReconnectHostAction()
     action.uuid = host_uuid
     action.timeout = timeout
@@ -76,6 +80,19 @@ def change_host_state(host_uuid, state, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def update_host(hostUuid, infoType, infoValue, session_uuid = None):
+    action = api_actions.UpdateHostAction()
+    action.uuid = hostUuid
+    if infoType == 'name':
+        action.name = infoValue
+    elif infoType == 'description':
+        action.description = infoValue
+    elif infoType == 'managementIp':
+        action.managementIp = infoValue
+    test_util.action_logger('Update Host %s to %s' %(infoType,infoValue))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def update_kvm_host(hostUuid, infoType, infoValue, session_uuid = None):
     action = api_actions.UpdateKVMHostAction()
     action.uuid = hostUuid
@@ -87,3 +104,34 @@ def update_kvm_host(hostUuid, infoType, infoValue, session_uuid = None):
         action.username = infoValue
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def get_ept_status(ip, username, password, port):
+    ssh_cmd = 'sshpass -p %s ssh -p %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null' %(password, port)
+    ret1 = shell.call("%s %s@%s cat /etc/modprobe.d/intel-ept.conf|awk -F'=' '{print $2}'" %(ssh_cmd, username, ip)).strip()
+    ret2 = shell.call("%s %s@%s cat /sys/module/kvm_intel/parameters/ept" %(ssh_cmd, username, ip)).strip()
+    if ret1 == "0" and ret2 == "N":
+        return "disable"
+    elif ret2 == "Y":
+        return "enable"
+    else:
+        return ret2+ret1
+
+def query_host(conditions, session_uuid = None):
+    action = api_actions.QueryHostAction()
+    action.conditions = conditions
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def poweroff_host(host_uuids, admin_password, mn_flag=None, session_uuid=None):
+    action = api_actions.PowerOffHostAction()
+    action.hostUuids = host_uuids 
+    action.adminPassword = admin_password 
+    action.timeout = 1200000
+    evt = account_operations.execute_action_with_session(action, session_uuid, mn_flag=mn_flag)
+    return evt
+
+def get_host_task(host_uuids, session_uuid = None):
+    action = api_actions.GetHostTaskAction()
+    action.hostUuids = host_uuids
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return json.loads(jsonobject.dumps(evt.results))

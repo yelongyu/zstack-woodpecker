@@ -25,8 +25,8 @@ def test():
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
     test_util.test_logger("check if it still works")
     zstack_ha_vip = os.environ.get('zstackHaVip')
-    if not test_lib.lib_network_check(zstack_ha_vip, 8888):
-        test_util.test_fail('Could not access UI through VIP: %s, port: 8888' % (zstack_ha_vip))
+    if not test_lib.lib_network_check(zstack_ha_vip, 8200):
+        test_util.test_fail('Could not access UI through VIP: %s, port: 8200' % (zstack_ha_vip))
     cmd = "zstack-ctl start_ui"
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
 
@@ -39,3 +39,4 @@ def error_cleanup():
     host_username = os.environ.get('nodeUserName')
     host_password = os.environ.get('nodePassword')
     rsp = test_lib.lib_execute_ssh_cmd(node_ip, host_username, host_password, cmd, 180)
+

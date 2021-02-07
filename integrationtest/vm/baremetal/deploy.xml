@@ -82,6 +82,11 @@
 	username="$imageUsername" password="$imagePassword">
       <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
     </image>
+    <image name="$imageName_iso" description="Test ISO"
+        format="$isoImageFormat" url="$imageUrl_iso"
+        mediaType="$isoMediaType">
+        <backupStorageRef>$imageStoreBackupStorageName</backupStorageRef>
+    </image>
   </images>
 
   <diskOfferings>
@@ -101,61 +106,57 @@
           </hosts>
           <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
           <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-          <l2NetworkRef>$l2VlanNetworkName2</l2NetworkRef>
-          <l2NetworkRef>$l2VlanNetworkName3</l2NetworkRef>
+          <l2NetworkRef>$l2NoVlanNetworkName1</l2NetworkRef>
+          <l2NetworkRef>$scenl2VlanNetworkName1</l2NetworkRef>
         </cluster>
       </clusters>
-
       <l2Networks>
-        <l2NoVlanNetwork name="$l2PublicNetworkName" description="Test"
-          physicalInterface="$l2NetworkPhysicalInterface">
+        <l2NoVlanNetwork name="$l2PublicNetworkName"
+          description="Test" physicalInterface="$l2PublicNetworkInterface">
           <l3Networks>
-            <l3BasicNetwork name="$l3PublicNetworkName" category="Public"
-              description="Test">
-              <ipRange name="$ipRangeName" description="Test" 
-                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
-                gateway="$ipRangeGateway"
+            <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network">
+              <ipRange name="$ipRangeName" description="Test"
+                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                 netmask="$ipRangeNetmask" />
+              <dns>$DNSServer</dns>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+        <l2NoVlanNetwork name="$l2NoVlanNetworkName1" description="guest l2 network"
+          physicalInterface="$l2NoVlanNetworkInterface1">
+          <l3Networks>
+            <l3BasicNetwork name="$l3NoVlanNetworkName1" description = "guest l3 network with user defined vlan">
+              <ipRange name="$noVlanIpRangeName1"
+                startIp="$noVlanIpRangeStart1"
+                endIp="$noVlanIpRangeEnd1"
+                gateway="$noVlanIpRangeGateway1"
+                netmask="$noVlanIpRangeNetmask1"/>
+              <dns>$DNSServer</dns>
+              <networkService provider="Flat Network Service Provider">
+                <serviceType>DHCP</serviceType>
+                <serviceType>Eip</serviceType>
+              </networkService>
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
         </l2NoVlanNetwork>
-
-        <l2VlanNetwork name="$l2VlanNetworkName2" description="Test"
-          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan2">
+        <l2NoVlanNetwork name="$scenl2VlanNetworkName1" description="baremetal deploy l3 network, it is for barametal deply."
+          physicalInterface="$scenl2NetworkPhysicalInterface">
           <l3Networks>
-            <l3BasicNetwork name="$l3VlanNetworkName1"
-              description="Test">
-              <ipRange name="$vlanIpRangeName1" description="Test" 
-                startIp="$vlanIpRangeStart1" endIp="$vlanIpRangeEnd1"
-                gateway="$vlanIpRangeGateway1"
-                netmask="$vlanIpRangeNetmask1" />
+            <l3BasicNetwork name="$scenl3VPCNetworkName1" description="Test">
+              <ipRange name="$scenvpcIpRangeName1" description="Test" 
+                startIp="$scenvpcIpRangeStart1" endIp="$scenvpcIpRangeEnd1"
+                gateway="$scenvpcIpRangeGateway1"
+                netmask="$scenvpcIpRangeNetmask1" />
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>
               </networkService>
             </l3BasicNetwork>
           </l3Networks>
-        </l2VlanNetwork>
-
-        <l2VlanNetwork name="$l2VlanNetworkName3" description="Test"
-          physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan3">
-          <l3Networks>
-            <l3BasicNetwork name="$l3VlanNetworkName3"
-              description="Test">
-              <ipRange name="$vlanIpRangeName3" description="Test" 
-                startIp="$vlanIpRangeStart3" endIp="$vlanIpRangeEnd3"
-                gateway="$vlanIpRangeGateway3"
-                netmask="$vlanIpRangeNetmask3" />
-              <networkService provider="SecurityGroup">
-                <serviceType>SecurityGroup</serviceType>
-              </networkService>
-            </l3BasicNetwork>
-          </l3Networks>
-        </l2VlanNetwork>
+        </l2NoVlanNetwork>
       </l2Networks>
-      
       <primaryStorages>
         <localPrimaryStorage name="$localPrimaryStorageName"
           description="Test" url="$localPrimaryStorageUrl" />

@@ -55,7 +55,7 @@ def create_temp_image(index):
 
 def check_create_temp_image_progress(index):
     global images
-    for i in range(0, 100):
+    for i in range(0, 600):
         time.sleep(0.1)
         image_cond = res_ops.gen_query_conditions("status", '=', "Creating")
         image_cond = res_ops.gen_query_conditions("name", '=', "test_create_image_template_progress%s" % (index), image_cond)
@@ -67,7 +67,7 @@ def check_create_temp_image_progress(index):
     if len(image_query) <= 0:
         test_util.test_fail("image is not in creating after 10 seconds")
 
-    for i in range(0, 100):
+    for i in range(0, 600):
         progress = res_ops.get_task_progress(image_jobs[index]).inventories[0]
         if progress.content != None:
             break

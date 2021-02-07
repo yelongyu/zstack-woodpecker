@@ -8,6 +8,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
+import time
 
 _config_ = {
         'timeout' : 1000,
@@ -52,6 +53,7 @@ def test():
     tot_res1 = test_lib.lib_get_cpu_memory_capacity([zone_uuid])
     
     host_ops.reconnect_host(host_uuid)
+    time.sleep(5)
 
     tot_res2 = test_lib.lib_get_cpu_memory_capacity([zone_uuid])
 
@@ -75,6 +77,8 @@ def test():
     else:
         test_util.test_fail("the resource consumption are not aligned after destroy vm: %s on host: %s" % (vm.get_vm().uuid, host_uuid))
 
+    test_stub.ensure_hosts_connected(120)
+    test_stub.ensure_pss_connected()    
     vm = test_stub.create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
     test_obj_dict.add_vm(vm)
 

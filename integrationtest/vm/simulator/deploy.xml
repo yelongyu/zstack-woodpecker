@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-  <basicConfig>
+<basicConfig>
   <!-- The following configurations are path in test machine. 
         zstackPkg is zstack all in one package tar.gz file.
         zstackInstallScript is the installation script, which could be 
@@ -25,106 +25,121 @@
     zstack-cli, after zstack server is started. The detailed information could
     be found in zstack-cli help manual.
   -->
-    <zstackPkg>$zstackPkg</zstackPkg>
-    <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
-    <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
-    <zstackProperties>$zstackPropertiesPath</zstackProperties>
-    <testAgent>$zstackTestAgentPkgPath</testAgent>
-    <db>
-      <!-- Database server IP address or hostname -->
-      <server>$DBServer</server>
-      <username>$DBUserName</username>
-      <server_root_password>$hostPassword</server_root_password>
-      <!-- <password>$DBPassword</password>
-      <port>$DBPort</port> -->
-    </db>
-    <rabbitmq>
-        <server>$rabbitmqServerIp</server>
-        <password>$hostPassword</password>
-    </rabbitmq>
-  </basicConfig>
+  <zstackPkg>$zstackPkg</zstackPkg>
+  <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
+  <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
+  <zstackProperties>$zstackPropertiesPath</zstackProperties>
+  <testAgent>$zstackTestAgentPkgPath</testAgent>
+  <db>
+    <!-- Database server IP address or hostname -->
+    <server>$DBServer</server>
+    <admin>$DBAdminUser</admin>
+    <adminPassword>$DBAdminPassword</adminPassword>
+    <username>$DBUserName</username>
+    <server_root_password>$hostPassword</server_root_password>
+    <!-- <password>$DBPassword</password>
+    <port>$DBPort</port> -->
+  </db>
+  <rabbitmq>
+      <server>$rabbitmqServerIp</server>
+      <password>$hostPassword</password>
+  </rabbitmq>
 
-  <deployerConfig xmlns="http://zstack.org/schema/zstack">
-    <nodes description="Woodpecker will send zstack command to the 1st node. 
-        multi nodes support real hosts or docker (if providing dockerImage and 
-        it is found in `docker images`). "> 
-      <node name="$node1Name" ip="$node1Ip"
-        username="$nodeUserName" password="$nodePassword"
-        description="The default node 1. It could be same as test machine."/>
-      <!-- multi node setting
-      <node name="$node2Name" dockerImage="$node2DockerImage" ip="$node2Ip" 
-        username="$nodeUserName" password="$nodePassword"
-        description="multi nodes will be deployed same catalinaHome as node 1"/>    -->
-    </nodes>
-    <instanceOfferings>
-      <instanceOffering name="$instanceOfferingName_s"
-        description="small install offering" 
-        memoryCapacity="$instanceOfferingMemory_s" 
-        cpuNum="$instanceOfferingCpuNum_s" 
-        />
-    </instanceOfferings>
+</basicConfig>
+
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+  <nodes description="Woodpecker will send zstack command to the 1st node. 
+      multi nodes support real hosts or docker (if providing dockerImage and 
+      it is found in `docker images`). "> 
+    <node name="$node1Name" ip="$node1Ip"
+      username="$nodeUserName" password="$nodePassword"
+      description="The default node 1. It could be same as test machine."/>
+    <!-- multi node setting
+    <node name="$node2Name" dockerImage="$node2DockerImage" ip="$node2Ip" 
+      username="$nodeUserName" password="$nodePassword"
+      description="multi nodes will be deployed same catalinaHome as node 1"/>    -->
+  </nodes>
+
+  <instanceOfferings>
+    <instanceOffering name="$instanceOfferingName_s"
+      description="small install offering" 
+      memoryCapacity="$instanceOfferingMemory_s" 
+      cpuNum="$instanceOfferingCpuNum_s" />
+    <instanceOffering name="$instanceOfferingName_win"
+      description="windows instance offering" 
+      memoryCapacity="$instanceOfferingMemory_win" 
+      cpuNum="$instanceOfferingCpuNum_win" />
+  </instanceOfferings>
+
+  <backupStorages>
+    <sftpBackupStorage name="$sftpBackupStorageName"
+      description="Test" url="$sftpBackupStorageUrl" 
+      username="$sftpBackupStorageUsername" 
+      password="$sftpBackupStoragePassword" 
+      hostname="$sftpBackupStorageHostname"/>
+  </backupStorages>
   
-    <backupStorages>
-      <simulatorBackupStorage name="$simulatorBackupStorageName"
-        description="Test" url="$simulatorBackupStorageUrl" 
-        totalCapacity="$simulatorBackupStorageTotalCapacity"
-        availableCapacity="$simulatorBackupStorageTotalCapacity"/>
-    </backupStorages>
-  
-    <images>
-      <image name="$imageName_s" description="Test"
-          mediaType="$rootMediaType" format="simulator"
-          url="$imageUrl_s" 
-          username="$imageUsername" password="$imagePassword">
-        <backupStorageRef>$simulatorBackupStorageName</backupStorageRef>
-      </image>
-    </images>
-  
-    <diskOfferings>
-      <diskOffering name="$rootDiskOfferingName" description="Test"
-        diskSize="$rootDiskOfferingSize" />
-  
-      <diskOffering name="$smallDiskOfferingName" description="Small Disk Offering"
-        diskSize="$smallDiskOfferingSize" /> 
-    </diskOfferings>
-  
-    <zones>
-      <zone name="$zoneName" description="Test" duplication="10">
-        <clusters>
-          <cluster name="$clusterName" description="Test" duplication="20"
-            hypervisorType="$clusterHypervisorType">
-            <hosts>
-              <host name="$hostName" description="Simulator Test Host" 
-                managementIp="$hostIp"
-                cpuCapacity="$cpuCapacity" memoryCapacity="$memoryCapacity" 
-                duplication="10"/>
-            </hosts>
-            <primaryStorageRef>$simulatorPrimaryStorageName</primaryStorageRef>
-            <l2NetworkRef>$l2BasicNetworkName</l2NetworkRef>
-          </cluster>
-        </clusters>
-  
-        <l2Networks>
-          <l2NoVlanNetwork name="$l2BasicNetworkName" description="Basic L2 Test"
-            physicalInterface="$l2NetworkPhysicalInterface">
-            <l3Networks>
-              <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Basic L3 Network without Vlan and no special services">
-                <ipRange name="$ipRangeName" description="Test"
-                  startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
-                  netmask="$ipRangeNetmask" />
-                <dns>$DNSServer</dns>
-              </l3BasicNetwork>
-            </l3Networks>
-          </l2NoVlanNetwork>
-        </l2Networks>
-  
-        <primaryStorages>
-          <simulatorPrimaryStorage name="$simulatorPrimaryStorageName"
-            description="Test" totalCapacity="10T" availableCapacity="10T" url="nfs://test" />
-        </primaryStorages>
-  
-        <backupStorageRef>$simulatorBackupStorageName</backupStorageRef>
-      </zone>
-    </zones>
-  </deployerConfig>
+  <images>
+    <image name="$imageName_s" description="Test" format="$rootImageFormat" 
+        url="$imageUrl_s" mediaType="$rootMediaType"
+	username="$imageUsername" password="$imagePassword">
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </image>
+    <image name="$imageName_windows" description="Small Test Image Template for windows platform" format="$rootImageFormat"
+	url="$imageUrl_windows" mediaType="$rootMediaType" platform="Windows"
+	username="$winImageUsername" password="$winImagePassword">
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </image>
+  </images>
+
+  <diskOfferings>
+    <diskOffering name="$rootDiskOfferingName" description="Test"
+      diskSize="$rootDiskOfferingSize" />
+    <diskOffering name="$smallDiskOfferingName" 
+      description="Small Disk Offering"
+      diskSize="$smallDiskOfferingSize" />
+  </diskOfferings>
+
+  <zones>
+    <zone name="$zoneName" description="Test">
+      <clusters>
+        <cluster name="$clusterName" description="Test" 
+          hypervisorType="$clusterHypervisorType">
+          <hosts>
+            <host name="$hostName" description="Test"
+              managementIp="$hostIp" username="$hostUsername" 
+              password="$hostPassword" />
+          </hosts>
+          <primaryStorageRef>$nfsPrimaryStorageName</primaryStorageRef>
+          <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+        </cluster>
+      </clusters>
+
+      <l2Networks>
+        <l2NoVlanNetwork name="$l2PublicNetworkName" description="Test"
+          physicalInterface="$l2PublicNetworkInterface">
+          <l3Networks>
+            <l3BasicNetwork name="$l3PublicNetworkName" category="Public" 
+              description="Test">
+              <ipRange name="$ipRangeName" description="Test" 
+                startIp="$ipRangeStartIp" endIp="$ipRangeEndIp"
+                gateway="$ipRangeGateway" 
+                netmask="$ipRangeNetmask" />
+              <networkService provider="SecurityGroup">
+                <serviceType>SecurityGroup</serviceType>
+              </networkService>
+            </l3BasicNetwork>
+          </l3Networks>
+        </l2NoVlanNetwork>
+      </l2Networks>
+      
+      <primaryStorages>
+        <nfsPrimaryStorage name="$nfsPrimaryStorageName"
+          description="Test" url="$nfsPrimaryStorageUrl" />
+      </primaryStorages>
+      
+      <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+    </zone>
+  </zones>
+</deployerConfig>
 </config>

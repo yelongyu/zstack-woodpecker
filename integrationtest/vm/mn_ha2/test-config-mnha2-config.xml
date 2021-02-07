@@ -1,0 +1,6 @@
+<testConfig>
+    <deployConfig>deploy-mnha2-config.xml</deployConfig>
+    <deployConfigTemplate>deploy-mnha2-config.tmpt</deployConfigTemplate>
+    <!-- suite special test variables -->
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

@@ -1,0 +1,27 @@
+import ./deploy.tmpt
+
+localPrimaryStorageName1 = local-ps1
+localPrimaryStorageUrl1 = /home/local-ps1
+
+localPrimaryStorageName2 = local-ps2
+localPrimaryStorageUrl2 = /home/local-ps2
+
+zoneName1 = zone1
+zoneName2 = zone2
+
+clusterName1 = cluster1
+clusterName2 = cluster2
+
+l2PublicNetworkName1 = l2-public-z1
+l2ManagementNetworkName1 = l2-management-z1
+
+l2PublicNetworkName2 = l2-public-z2
+l2ManagementNetworkName2 = l2-management-z2
+
+l3ManagementNetworkName1 = management network1
+l3PublicNetworkName1 = public network1
+
+l3ManagementNetworkName2 = management network2
+l3PublicNetworkName2 = public network2
+
+virtualRouterOfferingName_s2 = virtual-router-vm2

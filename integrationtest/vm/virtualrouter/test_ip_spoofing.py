@@ -29,15 +29,16 @@ def test():
     else:
         ct_original='true'
 
-    vm = test_stub.create_basic_vm()
+    l3_name = os.environ.get('l3PublicNetworkName') 
+    vm = test_stub.create_basic_vm(l3_name=l3_name)
     test_obj_dict.add_vm(vm)
     vm.check()
     vm_inv = vm.get_vm()
     vm_ip = vm_inv.vmNics[0].ip
 
-    new_vm_ip = '172.20.1.1'
+    new_vm_ip = '172.24.1.1'
     if new_vm_ip == vm_ip:
-        new_vm_ip = '172.20.1.2'
+        new_vm_ip = '172.24.1.2'
 
     test_util.test_dsc("Prepare Test File")
     cmd = "cp %s %s" % (test_file_src, test_file_des)

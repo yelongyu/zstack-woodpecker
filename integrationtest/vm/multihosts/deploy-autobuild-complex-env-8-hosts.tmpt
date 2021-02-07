@@ -1,0 +1,60 @@
+import ./deploy.tmpt
+import ./deploy-xsky-ceph-ps.tmpt
+
+zoneName2 = zone2
+
+clusterName2 = cluster2
+clusterHypervisorType2 = KVM
+
+clusterName3 = cluster3
+clusterHypervisorType3 = KVM
+
+clusterName4 = cluster4
+clusterHypervisorType4 = KVM
+
+hostName6 = node-6
+hostIp6 = 
+hostUsername6 = root
+hostPassword6 = password
+hostPort6 = 22
+
+hostName7 = node-7
+hostIp7 = 
+hostUsername7 = root
+hostPassword7 = password
+hostPort7 = 22
+
+hostName8 = node-8
+hostIp8 = 
+hostUsername8 = root
+hostPassword8 = password
+hostPort8 = 22
+
+l2PublicNetworkName2 = l2-public-2
+l2PublicNetworkName_2 = l2-public-2
+
+l3PublicNetworkName2 = public network 2
+
+ipRangeName2 = host IP range 2
+ipRangeStartIp2 = IP_START2
+ipRangeEndIp2 = IP_END2
+ipRangeNetmask2 = 255.255.0.0
+ipRangeGateway2 = 172.24.0.1
+
+virtualRouterImageName2 = vr-2
+virtualRouterOfferingName_s2 = virtual-router-vm-2
+
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/local-ps
+
+cephPrimaryStorageName = ceph-ps
+cephPrimaryStorageMonUrls = root:password@ceph1;root:password@ceph2
+
+cephPrimaryStorageName2 = xky-ps
+cephPrimaryStorageMonUrls2 = root:password@ceph1;root:password@ceph2
+
+cephBackupStorageName = ceph-bs
+cephBackupStorageMonUrls = root:password@ceph1;root:password@ceph2
+
+cephBackupStorageName2 = xsky-bs
+cephBackupStorageMonUrls2 = root:password@ceph1;root:password@ceph2

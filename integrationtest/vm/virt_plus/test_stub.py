@@ -11,6 +11,7 @@ import time
 import uuid
 
 import zstacklib.utils.ssh as ssh
+import zstacklib.utils.jsonobject as jsonobject
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.zstack_test.zstack_test_vm as zstack_vm_header
@@ -22,6 +23,16 @@ import zstackwoodpecker.operations.vm_operations as vm_ops
 
 test_file = '/tmp/test.img'
 TEST_TIME = 120
+
+def check_icmp_connection_to_public_ip(vm1, pub_ip='223.5.5.5', expected_result='PASS'):
+    vm1_inv = vm1.get_vm()
+    if expected_result is 'PASS':
+        test_lib.lib_check_ping(vm1_inv, pub_ip)
+    elif expected_result is 'FAIL':
+        with test_lib.expected_failure("ping from vm1 to public ", Exception):
+            test_lib.lib_check_ping(vm1_inv, pub_ip)
+    else:
+        test_util.test_fail('The expected result should either PASS or FAIL')
 
 def create_vlan_vm_with_volume(l3_name=None, disk_offering_uuids=None, disk_number=None, session_uuid = None):
     if not disk_offering_uuids:
@@ -49,7 +60,7 @@ def create_vm(vm_name='virt-vm', \
         l3_name = None, \
         instance_offering_uuid = None, \
         host_uuid = None, \
-        disk_offering_uuids=None, system_tags=None, session_uuid = None):
+        disk_offering_uuids=None, system_tags=None, rootVolumeSystemTags=None, session_uuid = None):
 
     if not image_name:
         image_name = os.environ.get('imageName_net') 
@@ -74,6 +85,8 @@ def create_vm(vm_name='virt-vm', \
     vm_creation_option.set_name(vm_name)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    if rootVolumeSystemTags:
+        vm_creation_option.set_rootVolume_systemTags(rootVolumeSystemTags)
     if host_uuid:
         vm_creation_option.set_host_uuid(host_uuid)
     vm = zstack_vm_header.ZstackTestVm()
@@ -143,6 +156,14 @@ def copy_key_file(vm_inv):
     timeout = 10
     if  execute_shell_in_process(cmd, timeout) != 0:
         test_util.test_fail('test file is not created')
+
+def copy_pub_key_file(vm_inv):
+    vm_ip = vm_inv.vmNics[0].ip
+
+    cmd = 'scp  -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null /root/.ssh/id_rsa.pub %s:/root/.ssh/id_rsa.pub' % vm_ip
+    timeout = 10
+    if  execute_shell_in_process(cmd, timeout) != 0:
+        test_util.test_fail('test pub key file is not created')
 
 def test_scp_vm_outbound_speed(vm_inv, bandwidth, raise_exception = True):
     '''
@@ -311,15 +332,21 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp', raise_exception=True):
         logfd.close()
         os.system('rm -f %s' % tmp_file)
 
-    timeout = TEST_TIME + 120
+    timeout = TEST_TIME + 360
     vm_ip = vm_inv.vmNics[0].ip
 
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s' % vm_ip
-    cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=100M -filename=%s/test1.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
-            % (ssh_cmd, path)
-    cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=900M -filename=%s/test2.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
-            % (ssh_cmd, path)
 
+    if '/dev/' in path:
+        cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=read -size=100M -filename=%s -name='EBS 1M read' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+                % (ssh_cmd, path)
+        cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=read -size=900M -filename=%s -name='EBS 1M read' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+                % (ssh_cmd, path)
+    else:
+        cmd1 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=100M -filename=%s/test1.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+                % (ssh_cmd, path)
+        cmd2 = """%s "fio -ioengine=libaio -bs=1M -direct=1 -thread -rw=write -size=900M -filename=%s/test2.img -name='EBS 1M write' -iodepth=64 -runtime=60 -numjobs=4 -group_reporting|grep iops" """ \
+                % (ssh_cmd, path)
 
     tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
     logfd = open(tmp_file, 'w', 0)
@@ -347,7 +374,10 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp', raise_exception=True):
             results = line.split()
             for result in results:
                 if 'bw=' in result:
-                    bw = int(float(result[3:].split('KB')[0]))
+                    if 'MB' in result:
+                        bw = int(float(result[3:].split('MB')[0])) * 1024
+                    else:
+                        bw = int(float(result[3:].split('KB')[0]))
 
     #cleanup_log()
     if bw == 0:
@@ -356,8 +386,9 @@ def test_fio_bandwidth(vm_inv, bandwidth, path = '/tmp', raise_exception=True):
             return False
         test_util.test_fail('Did not get bandwidth for fio test')
 
-    bw_up_limit = bandwidth/1024 + 10240
-    bw_down_limit = bandwidth/1024 - 10240
+    threshold = bandwidth/1024/2
+    bw_up_limit = bandwidth/1024 + threshold
+    bw_down_limit = bandwidth/1024 - threshold
     if bw > bw_down_limit and bw < bw_up_limit:
         test_util.test_logger('disk bandwidth:%s is between %s and %s' \
                 % (bw, bw_down_limit, bw_up_limit))
@@ -416,7 +447,7 @@ def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, \
     eip.create(vm_obj)
     return eip
 
-def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
+def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=None):
     if not vip_name:
         vip_name = 'test vip'
     if not l3_uuid:
@@ -426,6 +457,26 @@ def create_vip(vip_name=None, l3_uuid=None, session_uuid = None):
     vip_creation_option = test_util.VipOption()
     vip_creation_option.set_name(vip_name)
     vip_creation_option.set_l3_uuid(l3_uuid)
+    vip_creation_option.set_session_uuid(session_uuid)
+    vip_creation_option.set_requiredIp(required_ip)
+
+    vip = zstack_vip_header.ZstackTestVip()
+    vip.set_creation_option(vip_creation_option)
+    vip.create()
+
+    return vip
+
+def create_vip_with_ip(vip_name=None, l3_uuid=None, required_ip=None, session_uuid = None):
+    if not vip_name:
+        vip_name = 'test vip'
+    if not l3_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    vip_creation_option = test_util.VipOption()
+    vip_creation_option.set_name(vip_name)
+    vip_creation_option.set_l3_uuid(l3_uuid)
+    vip_creation_option.set_requiredIp(required_ip)
     vip_creation_option.set_session_uuid(session_uuid)
 
     vip = zstack_vip_header.ZstackTestVip()
@@ -550,3 +601,52 @@ def get_stage_time(vm_name, begin_time):
     if instantiate_res_post_end_time != 0 and instantiate_res_post_begin_time != 0:
         instantiate_res_post_time = instantiate_res_post_end_time - instantiate_res_post_begin_time
     return [select_bs_time, allocate_host_time, allocate_ps_time, local_storage_allocate_capacity_time, allocate_volume_time, allocate_nic_time, instantiate_res_pre_time, create_on_hypervisor_time, instantiate_res_post_time]
+
+def setup_fake_df(host, total, avail):
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "ls /usr/bin/df.real")
+    if rsp.return_code != 0:
+        rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'cp /usr/bin/df /usr/bin/df.real')
+    used = int(total) - int(avail)
+
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo 'Filesystem     1K-blocks    Used Available Use% Mounted on'" >/usr/bin/df.fake''')
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo '/dev/vda1      %s %s %s   2%% /'" >>/usr/bin/df.fake''' % (total, used, avail))
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'rm -rf /usr/bin/df; ln -s /usr/bin/df.fake /usr/bin/df; chmod a+x /usr/bin/df')
+
+def remove_fake_df(host):
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "ls /usr/bin/df.real")
+    if rsp.return_code == 0:
+        rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'rm -rf /usr/bin/df; ln -s /usr/bin/df.real /usr/bin/df')
+
+def setup_fake_fs(host, total, path):
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "mount -t tmpfs -o size=%s tmpfs %s" % (total, path))
+
+def remove_fake_fs(host, path):
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "umount %s" % (path))
+
+def setup_fake_ceph(host, total, avail):
+    test_lib.lib_install_testagent_to_host(host)
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "ls /usr/bin/ceph.real")
+    if rsp.return_code != 0:
+        rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'cp /usr/bin/ceph /usr/bin/ceph.real')
+    used = int(total) - int(avail)
+
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo '[ "$1 $2 $3" != "df -f json" ] && ceph.real "$@"'  >/usr/bin/ceph.fake''')
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo '[ "$1 $2 $3" != "df -f json" ] && exit'  >>/usr/bin/ceph.fake''')
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "/usr/bin/ceph.real df -f json")
+    df = jsonobject.loads(rsp.stdout)
+    df.stats.total_bytes = total
+    df.stats.total_avail_bytes = avail
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo ''" >>/usr/bin/ceph.fake''')
+    string = jsonobject.dumps(df).replace('"', '\\"')
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, '''echo "echo '%s'" >>/usr/bin/ceph.fake''' % (string))
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'rm -rf /usr/bin/ceph; ln -s /usr/bin/ceph.fake /usr/bin/ceph; chmod a+x /usr/bin/ceph')
+
+def remove_fake_ceph(host):
+    rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, "ls /usr/bin/ceph.real")
+    if rsp.return_code == 0:
+        rsp = test_lib.lib_execute_sh_cmd_by_agent(host.managementIp, 'rm -rf /usr/bin/ceph; ln -s /usr/bin/ceph.real /usr/bin/ceph')
+
+def run_command_in_vm(vm_inv, command):
+    managerip = test_lib.lib_find_host_by_vm(vm_inv).managementIp
+    vm_ip = vm_inv.vmNics[0].ip
+    return test_lib.lib_ssh_vm_cmd_by_agent(managerip, vm_ip, 'root', 'password', command)

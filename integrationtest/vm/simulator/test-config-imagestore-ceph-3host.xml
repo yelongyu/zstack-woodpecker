@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-imagestore-ceph-3host.xml</deployConfig>
+    <deployConfigTemplate>deploy-imagestore-ceph-3host.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

@@ -69,8 +69,11 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
 
-    test_stub.ensure_host_not_nfs_provider(host_uuid)
-    test_stub.ensure_host_has_no_vr(host_uuid)
+    vr_hosts = test_stub.get_host_has_vr()
+    mn_hosts = test_stub.get_host_has_mn()
+    nfs_hosts = test_stub.get_host_has_nfs()
+    if not test_stub.ensure_vm_not_on(vm.get_vm().uuid, vm.get_vm().hostUuid, vr_hosts+mn_hosts+nfs_hosts):
+        test_util.test_fail("Not find out a suitable host")
 
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
@@ -81,7 +84,7 @@ def test():
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_none_status')
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
 
-    for i in range(0, 180):
+    for i in range(0, 300):
         vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
             test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
@@ -92,18 +95,18 @@ def test():
         time.sleep(1)
 
     if vm_stop_time is None:
-        vm_stop_time = 180
+        vm_stop_time = 300
 
-    for i in range(vm_stop_time, 180):
+    for i in range(vm_stop_time, 300):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
         time.sleep(1)
     else:
-        test_util.test_fail("vm has not been changed to running as expected within 180s.")
+        test_util.test_fail("vm has not been changed to running as expected within 300s.")
 
     vm.destroy()
 
-    test_util.test_pass('Test VM none change to Stopped within 180s Success')
+    test_util.test_pass('Test VM none change to Stopped within 300s Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

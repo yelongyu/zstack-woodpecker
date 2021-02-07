@@ -31,7 +31,7 @@ def test():
         ps = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE)[0]
     except Exception as e:
         test_util.test_dsc(str(e))
-        test_util.test_fail('Fail to find ceph ps')
+        test_util.test_skip('Skip for not finding ceph ps')
     ps_uuid = ps.uuid
     try:
         ceph_node_ip = ps.mons[0].monAddr
@@ -49,7 +49,7 @@ def test():
     description = 'test_description'
     isCreate = 'true'
     test_util.test_dsc('add new pool by zstack')
-    ps_ops.add_ceph_primary_storage_pool(ps_uuid, poolName, aliasName, isCreate)
+    ps_ops.add_ceph_primary_storage_pool(ps_uuid, poolName, aliasName, isCreate, poolType="Data")
     cond = res_ops.gen_query_conditions('aliasName', '=', aliasName)
     pool = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE_POOL, cond)[0]
     print pool
@@ -58,7 +58,7 @@ def test():
         test_util.test_fail('Find wrong pool should find: ' + str(poolName) + 'But find: ' + str(pool.poolName))
     test_util.test_dsc('add exist pool by zstack')
     aliasName = 'test_aliasName_exist'
-    ps_ops.add_ceph_primary_storage_pool(ps_uuid, 'for_test_pool_create', aliasName)
+    ps_ops.add_ceph_primary_storage_pool(ps_uuid, 'for_test_pool_create', aliasName, poolType="Data")
     cond = res_ops.gen_query_conditions('aliasName', '=', aliasName)
     pool = res_ops.query_resource(res_ops.CEPH_PRIMARY_STORAGE_POOL, cond)[0]
     test_util.test_dsc("poolName: " + str(pool.poolName))

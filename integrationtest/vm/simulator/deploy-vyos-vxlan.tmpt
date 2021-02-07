@@ -1,0 +1,13 @@
+import ../deploy.tmpt
+
+l2VxlanNetworkPoolName = l2_vxlan_network_pool
+vniRangeName = vni_range
+startVni = 10
+endVni = 10000
+l2VxlanNetworkName = l2_vxlan_network
+l2VxlanNetworkCidr = 172.20.0.0/16
+l2VxlanNetworkName2 = l2_vxlan_network2
+l2VxlanNetworkName3 = l2_vxlan_network3
+l2VxlanNetworkName4 = l2_vxlan_network4
+l2VxlanNetworkName5 = l2_vxlan_network5
+l2VxlanNetworkName6 = l2_vxlan_network6

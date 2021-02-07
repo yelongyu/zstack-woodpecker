@@ -66,10 +66,10 @@ def test():
     elif len(new_mn_host) > 1:
         test_util.test_fail("management node VM runs on more than one host after its former host down")
 
-    try:
-        node_ops.wait_for_management_server_start(300)
-    except:
-        test_util.test_fail("management node does not recover after MN VM is running")
+    #node_ops.wait_for_management_server_start(300)
+    test_stub.wrapper_of_wait_for_management_server_start(600)
+
+    test_stub.return_pass_ahead_if_3sites("TEST PASS")
 
     ha_vm.set_state(vm_header.RUNNING)
     ha_vm.check()

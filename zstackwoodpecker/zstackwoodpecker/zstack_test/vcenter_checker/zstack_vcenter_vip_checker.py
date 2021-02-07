@@ -49,7 +49,7 @@ class vip_used_for_checker(checker_header.TestChecker):
                     % vip_uuid)
             return self.judge(False)
 
-        if vip_db and vip_db.useFor == self.use_for:
+        if vip_db and self.use_for in vip_db.useFor:
             test_util.test_logger('Check Result: [vip:] %s is used for %s' \
                     % (vip_uuid, self.use_for))
 

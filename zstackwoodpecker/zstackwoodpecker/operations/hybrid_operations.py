@@ -16,19 +16,21 @@ import config_operations
 import os
 import inspect
 
-def add_aliyun_key_secret(name, description, key, secret, session_uuid=None):
-    action = api_actions.AddAliyunKeySecretAction()
+def add_hybrid_key_secret(name, description, key, secret, ks_type='aliyun', sync='true', session_uuid=None):
+    action = api_actions.AddHybridKeySecretAction()
     action.name = name
     action.description = description
     action.key = key
     action.secret = secret
+    action.type = ks_type
+    action.sync = sync
     test_util.action_logger('Add [aliyun key secret:] %s' % key)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[aliyun key secret:] %s is added.' % key)
     return evt.inventory
 
-def del_aliyun_key_secret(uuid, session_uuid=None):
-    action = api_actions.DeleteAliyunKeySecretAction()
+def del_hybrid_key_secret(uuid, session_uuid=None):
+    action = api_actions.DeleteHybridKeySecretAction()
     action.uuid = uuid
     test_util.action_logger('Delete [aliyun key secret:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
@@ -45,16 +47,16 @@ def update_aliyun_key_secret(uuid, name=None, description=None, session_uuid=Non
     test_util.test_logger('[aliyun key secret:] %s is updated.' % uuid)
     return evt
 
-def attach_aliyun_key(uuid, session_uuid=None):
-    action = api_actions.AttachAliyunKeyAction()
+def attach_hybrid_key(uuid, session_uuid=None):
+    action = api_actions.AttachHybridKeyAction()
     action.uuid = uuid
     test_util.action_logger('Attach [aliyun key:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[aliyun key:] %s is attached.' % uuid)
     return evt
 
-def detach_aliyun_key(uuid, session_uuid=None):
-    action = api_actions.DetachAliyunKeyAction()
+def detach_hybrid_key(uuid, session_uuid=None):
+    action = api_actions.DetachHybridKeyAction()
     action.uuid = uuid
     test_util.action_logger('Detach [aliyun key:] %s' % uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid) 
@@ -68,10 +70,13 @@ def get_oss_bucket_name_from_remote(data_center_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories
 
-def add_oss_bucket_from_remote(data_center_uuid, oss_bucket_name, session_uuid=None):
+def add_oss_bucket_from_remote(data_center_uuid, oss_bucket_name, oss_domain=None, oss_key=None, oss_secret=None, session_uuid=None):
     action = api_actions.AddOssBucketFromRemoteAction()
     action.dataCenterUuid = data_center_uuid
     action.bucketName = oss_bucket_name
+    action.ossDomain = oss_domain
+    action.ossKey = oss_key
+    action.ossSecret = oss_secret
     test_util.action_logger('Add [Oss Bucket From Remote:] %s %s' % (data_center_uuid, oss_bucket_name))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[Oss Bucket:] %s %s is added.' % (data_center_uuid, oss_bucket_name))
@@ -133,11 +138,12 @@ def get_ecs_instance_type_from_remote(iz_uuid, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.types
 
-def add_datacenter_from_remote(datacenter_type, region_id, description, session_uuid=None):
+def add_datacenter_from_remote(datacenter_type, region_id, description, end_point=None, session_uuid=None):
     action = api_actions.AddDataCenterFromRemoteAction()
     action.type = datacenter_type
     action.regionId = region_id
     action.description = description
+    action.endpoint = end_point
     test_util.action_logger('Add [datacenter from remote:] %s %s' % (datacenter_type, region_id))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     test_util.test_logger('[datacenter from remote:] %s %s is added.' % (datacenter_type, region_id))
@@ -169,10 +175,11 @@ def detach_oss_bucket_from_ecs_datacenter(oss_bucket_uuid, session_uuid=None):
     test_util.test_logger('[Oss bucket:] %s is detached from Datacenter.' % oss_bucket_uuid)
     return evt
 
-def get_identity_zone_from_remote(datacenter_type, region_id, session_uuid=None):
+def get_identity_zone_from_remote(datacenter_type, region_id=None, dc_uuid=None, session_uuid=None):
     action = api_actions.GetIdentityZoneFromRemoteAction()
     action.type = datacenter_type
     action.regionId = region_id
+    action.dataCenterUuid = dc_uuid
     test_util.action_logger('Get [Identity zone From Remote:] %s %s' % (datacenter_type, region_id))
     evt = account_operations.execute_action_with_session(action, session_uuid) 
     return evt.inventories
@@ -364,7 +371,7 @@ def create_vpn_ipsec_config(name, pfs='group2', enc_alg='3des', auth_alg='sha1',
     test_util.test_logger('[VPN IPsec Config:] %s %s %s %s is created.' % (name, pfs, enc_alg, auth_alg))
     return evt.inventory
 
-def create_vpn_ike_ipsec_config(name, psk, local_ip, remote_ip, pfs='group2', enc_alg='3des', auth_alg='sha1', version='ikev1', mode='main', session_uuid=None):
+def create_vpn_ike_ipsec_config(name, psk, local_ip, remote_ip, pfs='group2', enc_alg='3des', auth_alg='sha1', version='ikev2', mode='main', session_uuid=None):
     action = api_actions.CreateVpnIkeConfigAction()
     action.psk = psk
     action.pfs = pfs
@@ -840,8 +847,8 @@ def query_ecs_instance_local(condition=[], session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def query_aliyun_key_secret(condition=[], session_uuid=None):
-    action = api_actions.QueryAliyunKeySecretAction()
+def query_hybrid_key_secret(condition=[], session_uuid=None):
+    action = api_actions.QueryHybridKeySecretAction()
     action.conditions = condition
     test_util.action_logger('Query Aliyun Key Secret')
     evt = account_operations.execute_action_with_session(action, session_uuid)

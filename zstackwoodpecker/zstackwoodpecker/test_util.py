@@ -1,3 +1,4 @@
+#coding:utf-8
 '''
 
 @author: Frank
@@ -9,6 +10,8 @@ import string
 import sys
 import traceback
 import string
+import pkgutil
+import copy
 
 import zstacklib.utils.xmlobject as xmlobject
 import apibinding.inventory as inventory
@@ -96,6 +99,14 @@ def test_skip(msg):
     test_logger(msg)
     test_result("Skipped")
     sys.exit(2)
+
+def test_env_not_ready(msg):
+    '''
+    No test case codes will be executed, after calling this function.
+    '''
+    test_logger(msg)
+    test_result("Env not ready")
+    sys.exit(3)
 
 #Record Action Log
 def action_logger(msg):
@@ -223,6 +234,7 @@ class DataOption(object):
         self.session_uuid = None
         self.timeout = 300000   #5 mins
         self.name = None
+        self.ipVersion = None
         self.description = None
         self.resourceUUID = None
         #system tag is an array
@@ -238,6 +250,12 @@ class DataOption(object):
 
     def set_name(self, name):
         self.name = name
+
+    def set_ipVersion(self, ipVersion):
+        self.ipVersion = ipVersion
+
+    def get_ipVersion(self):
+        return self.ipVersion
 
     def get_name(self):
         return self.name
@@ -284,10 +302,15 @@ class DataOption(object):
     def get_user_tags(self):
         return self.user_tags
 
+class ZoneOption(DataOption):
+    def __init__(self):
+        super(ZoneOption, self).__init__()
+
 class ClusterOption(DataOption):
     def __init__(self):
         self.hypervisor_type = None
         self.type = 'zstack'
+        self.zone_uuid = None
         super(ClusterOption, self).__init__()
 
     def set_hypervisor_type(self, hypervisor_type):
@@ -301,6 +324,12 @@ class ClusterOption(DataOption):
 
     def get_type(self):
         return self.type
+
+    def set_zone_uuid(self, zone_uuid):
+        self.zone_uuid = zone_uuid
+
+    def get_zone_uuid(self):
+        return self.zone_uuid
 
 class IpRangeOption(DataOption):
     def __init__(self):
@@ -340,6 +369,102 @@ class IpRangeOption(DataOption):
 
     def get_netmask(self):
         return self.netmask
+
+class IpV6RangeOption(DataOption):
+    def __init__(self):
+        self.l3_uuid = None
+        self.startIp = None
+        self.endIp = None
+        self.gateway = None
+        self.netmask = None
+        self.addressMode = None
+	self.prefixLen = None
+        super(IpV6RangeOption, self).__init__()
+
+    def set_l3_uuid(self, l3_uuid):
+        self.l3_uuid = l3_uuid
+
+    def get_l3_uuid(self):
+        return self.l3_uuid
+
+    def set_startIp(self, startIp):
+        self.startIp = startIp
+
+    def get_startIp(self):
+        return self.startIp
+
+    def set_endIp(self, endIp):
+        self.endIp = endIp
+
+    def get_endIp(self):
+        return self.endIp
+
+    def set_gateway(self, gateway):
+        self.gateway = gateway
+
+    def get_gateway(self):
+        return self.gateway
+
+    def set_netmask(self, netmask):
+        self.netmask = netmask
+
+    def get_netmask(self):
+        return self.netmask
+
+    def set_addressMode(self, addressMode):
+        self.addressMode = addressMode
+
+    def get_addressMode(self):
+        return self.addressMode
+  
+    def set_prefixLen(self, prefixLen):
+        self.prefixLen = prefixLen
+
+    def get_prefixLen(self):
+        return self.prefixLen
+
+class Ip_By_NetworkCidrOption(DataOption):
+    def __init__(self):
+        self.l3_uuid = None
+        self.networkCidr = None
+        super(Ip_By_NetworkCidrOption, self).__init__()
+
+    def set_l3_uuid(self, l3_uuid):
+        self.l3_uuid = l3_uuid
+
+    def get_l3_uuid(self):
+        return self.l3_uuid
+
+    def set_networkCidr(self, networkCidr):
+        self.networkCidr = networkCidr
+	
+    def get_networkCidr(self):
+        return self.networkCidr
+
+class IpV6_By_NetworkCidrOption(DataOption):
+    def __init__(self):
+        self.l3_uuid = None
+        self.networkCidr = None
+        self.addressMode = None
+        super(IpV6_By_NetworkCidrOption, self).__init__()
+
+    def set_l3_uuid(self, l3_uuid):
+        self.l3_uuid = l3_uuid
+
+    def get_l3_uuid(self):
+        return self.l3_uuid
+
+    def set_networkCidr(self, networkCidr):
+        self.networkCidr = networkCidr
+
+    def get_networkCidr(self):
+        return self.networkCidr
+
+    def set_addressMode(self, addressMode):
+        self.addressMode = addressMode
+
+    def get_addressMode(self):
+        return self.addressMode
 
 class VipOption(DataOption):
     def __init__(self):
@@ -550,7 +675,7 @@ class ImageStoreBackupStorageOption(BackupStorageOption):
         self.password = None
         self.sshPort = None
         super(ImageStoreBackupStorageOption, self).__init__()
-        self.type = inventory.SFTP_BACKUP_STORAGE_TYPE
+        self.type = inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
 
     def set_hostname(self, ip):
         self.hostname = ip
@@ -657,6 +782,12 @@ class VmOption(DataOption):
             self.console_password = None
             self.ps_uuid = None
             self.root_password = None
+            self.rootVolumeSystemTags = None
+            self.dataVolumeSystemTags = None
+            self.strategy_type = 'InstantStart'
+            self.cpu_num = None
+            self.memory_size = None
+            self.root_disk_size = None
             super(VmOption, self).__init__()
         else:
             self.l3_uuids = vm_opt.get_l3_uuids()
@@ -677,6 +808,12 @@ class VmOption(DataOption):
             self.default_l3_uuid = vm_opt.get_default_l3_uuid()
             self.system_tags = vm_opt.get_system_tags()
             self.user_tags = vm_opt.get_user_tags()
+            self.strategy_type = vm_opt.get_strategy_type()
+            self.rootVolumeSystemTags = vm_opt.get_rootVolume_systemTags()
+            self.dataVolumeSystemTags = vm_opt.get_dataVolume_systemTags()
+            self.cpu_num = vm_opt.get_cpu_num()
+            self.memory_size = vm_opt.get_memory_size()
+            self.root_disk_size = vm_opt.get_root_disk_size()
             super(VmOption, self).__init__()
 
     def set_l3_uuids(self, l3_uuids):
@@ -771,6 +908,41 @@ class VmOption(DataOption):
     def get_root_password(self):
         return self.root_password
 
+    def set_strategy_type(self, strategy_type):
+        self.strategy_type = strategy_type
+
+    def get_strategy_type(self):
+        return self.strategy_type
+
+    def set_rootVolume_systemTags(self, rootVolume_systemTags):
+        self.rootVolumeSystemTags = rootVolume_systemTags
+
+    def get_rootVolume_systemTags(self):
+        return self.rootVolumeSystemTags
+
+    def set_dataVolume_systemTags(self, dataVolume_systemTags):
+        self.dataVolumeSystemTags = dataVolume_systemTags
+
+    def get_dataVolume_systemTags(self):
+        return self.dataVolumeSystemTags
+
+    def set_cpu_num(self, cpu_num):
+        self.cpu_num = cpu_num
+
+    def get_cpu_num(self):
+        return self.cpu_num
+
+    def set_memory_size(self, memory_size):
+        self.memory_size = memory_size
+
+    def get_memory_size(self):
+        return self.memory_size
+
+    def set_root_disk_size(self, root_disk_size):
+        self.root_disk_size = root_disk_size
+
+    def get_root_disk_size(self):
+        return self.root_disk_size
 
 class VolumeOption(DataOption):
     def __init__(self):
@@ -779,6 +951,7 @@ class VolumeOption(DataOption):
         self.volume_type = None #used when add volume from url
         self.primary_storage_uuid = None #used when add volume from url
         self.system_tags = None
+        self.diskSize = None
         super(VolumeOption, self).__init__()
 
     def set_disk_offering_uuid(self, disk_offering_uuid):
@@ -786,6 +959,18 @@ class VolumeOption(DataOption):
 
     def get_disk_offering_uuid(self):
         return self.disk_offering_uuid
+
+    def set_diskSize(self, size):
+        self.diskSize = size
+
+    def get_diskSize(self):
+        return self.diskSize
+
+    def set_volume_template_uuid(self, volume_template_uuid):
+        self.volume_template_uuid = volume_template_uuid
+
+    def get_volume_template_uuid(self):
+        return self.volume_template_uuid
 
     def set_primary_storage_uuid(self, primary_storage_uuid):
         self.primary_storage_uuid = primary_storage_uuid
@@ -811,7 +996,6 @@ class VolumeOption(DataOption):
     def get_system_tags(self):
         return self.system_tags
 
-
 class ImageOption(DataOption):
     def __init__(self):
         self.root_volume_uuid = None #for create template from root volume
@@ -825,7 +1009,14 @@ class ImageOption(DataOption):
         self.format = None #qcow/raw for KVM, simulator, 
         self.system = None #used for system image
         self.system_tags = None #used for system tags
+        self.uuid = None
         super(ImageOption, self).__init__()
+
+    def set_uuid(self, uuid):
+        self.uuid = uuid
+
+    def get_uuid(self):
+        return self.uuid
 
     def set_root_volume_uuid(self, root_volume_uuid):
         self.root_volume_uuid = root_volume_uuid
@@ -975,6 +1166,54 @@ class HostOption(DataOption):
     def get_host_tags(self):
         return self.hostTags
 
+class MiniClusterOption(DataOption):
+    def __init__(self):
+        super(MiniClusterOption, self).__init__()
+        self.uuid = None
+        self.hostManagementIps= None
+        self.zoneUuid = None
+        self.username = None
+        self.password = None
+        self.hostTags = None
+        self.sshPort = None
+        self.hypervisorType = None
+
+    def set_sshPort(self, port):
+        self.sshPort = port
+
+    def get_sshPort(self):
+        return self.sshPort
+
+    def set_host_management_ips(self, ips):
+        self.hostManagementIps = ips
+
+    def get_host_management_ips(self):
+        return self.hostManagementIps
+
+    def set_zone_uuid(self, uuid):
+        self.zoneUuid = uuid
+
+    def get_zone_uuid(self):
+        return self.zoneUuid
+
+    def set_username(self, username):
+        self.username = username
+
+    def get_username(self):
+        return self.username
+
+    def set_password(self, password):
+        self.password = password
+
+    def get_password(self):
+        return self.password
+
+    def set_hypervisor_type(self, hypervisor_type):
+        self.hypervisorType = hypervisor_type
+
+    def get_hypervisor_type(self):
+        return self.hypervisorType
+
 class SnapshotOption(DataOption):
     def __init__(self):
         super(SnapshotOption, self).__init__()
@@ -986,16 +1225,46 @@ class SnapshotOption(DataOption):
     def get_volume_uuid(self):
         return self.volume_uuid
 
+class BackupOption(DataOption):
+    def __init__(self):
+        super(BackupOption, self).__init__()
+        self.volume_uuid = None
+        self.backupStorage_uuid = None
+        self.mode = None
+
+    def set_volume_uuid(self, volume_uuid):
+        self.volume_uuid = volume_uuid
+
+    def get_volume_uuid(self):
+        return self.volume_uuid
+
+    def set_backupStorage_uuid(self, bs_uuid):
+        self.backupStorage_uuid = bs_uuid
+
+    def get_backupStorage_uuid(self):
+        return self.backupStorage_uuid
+
+    def set_mode(self, mode):
+        self.mode = mode
+
+    def get_mode(self):
+        return self.mode
+
 class SecurityGroupOption(DataOption):
     def __init__(self):
         self.name = None
+        self.ipVersion = None
         super(SecurityGroupOption, self).__init__()
 
     def set_name(self, name):
         self.name = name
+    def set_ipVersion(self, ipVersion):
+        self.ipVersion = ipVersion
 
     def get_name(self):
         return self.name
+    def get_ipVersion(self):
+        return self.ipVersion
 
 
 class LoadBalancerListenerOption(DataOption):
@@ -1112,6 +1381,7 @@ class ChassisOption(DataOption):
         self.ipmiUsername = None
         self.ipmiPassword = None
         self.ipmiPort = 623
+        self.clusterUuid = None
         super(ChassisOption, self).__init__()
 
     def set_ipmi_address(self, ipmiAddress):
@@ -1138,12 +1408,174 @@ class ChassisOption(DataOption):
     def get_ipmi_port(self):
         return self.ipmiPort
 
+    def set_cluster_uuid(self, clusterUuid):
+        self.clusterUuid = clusterUuid
+
+    def get_cluster_uuid(self):
+        return self.clusterUuid
+
+class BaremetalInstanceOption(DataOption):
+    def __init__(self):
+        self.chassisUuid = None
+        self.imageUuid = None
+        self.password = 'password'
+        self.nicCfgs = None
+        self.strategy = None
+        self.tempplateUuid = None
+        self.bondingCfgs = None
+        self.customConfigurations = None
+        self.username = None
+        self.systemTags = None
+        super(BaremetalInstanceOption, self).__init__()
+
+    def set_chassis_uuid(self, chassisUuid):
+        self.chassisUuid = chassisUuid
+
+    def get_chassis_uuid(self):
+        return self.chassisUuid
+
+    def set_image_uuid(self, imageUuid):
+        self.imageUuid = imageUuid
+
+    def get_image_uuid(self):
+        return self.imageUuid
+
+    def set_password(self, password):
+        self.password = password
+
+    def get_password(self):
+        return self.password
+
+    def set_nic_cfgs(self, nicCfgs):
+        self.nicCfgs = nicCfgs
+
+    def get_nic_cfgs(self):
+        return self.nicCfgs
+
+    def set_strategy(self, strategy):
+        relf.strategy = strategy
+
+    def get_strategy(self):
+        return self.strategy
+
+    def set_template_uuid(self, templateUuid):
+        self.templateUuid = templateUuid
+
+    def get_template_uuid(self):
+        return self.templateUuid
+
+    def set_bondingCfgs(self, bondingCfgs):
+        self.bondingCfgs = bondingCfgs
+
+    def get_bondingCfgs(self):
+        return self.bondingCfgs
+
+    def set_customConfigurations(self, customConfigurations):
+        self.customConfigurations = customConfigurations
+
+    def get_customConfigurations(self):
+        return self.customConfigurations
+
+    def set_username(self, username):
+        self.username = username
+
+    def get_username(self):
+        return self.username
+
+    def set_systemTags(self, systemTags):
+        self.systemTags = systemTags
+
+    def get_systemTags(self):
+        return self.systemTags
+
+class StackTemplateOption(DataOption):
+    def __init__(self):
+        self.type = "zstack"
+        self.name = None
+        self.description = None
+        self.templateContent = None
+        self.url = None
+        self.state = None
+        super(StackTemplateOption, self).__init__()
+
+    def set_state(self, state):
+        self.state = state
+    def get_state(self):
+        return self.state
+    def set_name(self, name):
+        self.name = name
+    def get_name(self):
+        return self.name
+    def set_description(self, description):
+        self.description = description
+    def get_description(self):
+        return self.description
+    def set_templateContent(self, templateContent):
+        self.templateContent = templateContent
+    def get_templateContent(self):
+        return self.templateContent
+    def set_url(self, url):
+        self.url = url
+    def get_url(self):
+        return self.url
+
+class ResourceStackOption(DataOption):
+    def __init__(self):
+        self.name = None
+        self.description = None
+        self.type = "zstack"
+        self.rollback = False
+        self.templateContent = None
+        self.templateUuid = None
+        self.parameters = None
+        self.uuid = None
+        super(ResourceStackOption, self).__init__()
+
+    def get_type(self):
+        return self.type
+    def set_name(self, name):
+        self.name = name
+    def get_name(self):
+        return self.name
+    def set_templateContent(self, templateContent):
+        self.templateContent = templateContent
+    def get_templateContent(self):
+        return self.templateContent
+    def set_description(self, description):
+        self.description = description
+    def get_description(self):
+        return self.description
+    def set_rollback(self, rollback):
+        self.rollback = rollback
+    def get_rollback(self):
+        return self.rollback
+    def set_template_uuid(self, template_uuid):
+        self.templateUuid = template_uuid
+    def get_template_uuid(self):
+        return self.templateUuid
+    def set_parameters(self, parameters):
+        self.parameters = parameters
+    def get_parameters(self):
+        return self.parameters
+    def set_uuid(self, uuid):
+        self.uuid = uuid
+    def get_uuid(self):
+        return self.uuid
+    def get_timeout(self):
+        return self.timeout
+
 class PxeOption(DataOption):
     def __init__(self):
         self.dhcpInterface = None
         self.dhcpRangeBegin = None
         self.dhcpRangeEnd = None
         self.dhcpRangeNetmask = None
+        self.hostname = None
+        self.storagePath = None
+        self.sshUsername = None
+        self.sshPassword = None
+        self.sshPort = None
+        self.zoneUuid = None
         super(PxeOption, self).__init__()
 
     def set_dhcp_interface(self, dhcpInterface):
@@ -1169,6 +1601,42 @@ class PxeOption(DataOption):
 
     def get_dhcp_netmask(self):
         return self.dhcpRangeNetmask
+
+    def set_hostname(self, hostname):
+        self.hostname = hostname
+
+    def get_hostname(self):
+        return self.hostname
+
+    def set_storagePath(self, storagePath):
+        self.storagePath = storagePath
+
+    def get_storagePath(self):
+        return self.storagePath
+
+    def set_sshUsername(self, sshUsername):
+        self.sshUsername = sshUsername
+
+    def get_sshUsername(self):
+        return self.sshUsername
+
+    def set_sshPassword(self, sshPassword):
+        self.sshPassword = sshPassword
+
+    def get_sshPassword(self):
+        return self.sshPassword
+
+    def set_sshPort(self, sshPort):
+        self.sshPort = sshPort
+
+    def get_sshPort(self):
+        return self.sshPort
+
+    def set_zoneUuid(self, zoneUuid):
+        self.zoneUuid = zoneUuid
+
+    def get_zoneUuid(self):
+        return self.zoneUuid
 
 class BaremetalHostCfgOption(DataOption):
     def __init__(self):
@@ -1208,7 +1676,73 @@ class BaremetalHostCfgOption(DataOption):
 
     def get_cfgItems(self):
         return self.cfgItems
+
+class IscsiOption(DataOption):
+    def __init__(self):
+        self.ip = None
+        self.port = None
+        self.chapUserName = None
+        self.chapUserPassword = None
+        super(IscsiOption, self).__init__()
+
+    def set_ip(self, ip):
+        self.ip = ip
+
+    def get_ip(self):
+        return self.ip
+
+    def set_port(self, port):
+        self.port = port
+
+    def get_port(self):
+        return self.port
+
+    def set_chapUserName(self, chapUserName):
+        self.chapUserName = chapUserName
+
+    def get_chapUserName(self):
+        return self.chapUserName
+
+    def set_chapUserPassword(self, chapUserName):
+        self.chapUserPassword = chapUserPassword
+
+    def get_chapUserPassword(self):
+        return self.chapUserPassword
  
+class VidOption(DataOption):
+    def __init__(self):
+        self.uuid = None
+        self.name = None
+        self.state = None
+        self.attributes = None
+        self.password = None
+        super(VidOption, self).__init__()
+
+    def set_vid_uuid(self, uuid):
+        self.uuid = uuid
+
+    def get_vid_uuid(self):
+        return self.uuid
+
+    def set_password(self, password):
+        self.password = password
+
+    def get_password(self):
+        return self.password
+
+    def set_state(self, state):
+        self.state = state
+
+    def get_state(self):
+        return self.state
+
+    def set_attributes(self, attributes):
+        if not isinstance(attributes, list):
+            raise TestError('Attributes is not a list.')
+        self.attributes = attributes
+
+    def get_attributes(self):
+        return self.attributes
 
 def _template_to_dict(template_file_path):
     def _parse(path, ret, done):
@@ -1328,6 +1862,8 @@ class Robot_Test_Object(object):
         self.random_type = None #Preserve 
         self.public_l3 = None   #For VIP
         self.action_history = []
+        self.resource_action_history = dict()
+        self.required_path_list = []
         self.utility_vm_dict = {} #per primary storage
         #DMZ resource will not be selected to be deleted or moved, so utiltiy 
         # vms will be put there safely. This will be important when doing robot
@@ -1341,12 +1877,26 @@ class Robot_Test_Object(object):
                 self.ps: [],
                 self.bs: []
                 } 
+        self.initial_formation = None
+        self.initial_formation_parameters = None
+        self.constant_path_list = []
+        self.constant_path_list_group_dict = {}
+        self.configs_dict = {}
 
     def add_action_history(self, action):
         self.action_history.append(action)
 
     def get_action_history(self):
         return self.action_history
+
+    def add_resource_action_history(self, uuid, action):
+        if self.resource_action_history.has_key(uuid):
+            self.resource_action_history[uuid].append(action)
+        else:
+            self.resource_action_history[uuid] = [ action ]
+
+    def get_resource_action_history(self):
+        return self.resource_action_history
 
     def set_test_dict(self, test_dict):
         self.test_dict = test_dict
@@ -1441,6 +1991,88 @@ class Robot_Test_Object(object):
         if not resource in self.get_dmz_backup_storage(self.bs):
             self.dmz_resource[self.bs].append(resource)
 
+    def set_required_path_list(self, path_list):
+        self.required_path_list = path_list
+
+    def get_required_path_list(self):
+        return self.required_path_list
+
+    def set_initial_formation(self, formation):
+        self.initial_formation = formation
+
+    def get_initial_formation(self):
+        return self.initial_formation
+
+    def set_initial_formation_parameters(self, parameters):
+        self.initial_formation_parameters = parameters
+
+    def get_initial_formation_parameters(self):
+        return self.initial_formation_parameters
+
+    def get_constant_path_list(self):
+        return self.constant_path_list
+
+    def set_constant_path_list(self, path_list):
+        if self.constant_path_list_group_dict:
+            tmp_path_list = path_list
+            for list_group_name in self.constant_path_list_group_dict.keys():
+                tmp_constant_path_list = []
+
+                while True:
+                    tmp_path_list_no_param = []
+                    for action_with_param in tmp_path_list:
+                        tmp_path_list_no_param.append(action_with_param[0]) 
+
+                    if list_group_name in tmp_path_list_no_param:
+                        idx = tmp_path_list_no_param.index(list_group_name)
+                        #replaced_unpacked_list = []
+                        #params_list = tmp_path_list[idx][1:]
+                        #for idx1 in range(len(self.constant_path_list_group_dict[list_group_name])):
+                        #    replaced_unpacked_list.append(self.constant_path_list_group_dict[list_group_name][idx1]+params_list)
+                        #tmp_constant_path_list.extend(tmp_path_list[:idx] + replaced_unpacked_list)
+                        tmp_constant_path_list.extend(tmp_path_list[:idx] + self.constant_path_list_group_dict[list_group_name])
+                        del tmp_path_list[:idx+1]
+                    else:
+                        tmp_constant_path_list.extend(tmp_path_list)
+                        break
+
+                tmp_path_list = tmp_constant_path_list
+
+            self.constant_path_list = tmp_path_list
+
+        else:
+            self.constant_path_list = path_list
+
+    def get_constant_path_list_group_dict(self):
+        return self.constant_path_list_group_dict
+
+    def set_constant_path_list_group_dict(self, list_group_dict):
+        self.constant_path_list_group_dict = list_group_dict
+
+    def set_config(self, configs):
+        print "shuang %s" % configs
+        for config in configs:
+            for key in config:
+                print "shuang %s" % config
+                if config[key] == "default":
+                    continue
+                if self.configs_dict.has_key(config[key]):
+                    print "shuang2 %s" % config[key]
+                    self.configs_dict[config[key]][key] = None
+                else:
+                    print "shuang3 %s" % config[key]
+                    self.configs_dict[config[key]] = {key: None}
+        for config in configs:
+            for key in config:
+                if config[key] == "default":
+                    for cd_key in self.configs_dict:
+                        if self.configs_dict[cd_key].has_key(key):
+                            self.configs_dict[cd_key]['default'] = key
+                            break
+        print "shuang %s" % self.configs_dict
+
+    def get_config(self):
+        return self.config
 
 class ComponentLoader(object):
     def __init__(self):
@@ -1456,3 +2088,214 @@ component_loader = ComponentLoader()
 
 def get_component_loader():
     return component_loader
+
+class SPTREE(object):
+    '''
+    Data structure of volume snapshot tree
+    '''
+    def __init__(self):
+        self.tree = {}
+        self.root = None
+        self._depth = {}
+        self._sign = {}
+        self.curr_depth = 0
+        self.curr_node = []
+        self.fork = []
+        self.branch_root = None
+
+    def add(self, node, parent=None):
+        if parent:
+            self.revert(parent)
+        if not self.tree:
+            self.root = node
+        elif node not in self.curr_node:
+            self.curr_node.append(node)
+        self.curr_depth += 1
+        self.tree[node] = self.curr_node = []
+        self._depth[node] = self.curr_depth
+
+    def revert(self, node):
+        self.curr_node = self.tree[node]
+        self.curr_depth = self._depth[node]
+        if self.children(node):
+            self.fork.append(node)
+
+    def get_branch_root(self, node):
+        up_node = self.parent(node)
+        if len(self.children(up_node)) == 1:
+            self.get_branch_root(up_node)
+        else:
+            self.branch_root = up_node
+
+    def get_curr_node(self):
+        for k in self.tree.keys():
+            if self.tree[k] is self.curr_node:
+                return k
+
+    def delete(self, node):
+        if node not in self.tree:
+            print('No such node in this tree!')
+            return
+        self.tree.pop(node)
+        key = ''
+        for k, v in self.tree.iteritems():
+            if node in v:
+                v.remove(node)
+                key = k
+        self.clean_up(self.depth())
+        if not self.get_curr_node():
+            self.curr_node = self.tree[key]
+        return True
+
+    def clean_up(self, r=0):
+        keys = self.tree.keys()
+        nodes = self.get_all_nodes()
+        for k in keys:
+            if k not in nodes:
+                self.tree.pop(k)
+        _fork = self.fork[:]
+        for f in _fork:
+            if (f not in nodes) or len(self.children(f)) <= 1:
+                f_count = self.fork.count(f)
+                for _ in range(f_count):
+                    self.fork.remove(f)
+        depth_keys = self._depth.keys()
+        for dk in depth_keys:
+            if dk not in nodes:
+                self._depth.pop(dk)
+        r -= 1
+        if r > 0:
+            self.clean_up(r)
+
+    def get_all_nodes(self):
+        vals = self.tree.values()
+        nodes = [n for node in vals for n in node]
+        if self.root in self.tree:
+            nodes.append(self.root)
+        return nodes
+
+    def parent(self, node):
+        for k, v in self.tree.iteritems():
+            if node in v:
+                return k
+
+    def children(self, node):
+        return self.tree[node]
+
+    def depth(self):
+        return max(self._depth.values())
+
+    def get_depth(self, node):
+        return self._depth[node]
+
+    def show_tree(self):
+        if not self.tree:
+            print 'The tree is empty'
+            return
+        grp = []
+        nc = []
+        indent = {}
+        rendered_tree = []
+        unlinked_branch = []
+        def get_unlinked_branch(rendtr):
+            if len(rendtr) > 2:
+                if len(rendtr[-1][0]) < len(rendtr[-2][0]):
+                    unlinked_branch.append(rendtr.pop())
+                else:
+                    rendtr.pop()
+                get_unlinked_branch(rendtr)
+
+        def link_branch(ubr, rendtr):
+            nd = ubr.pop()
+            nd_alpha = filter(lambda x: x.isalnum(), nd)
+            upbr = rendtr[1:rendtr.index(nd)]
+            upbr.reverse()
+            for g in upbr:
+                tr = g[0]
+                g_alpha = filter(lambda x: x.isalnum(), g)
+                if self.get_depth(g_alpha[0]) <= self.get_depth(nd_alpha[0]):
+                    break
+                else:
+                    g.remove(tr)
+                    g.insert(0, ' ' * len(nd[0]))
+                    g.insert(1, '│' + ' ' * (len(tr) - len(nd[0]) - 1))
+            if len(ubr) > 0:
+                link_branch(ubr, rendtr)
+
+        def list_all_nodes(tree, root=None):
+            if not root:
+                root = tree.root
+            nc.append(root)
+            cld = tree.children(root)
+            if not cld:
+                _nc = nc[:]
+                _grp = [j for i in grp for j in i]
+                grp.append([x for x in _nc if x not in _grp])
+            for c in cld:
+                list_all_nodes(tree, c)
+        list_all_nodes(self)
+        for g in grp:
+            _g = g[:]
+            for n in g:
+                indent[self.root] = '   ' if len(self.children(self.root)) > 1 or self.root in self.fork else '  '
+                indent[self.root] += ' ' * len(self.root)
+                if self.parent(n) in self.fork:
+                    if self.fork.count(self.parent(n)) > 1 and n in self.children(self.parent(n))[1:-1]:
+                        _g.insert(_g.index(n), ' ' * (len(indent[self.parent(n)]) - 2))
+                        _g.insert(_g.index(n), '├─')
+                    if len(self.children(self.parent(n))) > 1 and n == self.children(self.parent(n))[-1]:
+                        _g.insert(_g.index(n), ' ' * (len(indent[self.parent(n)]) - 2))
+                        _g.insert(_g.index(n), '└─')
+                if n in self.fork:
+                    _g.insert(_g.index(n) + 1, '─┬─')
+                    if n not in indent:
+                        indent[n] = indent[self.parent(n)] + ' ' * len(self.parent(n)) + '   '
+                    for c in self.children(n):
+                        if len(self.children(c)) > 1:
+                            dent = '   '
+                        else:
+                            dent = '  '
+                        indent[c] = indent[n] + ' ' * len(c) + dent
+                elif self.children(n):
+                    _g.insert(_g.index(n) + 1, '──')
+                    if n not in indent:
+                        indent[n] = indent[self.parent(n)] + ' ' * len(n) + '  '
+                else:
+                    _g.insert(_g.index(n) + 1, '\n')
+            rendered_tree.append(_g)
+        get_unlinked_branch(copy.deepcopy(rendered_tree))
+        if unlinked_branch:
+            link_branch(unlinked_branch, rendered_tree)
+        sp_tree = ''.join([s for t in rendered_tree for s in t])
+        test_dsc('The snapshot tree is: \n\n%s' % sp_tree)
+
+def load_paths(template_dirname, path_dirname):
+    paths = dict()
+    templates_dict = dict()
+    for importer, package_name, _ in pkgutil.iter_modules([template_dirname]):
+        full_package_name = '%s.%s' % (template_dirname, package_name)
+        if full_package_name not in sys.modules:
+            templates_dict[package_name] = importer.find_module(package_name).load_module(full_package_name)
+
+    paths_dict = dict()
+    for importer, package_name, _ in pkgutil.iter_modules([path_dirname]):
+        full_package_name = '%s.%s' % (path_dirname, package_name)
+        if full_package_name not in sys.modules:
+            paths_dict[package_name] = importer.find_module(package_name).load_module(full_package_name)
+            paths[package_name] = dict()
+            paths[package_name]['initial_formation'] = templates_dict[paths_dict[package_name].path()['initial_formation']].template()
+            paths[package_name]['path_list'] = paths_dict[package_name].path()['path_list']
+            if paths_dict[package_name].path().has_key('repeat'):
+                paths[package_name]['repeat'] = paths_dict[package_name].path()['repeat']
+            else:
+                paths[package_name]['repeat'] = 1
+            if paths_dict[package_name].path().has_key('checking_point'):
+                paths[package_name]['checking_point'] = paths_dict[package_name].path()['checking_point']
+            else:
+                paths[package_name]['checking_point'] = 1
+            if paths_dict[package_name].path().has_key('faild_point'):
+                paths[package_name]['faild_point'] = paths_dict[package_name].path()['faild_point']
+            else:
+                paths[package_name]['faild_point'] = 100000000
+
+    return paths

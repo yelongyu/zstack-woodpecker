@@ -1,0 +1,35 @@
+<integrationTest>
+    <suite name="simulator test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
+        <case timeout='600' repeat='1' >test_volume_operation.py</case>
+        <case timeout='600' repeat='1' >test_change_vm_image_neg.py</case>
+	<case timeout='600' repeat='1' >test_change_vm_image_in_multihosts_env.py</case>
+	<case timeout='600' repeat='1' >test_create_root_volume_template_with_bs_disable_or_disconnected.py</case>
+	<case timeout='600' repeat='1' >test_vm_operation.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_ha.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_vm.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_host.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_image.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_kvm.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_mevoco.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_networkservice.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_zwatch.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_virtualrouter.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_quota.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_ceph.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_aliyun.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_loadbalancer.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_primarystorage.py</case>
+	<case timeout='600' repeat='1' >config/test_config_category_sharedblock.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_public_ip_biling.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_cpu_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_memory_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_rootvolume_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_datavolume_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_check_vmm_life_cycle_with_ip_biling.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_check_vm_lifecycle_with_cpu_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_check_vm_lifecycle_with_memory_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_check_vm_lifecycle_with_rootvolume_billing.py</case>
+	<case timeout='600' repeat='1' >public_billing/test_check_vm_lifecycle_with_datavolume_billing.py</case>
+	<case timeout='600' repeat='1' >test_twofa_enable_disable.py</case>
+    </suite>
+</integrationTest>

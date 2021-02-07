@@ -8,14 +8,16 @@ import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstacklib.utils.ssh as ssh
-import test_stub
+import os
 
+test_stub = test_lib.lib_get_specific_stub()
 
 exist_users = ["root"]
 
 users   = [ "bc"       ]
-passwds = [ "x"*265    ] 
+passwds = [ "x"*265    ]
 
 
 vm = None
@@ -24,6 +26,10 @@ def test():
     global vm, exist_users
     test_util.test_dsc('change VM with assigned password test')
 
+    image_name = "imageName_i_c7"
+    ps_type = res_ops.query_resource(res_ops.PRIMARY_STORAGE)[0].type
+    if ps_type == 'MiniStorage':
+        image_name = os.environ.get(image_name)
 
     for (usr,passwd) in zip(users, passwds):
 
@@ -32,15 +38,16 @@ def test():
         #Create VM API
         if usr == "root":
             try:
-                vm = test_stub.create_vm(vm_name = 'c7-vm', image_name = "imageName_i_c7", root_password=passwd)
+                vm = test_stub.create_vm(vm_name='c7-vm', image_name=image_name, root_password=passwd)
             except:
                 pass
             else:
                 test_util.test_fail("create vm && the invaild password: %s successfully be set" % (passwd))
 
         #Check bs type
-        vm = test_stub.create_vm(vm_name = 'c7-vm', image_name = "imageName_i_c7")
+        vm = test_stub.create_vm(vm_name='c7-vm', image_name=image_name)
         vm.check()
+        vm_ops.set_vm_qga_enable(vm.get_vm().uuid)
         backup_storage_list = test_lib.lib_get_backup_storage_list_by_vm(vm.vm)
         for bs in backup_storage_list:
             if bs.type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
@@ -54,7 +61,7 @@ def test():
 
         #inject normal account username/password
         if usr not in exist_users:
-            test_stub.create_user_in_vm(vm.get_vm(), usr, "password") 
+            test_stub.create_user_in_vm(vm.get_vm(), usr, "password")
             exist_users.append(usr)
 
 

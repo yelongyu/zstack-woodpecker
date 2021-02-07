@@ -35,7 +35,8 @@ def test():
         test_util.test_fail('%s is not available for monitor' % test_item)
 
     duration = 60
-    expression = "vm.cpu.util{}>125.6"
+    #expression = "vm.cpu.util{}>125.6"
+    expression = "vm.cpu.util{}>5"
     monitor_trigger = mon_ops.create_monitor_trigger(vm_uuid, duration, expression)
 
     send_email = test_stub.create_email_media()

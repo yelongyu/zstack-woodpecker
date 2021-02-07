@@ -26,6 +26,7 @@ def test():
     global mn_host_list
     global need_recover_mn_host_list
 
+    test_stub.return_skip_ahead_if_3sites("Skip the test in vpc ceph because create vm with vyos is not supported.")
     test_stub.skip_if_vr_not_vyos("vr")
     mn_host_list = test_stub.get_mn_host(test_lib.all_scenario_config, test_lib.scenario_file)
     mn_host_num = len(mn_host_list)
@@ -79,16 +80,19 @@ def test():
     elif len(new_mn_host) > 1:
         test_util.test_fail("management node VM runs on more than one host after its former host down")
 
-    try:
-        node_ops.wait_for_management_server_start(300)
-    except:
-        test_util.test_fail("management node does not recover after MN VM is running")
+    #node_ops.wait_for_management_server_start(300)
+    test_stub.wrapper_of_wait_for_management_server_start(600)
+
+    test_stub.return_pass_ahead_if_3sites("TEST PASS") 
 
     test_util.test_logger("Delay 60s and then check if the vm is running")
     time.sleep(180)
-    vm.update()
-    vm.check()
-    vm.destroy()
+    if test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, '22', 300):
+        vm.update()
+        vm.check()
+        vm.destroy()
+    else:
+        test_util.test_fail("ha vm has not changed to running after 2 hosts recover with 300s")
     test_util.test_pass('Check Never Stop VM Test Success')
 
 #Will be called what ever test result is

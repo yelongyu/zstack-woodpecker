@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-local-smp.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-local-smp.tmpt</scenarioConfigTemplate>
+</testConfig>

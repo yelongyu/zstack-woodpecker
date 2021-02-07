@@ -1,0 +1,6 @@
+<testConfig>
+    <deployConfig>deploy-sftp-flat-smp-q35.xml</deployConfig>
+    <deployConfigTemplate>deploy-sftp-flat-smp.tmpt</deployConfigTemplate>
+    <!-- suite special test variables -->
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

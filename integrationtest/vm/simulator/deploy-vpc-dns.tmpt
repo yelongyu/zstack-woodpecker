@@ -1,0 +1,13 @@
+import ../deploy.tmpt
+
+l2VpcNetworkName1 = vpc-test1
+
+l2Vlan1 = 21
+
+l3VpcNetworkName1  = l3VpcNetwork1
+
+vpcIpRangeName1 = guest vpc ip range name 1
+vpcIpRangeStart1 = 10.11.0.2
+vpcIpRangeEnd1 = 10.11.0.10
+vpcIpRangeGateway1 = 10.11.0.1
+vpcIpRangeNetmask1 = 255.255.0.0

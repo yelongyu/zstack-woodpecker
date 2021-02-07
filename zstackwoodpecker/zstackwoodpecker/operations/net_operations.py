@@ -17,13 +17,17 @@ import os
 import sys
 import traceback
 
+
 def create_security_group(sg_creation_option):
     action = api_actions.CreateSecurityGroupAction()
     if not sg_creation_option.get_name():
         action.name = 'test_sg'
     else:
         action.name = sg_creation_option.get_name()
-        
+
+    if sg_creation_option.get_ipVersion():
+        action.ipVersion = sg_creation_option.get_ipVersion()
+
     if not sg_creation_option.get_description():
         action.description = 'Test Security Group'
     else:
@@ -55,8 +59,8 @@ def add_rules_to_security_group(sg_uuid, rules, remote_sg_uuids=None, session_uu
         action.remoteSecurityGroupUuids = remote_sg_uuids
     action.timeout = 120000
     action.rules = rules
-    for rule in rules:
-        test_util.action_logger('Add Security Group [Rule:] type: %s, protocol: %s, startPort: %s, endPort: %s, address: %s in [Security Group:] %s' % (rule.type, rule.protocol, rule.startPort, rule.endPort, rule.allowedCidr, sg_uuid))
+    #for rule in rules:
+    #    test_util.action_logger('Add Security Group [Rule:] type: %s, protocol: %s, startPort: %s, endPort: %s, address: %s in [Security Group:] %s' % (rule.type, rule.protocol, rule.startPort, rule.endPort, rule.allowedCidr, sg_uuid))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
@@ -129,6 +133,12 @@ def create_vip(vip_creation_option):
     test_util.action_logger('Create [VIP:] %s [IP:] %s in [l3:] %s' % (evt.uuid, evt.ip, action.l3NetworkUuid))
     return evt
 
+def get_snat_ip_as_vip(snat_ip):
+    conditions = res_ops.gen_query_conditions('ip', '=', snat_ip)
+    vip = res_ops.query_resource(res_ops.VIP, conditions)
+    test_util.action_logger('Get SNAT [VIP:] %s [IP:] %s' % (vip[0].uuid, vip[0].ip))
+    return vip[0]
+
 def delete_vip(vip_uuid, session_uuid=None):
     action = api_actions.DeleteVipAction()
     action.uuid = vip_uuid
@@ -136,19 +146,29 @@ def delete_vip(vip_uuid, session_uuid=None):
     test_util.action_logger("[VIP]: %s is deleted" % vip_uuid)
     return evt
 
-def set_vip_qos(vip_uuid, inboundBandwidth=None, outboundBandwidth=None, session_uuid=None):
+def set_vip_qos(vip_uuid, inboundBandwidth=None, outboundBandwidth=None, port=None, session_uuid=None):
     action = api_actions.SetVipQosAction()
     action.uuid = vip_uuid
+    action.port = port
     action.inboundBandwidth = inboundBandwidth
     action.outboundBandwidth = outboundBandwidth
     action.timeout = 12000
+    test_util.action_logger("SetVipQos [vip:] %s [inboundBandwidth: ] %s [outboundBandwidth: ] %s [port: ] %s" % (vip_uuid, inboundBandwidth, outboundBandwidth, port))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     return evt
 
-def delete_vip_qos(vip_uuid, direction, session_uuid=None):
+def get_vip_qos(vip_uuid, session_uuid=None):
+    action = api_actions.GetVipQosAction()
+    action.uuid = vip_uuid
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("GetVipQos [vip:] %s" % vip_uuid)
+    return evt.inventories
+
+def delete_vip_qos(vip_uuid, port=None, session_uuid=None):
     action = api_actions.DeleteVipQosAction()
     action.uuid = vip_uuid
-    action.direction = direction
+    action.port = port
+#     action.direction = direction
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("DeleteVipQos [vip:] %s is deleted" % vip_uuid)
     return evt
@@ -231,7 +251,7 @@ def attach_eip(eip_uuid, nic_uuid, session_uuid=None):
 def detach_eip(eip_uuid, session_uuid=None):
     action = api_actions.DetachEipAction()
     action.uuid = eip_uuid
-    action.timeout = 12000
+    action.timeout = 24000
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("[EIP:] %s is detached" % eip_uuid)
     return evt.inventory
@@ -239,11 +259,52 @@ def detach_eip(eip_uuid, session_uuid=None):
 def delete_eip(eip_uuid, session_uuid=None):
     action = api_actions.DeleteEipAction()
     action.uuid = eip_uuid
-    action.timeout = 12000
+    action.timeout = 24000
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("[EIP:] %s is deleted" % eip_uuid)
     return evt
-    
+
+def create_l2_novlan(name, nic, zone_uuid, session_uuid = None):
+    '''
+    Delete L2 will stop all VMs which is using this L2. When VM started again, 
+    the related L2 NIC will be removed. 
+    '''
+    action = api_actions.CreateL2NoVlanNetworkAction()
+    action.name = name
+    action.physicalInterface = nic
+    action.zoneUuid = zone_uuid
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[Novlan L2:] %s is created" % evt.uuid)
+    return evt   
+
+def create_l2_vlan(name, nic, zone_uuid, vlan, session_uuid = None):
+    '''
+    Delete L2 will stop all VMs which is using this L2. When VM started again, 
+    the related L2 NIC will be removed. 
+    '''
+    action = api_actions.CreateL2VlanNetworkAction()
+    action.name = name
+    action.physicalInterface = nic
+    action.vlan = vlan
+    action.zoneUuid = zone_uuid
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[Vlan L2:] %s is created" % evt.uuid)
+    return evt   
+
+def update_l2(l2_uuid, name=None, description=None, session_uuid = None):
+    '''
+    Update name or desrciption of l2 network
+    '''
+    action = api_actions.UpdateL2NetworkAction()
+    action.name = name
+    action.description = description
+    action.uuid = l2_uuid
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[L2:] %s is updated" % evt.uuid)
+    return evt
 
 def delete_l2(l2_uuid, session_uuid = None):
     '''
@@ -285,14 +346,25 @@ def delete_l3(l3_uuid, session_uuid = None):
     test_util.action_logger("[L3:] %s is deleted" % l3_uuid)
     return evt
 
-def attach_l2(l2_uuid, cluster_uuid, session_uuid = None):
+def attach_l2(l2_uuid, cluster_uuid, systemTags = None, session_uuid = None):
     action = api_actions.AttachL2NetworkToClusterAction()
     action.clusterUuid = cluster_uuid
     action.l2NetworkUuid = l2_uuid
+    action.systemTags = systemTags
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("Attach [L2:] %s to [Cluster:] %s " \
             % (l2_uuid, cluster_uuid))
     return evt
+
+def attach_l2_vxlan_pool(l2_uuid, cluster_uuid, systemTags = None,session_uuid = None):
+		action = api_actions.AttachL2NetworkToClusterAction()
+		action.clusterUuid = cluster_uuid
+		action.l2NetworkUuid = l2_uuid
+		action.systemTags = systemTags
+		evt = acc_ops.execute_action_with_session(action, session_uuid)
+		test_util.action_logger("Attach [L2:] %s to [Cluster:] %s " \
+				 % (l2_uuid, cluster_uuid))
+		return evt
 
 def add_l2_resource(deploy_config, l2_name, zone_name = None, \
         session_uuid = None):
@@ -381,8 +453,54 @@ def add_ip_range(ip_range_option, session_uuid = None):
     action.gateway = ip_range_option.get_gateway()
     action.l3NetworkUuid = ip_range_option.get_l3_uuid()
     action.description = ip_range_option.get_description()
+    action.systemTags = ip_range_option.get_system_tags()
     evt = acc_ops.execute_action_with_session(action, session_uuid)
     test_util.action_logger("[IP Range:] %s is add" % evt.inventory.uuid)
+    return evt.inventory
+
+def add_ipv6_range(ipv6_range_option, session_uuid = None):
+    action = api_actions.AddIpv6RangeAction()
+    action.sessionUuid = session_uuid
+    action.timeout = 30000
+    action.name = ipv6_range_option.get_name()
+    action.startIp = ipv6_range_option.get_startIp()
+    action.endIp = ipv6_range_option.get_endIp()
+    action.netmask = ipv6_range_option.get_netmask()
+    action.gateway = ipv6_range_option.get_gateway()
+    action.addressMode = ipv6_range_option.get_addressMode()
+    action.prefixLen = ipv6_range_option.get_prefixLen()
+    action.l3NetworkUuid = ipv6_range_option.get_l3_uuid()
+    action.description = ipv6_range_option.get_description()
+    action.systemTags = ipv6_range_option.get_system_tags()
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[IP Range:] %s is add" % evt.inventory.uuid)
+    return evt.inventory
+
+def add_ip_by_networkcidr(ip_by_networkcidr_option, session_uuid = None):
+    action = api_actions.AddIpRangeByNetworkCidrAction()
+    action.sessionUuid = session_uuid
+    action.timeout = 30000
+    action.name = ip_by_networkcidr_option.get_name()
+    action.networkCidr = ip_by_networkcidr_option.get_networkCidr()
+    action.l3NetworkUuid = ip_by_networkcidr_option.get_l3_uuid()
+    action.description = ip_by_networkcidr_option.get_description()
+    action.systemTags = ip_by_networkcidr_option.get_system_tags()
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[IP v6 Range:] %s is add" % evt.inventory.uuid)
+    return evt.inventory
+
+def add_ipv6_by_networkcidr(ipv6_by_networkcidr_option, session_uuid = None):
+    action = api_actions.AddIpv6RangeByNetworkCidrAction()
+    action.sessionUuid = session_uuid
+    action.timeout = 30000
+    action.name = ipv6_by_networkcidr_option.get_name()
+    action.networkCidr = ipv6_by_networkcidr_option.get_networkCidr()
+    action.addressMode = ipv6_by_networkcidr_option.get_addressMode()
+    action.l3NetworkUuid = ipv6_by_networkcidr_option.get_l3_uuid()
+    action.description = ipv6_by_networkcidr_option.get_description()
+    action.systemTags = ipv6_by_networkcidr_option.get_system_tags()
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[IP v6 Range:] %s is add" % evt.inventory.uuid)
     return evt.inventory
 
 def detach_l2(l2_uuid, cluster_uuid, session_uuid = None):
@@ -597,6 +715,92 @@ def detach_network_service_from_l3network(l3_uuid, service_uuid, session_uuid=No
     test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
     evt = acc_ops.execute_action_with_session(action, session_uuid)
 
+def attach_pf_service_to_l3network(l3_uuid, service_uuid, session_uuid=None, snat=False):
+    providers = {}
+    action = api_actions.AttachNetworkServiceToL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['PortForwarding']
+    if snat:
+        providers[service_uuid].append('SNAT')
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Attach [Network Service]: %s to [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def detach_pf_service_from_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.DetachNetworkServiceFromL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['PortForwarding']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+
+def attach_lb_service_to_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.AttachNetworkServiceToL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['LoadBalancer']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Attach [Network Service]: %s to [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def detach_lb_service_from_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.DetachNetworkServiceFromL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['LoadBalancer']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+
+def attach_sg_service_to_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.AttachNetworkServiceToL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['SecurityGroup']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Attach [Network Service]: %s to [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def detach_sg_service_from_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.DetachNetworkServiceFromL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['SecurityGroup']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Detach [Network Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+
+def attach_eip_service_to_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.AttachNetworkServiceToL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['Eip'] 
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Attach [Eip Service]: %s to [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+
+def detach_eip_service_from_l3network(l3_uuid, service_uuid, session_uuid=None):
+    providers = {}
+    action = api_actions.DetachNetworkServiceFromL3NetworkAction()
+    action.l3NetworkUuid = l3_uuid
+    providers[service_uuid] = ['Eip']
+    action.networkServices = providers
+    action.timeout = 12000
+    test_util.action_logger('Detach [Eip Service]: %s from [l3]: %s' % (service_uuid, l3_uuid))
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+
 def create_virtual_router_offering(name, cpuNum, memorySize, imageUuid, zoneUuid, managementNetworkUuid, publicNetworkUuid=None, description=None, allocatorStrategy=None, offeringType=None, session_uuid = None):
     action = api_actions.CreateVirtualRouterOfferingAction()
     action.name = name
@@ -656,3 +860,60 @@ def destroy_vrouter(vrouter_uuid, session_uuid=None):
     test_util.test_logger('Destroy vRouter uuid: {}'.format(vrouter_uuid))
     result = acc_ops.execute_action_with_session(action, session_uuid)
     return result.success
+
+def create_certificate(name, certificate, session_uuid = None):
+    action = api_actions.CreateCertificateAction()
+    action.name = name
+    action.certificate = certificate
+    action.timeout = 120000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Create [Certificate]: %s' % name)
+    return evt.inventory
+
+def delete_certificate(uuid, session_uuid = None):
+    action = api_actions.DeleteCertificateAction()
+    action.uuid = uuid
+    action.timeout = 120000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Delete [Certificate]: %s' % uuid)
+    return evt.inventory
+
+def create_l3(name, l2_uuid, ipVersion = None, category = None, Type = None, session_uuid = None):
+    action = api_actions.CreateL3NetworkAction()
+    action.name = name
+    if ipVersion:
+        action.ipVersion = ipVersion
+    if category:
+	action.category = category
+    if Type:
+        action.type = Type
+    action.l2NetworkUuid = l2_uuid
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[L3:] %s is created" % name)
+    return evt.inventory 
+
+def delete_l3(uuid, session_uuid = None):
+    action = api_actions.DeleteL3NetworkAction()
+    action.uuid = uuid
+    action.timeout = 300000
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("[L3:] %s is deleted" % uuid)
+    return evt   
+
+def get_l3network_dhcp_ip(l3NetworkUuid, session_uuid=None):
+    action = api_actions.GetL3NetworkDhcpIpAddressAction()
+    action.l3NetworkUuid = l3NetworkUuid
+    action.timeout = 12000
+    test_util.test_logger('Get l3 network dhcp ip from L3 uuid: {}'.format(l3NetworkUuid))
+    result = acc_ops.execute_action_with_session(action, session_uuid)
+    return result.ip
+	
+def add_dns_to_l3(l3_uuid, dns, session_uuid=None):
+    action = api_actions.AddDnsToL3NetworkAction()
+    action.sessionUuid = session_uuid
+    action.dns = dns
+    action.l3NetworkUuid = l3_uuid
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt
+

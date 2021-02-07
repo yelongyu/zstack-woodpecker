@@ -78,25 +78,25 @@ def test():
 
     test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
 
-    #test_util.test_logger("wait for 180 seconds")
-    #time.sleep(180)
+    #test_util.test_logger("wait for 300 seconds")
+    #time.sleep(300)
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_ha_self_start')
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
-    for i in range(0, 180):
+    for i in range(0, 300):
         vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Unknown":
             test_stub.up_host_network(host_ip, test_lib.all_scenario_config)
             break
         time.sleep(1)
     if vm_stop_time is None:
-        vm_stop_time = 180 
-    for i in range(vm_stop_time, 180):
+        vm_stop_time = 300 
+    for i in range(vm_stop_time, 300):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Running":
             break
         time.sleep(1)
     else:
-        test_util.test_fail("vm has not been changed to running as expected within 180s.")
+        test_util.test_fail("vm has not been changed to running as expected within 300s.")
 
     vm.destroy()
 

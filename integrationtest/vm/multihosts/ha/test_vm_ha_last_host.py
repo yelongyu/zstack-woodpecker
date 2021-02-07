@@ -32,7 +32,7 @@ def test():
     global max_attempts
     global storagechecker_timeout
 
-    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint']
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', 'AliyunNAS']
     test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
 
     if test_lib.lib_get_ha_enable() != 'true':
@@ -72,8 +72,17 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
 
-    test_stub.ensure_host_has_no_vr(host_uuid)
+    vr_hosts = test_stub.get_host_has_vr()
+    mn_hosts = test_stub.get_host_has_mn()
+    nfs_hosts = test_stub.get_host_has_nfs()
+    test_util.test_logger('vr_hosts = %s' % vr_hosts)
+    test_util.test_logger('mn_hosts = %s' % mn_hosts)
+    test_util.test_logger('nfs_hosts = %s' % nfs_hosts)
+    #test_stub.test_skip('debug')
+    if not test_stub.ensure_vm_not_on(vm.get_vm().uuid, vm.get_vm().hostUuid, vr_hosts+mn_hosts+nfs_hosts):
+        test_util.test_fail("Not find out a suitable host")
 
+    vm.update()
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
     host_port = test_lib.lib_get_host_port(host_ip)
@@ -84,8 +93,10 @@ def test():
     os.system('bash -ex %s %s' % (os.environ.get('hostForceStopScript'), host_ip))
     test_util.test_logger("host is expected to shutdown for a while")
 
-    test_util.test_logger("wait for 180 seconds")
-    time.sleep(180)
+#     test_util.test_logger("wait for 360 seconds")
+#     time.sleep(360)
+    test_util.test_logger("wait for 600 seconds")
+    time.sleep(600)
     vm.update()
     if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
 	test_util.test_fail("VM is expected to start running on another host")
@@ -95,11 +106,17 @@ def test():
     if test_lib.lib_get_vm_last_host(vm.get_vm()).managementIp != host_ip:
         test_util.test_fail("Migrated VM's last host is expected to be the last host[ip:%s]" % (host_ip))
 
-    vm.destroy()
+#     vm.destroy()
 
     os.system('bash -ex %s %s' % (os.environ.get('hostRecoverScript'), host_ip))
     host_ops.reconnect_host(host_uuid)
     test_util.test_pass('Test VM ha on host failure Success')
+
+def env_recover():
+    try:
+        vm.destroy()
+    except:
+        pass
 
 #Will be called only if exception happens in test().
 def error_cleanup():

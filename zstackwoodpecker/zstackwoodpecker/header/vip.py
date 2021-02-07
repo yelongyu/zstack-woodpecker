@@ -5,11 +5,12 @@ DETACHED = 'detached'
 DELETED = 'deleted'
 Eip = 'Eip'
 PortForwarding = 'PortForwarding'
+LoadBalancer = 'LoadBalancer'
 
 class TestVip(zstack_header.ZstackObject):
     def __init__(self):
         self.vip = None
-        self.use_for = None
+        self.use_for = []
         self.state = None
 
     def __repr__(self):
@@ -25,7 +26,7 @@ class TestVip(zstack_header.ZstackObject):
         self.state = DELETED
 
     def set_use_for(self, service_type=None):
-        self.use_for = service_type
+        self.use_for.append(service_type)
 
     def get_use_for(self):
         return self.use_for

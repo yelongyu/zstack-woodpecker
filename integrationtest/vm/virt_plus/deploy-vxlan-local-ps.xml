@@ -125,6 +125,11 @@
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
       </image>
+      <image name="$imageName_linux_UEFI" description="Test" format="$rootImageFormat"
+        url="$imageUrl_linux_UEFI" mediaType="$rootMediaType" systemTags="bootMode::UEFI"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      </image>
     </images>
   
     <diskOfferings>

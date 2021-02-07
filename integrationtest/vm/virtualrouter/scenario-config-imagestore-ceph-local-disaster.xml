@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-imagestore-ceph-local-disaster.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-imagestore-ceph-local-disaster.tmpt</scenarioConfigTemplate>
+</testConfig>

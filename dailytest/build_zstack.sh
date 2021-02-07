@@ -91,5 +91,5 @@ which ant
 
 mkdir -p ${ZSTACK_ARCHIVE}
 rm -f ${ZSTACK_ARCHIVE}/latest
-ln -s /home/172.20.197.201/zstack-all-in-one.tar ${ZSTACK_ARCHIVE}/latest
+ln -s /home/172.20.198.245/zstack-all-in-one.tar ${ZSTACK_ARCHIVE}/latest
 echo -e "$(tput setaf 2)\n - Build zstack successfully and saved as $zstack_archive_file - \n$(tput sgr0)"

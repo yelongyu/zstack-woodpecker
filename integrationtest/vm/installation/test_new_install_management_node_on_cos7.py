@@ -27,7 +27,8 @@ def create_vm(image):
     l3_name = os.environ.get('l3PublicNetworkName')
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     image_uuid = image.uuid
-    vm_name = 'zs_install_%s' % image.name
+    #vm_name = 'zs_install_new_install_management_node_%s' % image.name
+    vm_name = os.environ.get('vmName')
     vm_instrance_offering_uuid = os.environ.get('instanceOfferingUuid')
 
     vm_creation_option = test_util.VmOption()
@@ -46,11 +47,14 @@ def test():
     zstack_latest_version = os.environ.get('zstackLatestVersion')
     zstack_latest_path = os.environ.get('zstackLatestInstaller')
 
+    iso_path = os.environ.get('iso_path')
+    upgrade_script_path = os.environ.get('upgradeScript')
+
     test_util.test_dsc('Create 2 CentOS7 vm to test install management node installation')
 
     conditions = res_ops.gen_query_conditions('name', '=', os.environ.get('imageNameBase_21_ex'))
-    image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
-    
+    #image = res_ops.query_resource(res_ops.IMAGE, conditions)[0]
+    image = sce_ops.query_resource(zstack_management_ip, res_ops.IMAGE, conditions)[0]
     vm1_inv = create_vm(image) 
     vm2_inv = create_vm(image)
 
@@ -59,6 +63,7 @@ def test():
 
     time.sleep(60)
     test_stub.make_ssh_no_password(vm1_ip, tmp_file)
+    test_stub.update_iso(vm1_ip, tmp_file, iso_path, upgrade_script_path)
 
     target_file = '/root/zstack-all-in-one.tgz'
     test_stub.prepare_test_env(vm1_inv, target_file)

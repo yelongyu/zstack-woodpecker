@@ -14,7 +14,7 @@ import apibinding.inventory as inventory
 import threading
 import time
 import uuid
-threads_num = 5
+threads_num = 3
 vms = [None] * threads_num
 threads = [None] * threads_num
 migrate_jobs = [None] * threads_num
@@ -33,7 +33,7 @@ def migrate_volume(index):
     threads_result[index] = "Done"
 
 def check_migrate_volume_progress(index):
-    for i in range(0, 600):
+    for i in range(0, 2400):
         if threads_result[index] == None:
             time.sleep(0.1)
             continue

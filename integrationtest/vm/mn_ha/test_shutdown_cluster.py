@@ -32,10 +32,8 @@ def test():
     if len(mn_host) != 1:
         test_util.test_fail('MN VM is running on %d host(s) after shutdown and start ha cluster' % len(mn_host))
     test_util.test_logger("wait for 5 minutes to see if management node starts again")
-    try:
-        node_ops.wait_for_management_server_start(300)
-    except:
-        test_util.test_fail("management node does not recover after shutdown and start ha cluster")
+    #node_ops.wait_for_management_server_start(300)
+    test_stub.wrapper_of_wait_for_management_server_start(600)
     test_util.test_pass('Shutdown HA Cluster Test Success')
 
 #Will be called what ever test result is

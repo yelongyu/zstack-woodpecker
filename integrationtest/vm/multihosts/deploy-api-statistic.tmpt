@@ -1,0 +1,5 @@
+import ./deploy.tmpt
+
+localPrimaryStorageName = local-ps
+localPrimaryStorageUrl = /home/local-ps
+

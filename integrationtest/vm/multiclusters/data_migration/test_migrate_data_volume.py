@@ -14,8 +14,10 @@ test_stub = test_lib.lib_get_test_stub()
 data_migration = test_stub.DataMigration()
 
 def test():
-    data_migration.create_vm()
+    data_migration.create_vm(data_migration.image_name_net)
     data_migration.create_data_volume()
+    data_migration.mount_disk_in_vm()
+    data_migration.copy_data()
 
     data_migration.data_volume.detach()
     data_migration.migrate_vm()
@@ -24,8 +26,12 @@ def test():
     test_obj_dict.add_vm(data_migration.vm)
     test_obj_dict.add_volume(data_migration.data_volume)
     data_migration.data_volume.attach(data_migration.vm)
+    data_migration.mount_disk_in_vm()
+    data_migration.check_data()
+    data_migration.check_origin_data_exist(root_vol=False)
+    data_migration.clean_up_ps_trash_and_check()
 
-    data_migration.del_obsoleted_data_volume()
+#     data_migration.del_obsoleted_data_volume()
     test_lib.lib_robot_cleanup(test_obj_dict)
     test_util.test_pass('Migrate Data Volume Test Success')
 

@@ -26,6 +26,9 @@ def test():
     if not test_stub.verify_chassis_status(chassis_uuid, "PxeBootFailed"):
         test_util.test_fail(
             'Chassis failed to get PxeBootFailed after the first provision')
+    bare_operations.start_pxe(pxe_uuid)
+    if test_lib.lib_get_pxe_by_name(os.environ.get('pxename')).status != "Running":
+                    test_util.test_fail('Fail to start PXE')
     test_stub.delete_vbmc(vm=vm)
     bare_operations.delete_chassis(chassis_uuid)
     vm.destroy()

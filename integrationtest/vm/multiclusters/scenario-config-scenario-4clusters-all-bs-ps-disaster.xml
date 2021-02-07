@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-4clusters-all-bs-ps-disaster.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-4clusters-all-bs-ps-disaster.tmpt</scenarioConfigTemplate>
+</testConfig>

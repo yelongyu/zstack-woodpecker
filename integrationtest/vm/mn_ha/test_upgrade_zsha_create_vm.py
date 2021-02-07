@@ -40,6 +40,7 @@ def test():
     test_stub.ensure_pss_connected()
     test_stub.ensure_bss_connected()
 
+    test_stub.return_pass_ahead_if_3sites("TEST PASS") 
     vm = test_stub.create_basic_vm()
     vm.check()
     vm.destroy()

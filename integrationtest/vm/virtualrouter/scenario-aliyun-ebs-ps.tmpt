@@ -1,0 +1,10 @@
+import ../scenario.tmpt
+import ./deploy-aliyun-ebs-ps.tmpt
+
+vmName0 = test_vm0
+vmName1 = test_vm1
+vmName2 = test_vm2
+vmName3 = test_vm3
+vmName4 = test_vm4
+vmInstranceOfferingUuid2 = 234567
+imageUuid2 = 234567

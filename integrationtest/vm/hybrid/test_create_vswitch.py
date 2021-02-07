@@ -23,8 +23,17 @@ def test():
     hybrid.del_vswitch()
     test_util.test_pass('Create ECS VSwitch Test Success')
 
+def env_recover():
+    try:
+        hybrid.del_vswitch()
+    except:
+        pass
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global test_obj_dict
+    try:
+        hybrid.del_vswitch()
+    except:
+        pass
     test_lib.lib_error_cleanup(test_obj_dict)

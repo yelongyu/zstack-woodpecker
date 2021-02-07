@@ -6,11 +6,13 @@ New Integration Test for detaching volume under PS maintain mode.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_state as test_state
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.header.vm as vm_header
 import os
+import time
 
 _config_ = {
         'timeout' : 1000,
@@ -50,9 +52,10 @@ def test():
     volume.check()
     volume.attach(vm)
 
-    ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
-    ps_uuid = ps.uuid
-    ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    #ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
+    #ps_uuid = ps.uuid
+    #ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    test_stub.maintain_all_pss()
     if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
         test_util.test_fail('VM is expected to stop when PS change to maintain state')
 
@@ -60,12 +63,27 @@ def test():
     vm.check()
     volume.detach(vm.get_vm().uuid)
 
-    ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    #ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    test_stub.enable_all_pss()
     host_ops.reconnect_host(host_uuid)
     #vm_ops.reconnect_vr(vr_uuid)
+
+    time.sleep(5)
+    test_stub.ensure_hosts_connected(120)
+    test_stub.ensure_pss_connected()
     vrs = test_lib.lib_get_all_vrs()
     for vr in vrs:
-        vm_ops.start_vm(vr.uuid)  
+        vr_cond = res_ops.gen_query_conditions('uuid', '=', vr.uuid)
+        vr_inv = res_ops.query_resource(res_ops.VM_INSTANCE, vr_cond)[0]
+        if vr_inv.state == 'Stopped':
+            vm_ops.start_vm(vr.uuid)
+        else:
+            test_lib.lib_wait_target_up(vr_inv.vmNics[0].ip, '22', 360)
+            for _ in xrange(100):
+                if res_ops.query_resource(res_ops.VM_INSTANCE, vr_cond)[0].state != 'Running':
+                    time.sleep(3)
+                else:
+                    break
 
     vm.start()
     vm.check()

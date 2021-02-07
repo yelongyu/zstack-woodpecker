@@ -11,10 +11,14 @@ import time
 import datetime
 import uuid
 
+import apibinding.api_actions as api_actions
+import apibinding.inventory as inventory
+
 import zstacklib.utils.ssh as ssh
 import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.operations.license_operations as lic_ops
+import zstackwoodpecker.operations.account_operations as acc_ops
 
 TEST_TIME = 120
 
@@ -29,16 +33,37 @@ def get_license_info():
     lic_expired_date = lic_info.expiredDate
     return lic_info
 
+def get_license_addons_info():
+    global lic_issued_date
+    global lic_expired_date
+    lic_info = lic_ops.get_license_addons_info().addons[0]
+    if lic_issued_date == None or lic_expired_date != None:
+        lic_issued_date = lic_info.issuedDate
+    lic_expired_date = lic_info.expiredDate
+    return lic_info
+
 def get_license_issued_date():
     global lic_issued_date
     if lic_issued_date == None or lic_expired_date == None:
         get_license_info()
     return lic_issued_date
 
+def get_license_addons_issued_date():
+    global lic_issued_date
+    if lic_issued_date == None or lic_expired_date == None:
+        get_license_addons_info()
+    return lic_issued_date
+
 def get_license_expired_date():
     global lic_expired_date
     if lic_expired_date == None:
         get_license_info()
+    return lic_expired_date
+
+def get_license_addons_expired_date():
+    global lic_expired_date
+    if lic_expired_date == None:
+        get_license_addons_info()
     return lic_expired_date
 
 def execute_shell_in_process(cmd, timeout=10, logfd=None):
@@ -91,7 +116,7 @@ def execute_shell_in_process_stdout(cmd, tmp_file, timeout = 1200, no_timeout_ex
     return (process.returncode, stdout)
 
 def reload_default_license():
-    execute_shell_in_process('rm -rf /var/lib/zstack/license/license.txt')
+    execute_shell_in_process('rm -rf /var/lib/zstack/license/license*')
     result = lic_ops.reload_license()
 
 def gen_license(customer_name, user_name, duration, lic_type, cpu_num, host_num):
@@ -113,8 +138,21 @@ def gen_other_license(customer_name, user_name, duration, lic_type, cpu_num, hos
     (ret, file_path) = execute_shell_in_process_stdout("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, request_key), tmp_file)
     return file_path
 
+def gen_addons_license(customer_name, user_name, duration, lic_type, cpu_num, host_num, pro_mode):
+    tmp_file = '/tmp/%s' % uuid.uuid1().get_hex()
+    license_script = os.environ.get('licenseGenScript') 
+    lic_info = lic_ops.get_license_info()
+    test_util.test_logger("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, lic_info.inventory.licenseRequest, pro_mode))
+    (ret, file_path) = execute_shell_in_process_stdout("bash '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (license_script, customer_name, user_name, duration, lic_type, cpu_num, host_num, lic_info.inventory.licenseRequest, pro_mode), tmp_file)
+    return file_path
+
 def load_license(file_path):
     execute_shell_in_process('zstack-ctl install_license --license %s' % file_path)
+    result = lic_ops.reload_license()
+
+def update_license(node_uuid, file_path):
+    execute_shell_in_process('zstack-cli LogInByAccount accountName=admin password=password')
+    execute_shell_in_process('zstack-cli UpdateLicense managementNodeUuid=%s license=`base64 -w 0 %s`' % (node_uuid, file_path))
     result = lic_ops.reload_license()
 
 def check_license(user_name, cpu_num, host_num, expired, lic_type, issued_date=None, expired_date=None):
@@ -136,7 +174,25 @@ def check_license(user_name, cpu_num, host_num, expired, lic_type, issued_date=N
     if lic_info.issuedDate != issued_date:
         test_util.test_fail("License issue date info not correct")
     if lic_info.expiredDate != expired_date:
+        test_util.test_fail("License expire date info not correct")
 
+def check_license_addons(cpu_num, host_num, expired, lic_type, issued_date=None, expired_date=None):
+    if issued_date == None:
+        issued_date = get_license_addons_issued_date()
+    if expired_date == None:
+        expired_date = get_license_addons_expired_date()
+    lic_info = lic_ops.get_license_addons_info().addons[0]
+    if lic_info.cpuNum != cpu_num:
+        test_util.test_fail("License cpu info not correct")
+    if lic_info.hostNum != host_num:
+        test_util.test_fail("License host info not correct")
+    if lic_info.expired != expired:
+        test_util.test_fail("License expire info not correct")
+    if lic_info.licenseType != lic_type:
+        test_util.test_fail("License type info not correct")
+    if lic_info.issuedDate != issued_date:
+        test_util.test_fail("License issue date info not correct")
+    if lic_info.expiredDate != expired_date:
         test_util.test_fail("License expire date info not correct")
 
 def license_date_cal(issued_date, duration):
@@ -149,4 +205,25 @@ def license_date_cal(issued_date, duration):
         expired_time = issued_time + duration
         expired_date = datetime.datetime.fromtimestamp(expired_time).strftime('%Y-%m-%dT%H:%M:%S.000+08:00')
     return expired_date
+
+def create_zone(zone_name='ZONE1', session_uuid=None):
+    action = api_actions.CreateZoneAction()
+    action.name = zone_name
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add Zone [uuid:] %s [name:] %s' % \
+            (evt.uuid, action.name))
+    return evt.inventory
+
+def create_image_store_backup_storage(bs_name, bs_hostname, bs_username, bs_password, bs_url, bs_sshport, session_uuid=None):
+    action = api_actions.AddImageStoreBackupStorageAction()
+    action.name = bs_name
+    action.url = bs_url
+    action.hostname = bs_hostname
+    action.username = bs_username
+    action.password = bs_password
+    action.sshPort = bs_sshport
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create Sftp Backup Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
+    return evt.inventory
 

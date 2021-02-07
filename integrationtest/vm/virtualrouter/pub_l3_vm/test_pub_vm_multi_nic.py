@@ -22,7 +22,7 @@ def test():
     net_ops.attach_l3(flat_l3_vm.get_vm().vmNics[0].l3NetworkUuid, pub_l3_vm.get_vm().uuid)
     net_ops.attach_l3(vr_l3_vm.get_vm().vmNics[0].l3NetworkUuid, pub_l3_vm.get_vm().uuid)
 
-    for action in ('check', 'stop', 'start', 'check'):
+    for action in ('update', 'stop', 'start'):
         getattr(pub_l3_vm, action)()
 
     pub_nic_l3uuid_list = [nic.l3NetworkUuid for nic in pub_l3_vm.get_vm().vmNics]
@@ -34,7 +34,7 @@ def test():
     pub_l3_vm.remove_nic([nic.uuid for nic in pub_l3_vm.get_vm().vmNics if nic.l3NetworkUuid == vr_l3_vm.get_vm().vmNics[0].l3NetworkUuid][0])
     assert len(pub_l3_vm.get_vm().vmNics) == 1
 
-    for action in ('check', 'stop', 'start', 'check'):
+    for action in ('update', 'stop', 'start', 'check'):
         getattr(pub_l3_vm, action)()
 
 

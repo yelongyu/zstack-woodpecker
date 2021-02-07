@@ -32,7 +32,7 @@ def test():
     free = os.popen('free|grep Mem|awk \'{print $4}\'').read().replace('\n','')
     rate = float(free)/float(total)
 
-    expression = "host.mem.util{type=\"used\"} > " + str(1-rate) 
+    expression = "host.mem.util{type=\"used\"} > " + str(0.2-rate) 
     monitor_trigger = mon_ops.create_monitor_trigger(host.uuid, duration, expression)
 
     send_email = test_stub.create_email_media()

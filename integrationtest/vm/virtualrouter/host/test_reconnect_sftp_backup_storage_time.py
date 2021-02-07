@@ -26,7 +26,7 @@ def test():
     else:
         test_util.test_skip("current test suite is for ceph, and there is no sftp. Skip test")
 
-    recnt_timeout=5000
+    recnt_timeout=60000
     test_util.test_dsc('Test SFTP Backup Storage Reconnect within %s ms' % recnt_timeout)
 
     host_ops.reconnect_sftp_backup_storage(sftp_backup_storage_uuid, timeout=recnt_timeout) 

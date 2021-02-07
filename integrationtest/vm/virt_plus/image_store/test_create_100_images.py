@@ -22,7 +22,7 @@ _config_ = {
         'noparallel' : True
         }
 
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 test_obj_dict = test_state.TestStateDict()
 default_snapshot_depth = None
 test_depth = 120
@@ -52,7 +52,7 @@ def test():
         image = test_image.ZstackTestImage()
         image.set_creation_option(image_creation_option)
         image.create()
-        image.check()
+        # image.check()
         test_obj_dict.add_image(image)
         test_img_num += 1
 
@@ -69,3 +69,4 @@ def error_cleanup():
             'incrementalSnapshot.maxNum', default_snapshot_depth)
 
     test_lib.lib_error_cleanup(test_obj_dict)
+

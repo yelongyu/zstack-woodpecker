@@ -34,6 +34,30 @@ def create_volume_from_offering(volume_option):
     test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
     return evt.inventory
 
+def create_volume_from_diskSize(volume_option):
+    action = api_actions.CreateDataVolumeAction()
+    action.primaryStorageUuid = volume_option.get_primary_storage_uuid()
+    action.diskSize = volume_option.get_diskSize()
+    action.description = volume_option.get_description()
+    action.systemTags = volume_option.get_system_tags()
+    timeout = volume_option.get_timeout()
+    if not timeout:
+        action.timeout = 240000
+    else:
+        action.timeout = timeout
+
+    name = volume_option.get_name()
+    if not name:
+        action.name = 'test_volume'
+    else:
+        action.name = name
+
+    test_util.action_logger('Create [Volume:] %s with [disk size:] %s ' % (action.name, action.diskSize))
+    evt = account_operations.execute_action_with_session(action, volume_option.get_session_uuid())
+
+    test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
+    return evt.inventory
+
 def create_volume_template(volume_uuid, backup_storage_uuid_list, name = None, \
         session_uuid = None):
     action = api_actions.CreateDataVolumeTemplateFromVolumeAction()
@@ -50,10 +74,11 @@ def create_volume_template(volume_uuid, backup_storage_uuid_list, name = None, \
     return evt.inventory
 
 def create_volume_from_template(image_uuid, ps_uuid, name = None, \
-        host_uuid = None, session_uuid = None):
+        host_uuid = None, systemtags = None, session_uuid = None):
     action = api_actions.CreateDataVolumeFromVolumeTemplateAction()
     action.imageUuid = image_uuid
     action.primaryStorageUuid = ps_uuid
+    action.systemTags = systemtags
     if name:
         action.name = name
     else:
@@ -64,6 +89,38 @@ def create_volume_from_template(image_uuid, ps_uuid, name = None, \
 
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.test_logger('[Volume:] %s is created from [Volume Template:] %s on [Primary Storage:] %s.' % (evt.inventory.uuid, image_uuid, ps_uuid))
+    return evt.inventory
+
+def _create_volume_from_template(volume_option):
+    action = api_actions.CreateDataVolumeFromVolumeTemplateAction()
+    action.imageUuid = volume_option.get_volume_template_uuid()
+    action.primaryStorageUuid = volume_option.get_primary_storage_uuid()
+    name = volume_option.get_name()
+    if not name:
+        action.name = 'test_volume'
+    else:
+        action.name = name
+    test_util.action_logger('Create [Volume:] %s with [volume template:] %s ' % (action.name, action.imageUuid))
+    evt = account_operations.execute_action_with_session(action, volume_option.get_session_uuid())
+    test_util.test_logger('[volume:] %s is created.' % evt.inventory.uuid)
+    return evt.inventory
+
+def stop_volume(volume_uuid, session_uuid=None):
+    action = api_actions.ChangeVolumeStateAction()
+    action.uuid = volume_uuid
+    action.stateEvent = 'disable'
+    action.timeout = 240000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Stop Volume [uuid:] %s' % volume_uuid)
+    return evt.inventory
+
+def start_volume(volume_uuid, session_uuid=None):
+    action = api_actions.ChangeVolumeStateAction()
+    action.uuid = volume_uuid
+    action.stateEvent = 'enable'
+    action.timeout = 240000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Start Volume [uuid:] %s' % volume_uuid)
     return evt.inventory
 
 def recover_volume(volume_uuid, session_uuid=None):
@@ -85,7 +142,7 @@ def delete_volume(volume_uuid, session_uuid=None):
 def expunge_volume(volume_uuid, session_uuid=None):
     action = api_actions.ExpungeDataVolumeAction()
     action.uuid = volume_uuid
-    action.timeout = 60000
+    action.timeout = 240000
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Expunge Volume [uuid:] %s' % volume_uuid)
     return evt
@@ -108,6 +165,24 @@ def detach_volume(volume_uuid, vm_uuid=None, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
+def resize_volume(volume_uuid, size, session_uuid=None):
+    action = api_actions.ResizeRootVolumeAction()
+    action.uuid = volume_uuid
+    action.size = size
+    action.timeout = 240000
+    test_util.action_logger('Resize Volume [uuid:] %s to %s' % (volume_uuid, size))
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    return evt.inventory
+
+def resize_data_volume(volume_uuid, size, session_uuid=None):
+    action = api_actions.ResizeDataVolumeAction()
+    action.uuid = volume_uuid
+    action.size = size
+    action.timeout = 240000
+    test_util.action_logger('Resize Data Volume [uuid:] %s to %s' % (volume_uuid, size))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
 def create_snapshot(snapshot_option, session_uuid=None):
     action = api_actions.CreateVolumeSnapshotAction()
     action.volumeUuid = snapshot_option.get_volume_uuid()
@@ -124,6 +199,152 @@ def create_snapshot(snapshot_option, session_uuid=None):
             (action.name, snapshot.uuid, action.volumeUuid))
     return snapshot
 
+def create_backup(backup_option, session_uuid=None):
+    action = api_actions.CreateVolumeBackupAction()
+    action.volumeUuid = backup_option.get_volume_uuid()
+    action.backupStorageUuid = backup_option.get_backupStorage_uuid()
+    action.name = backup_option.get_name()
+    action.mode = backup_option.get_mode()
+    if not action.name:
+        action.name = 'backup_for_volume_%s' % action.volumeUuid
+    action.description = backup_option.get_description()
+    action.timeout = 240000
+    if backup_option.get_session_uuid():
+        session_uuid = backup_option.get_session_uuid()
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    backup = evt.inventory
+    test_util.action_logger('Create [Backup:] %s [uuid:] %s for [volume:] %s' % \
+            (action.name, backup.uuid, action.volumeUuid))
+    return backup
+
+def create_vm_backup(backup_option, session_uuid=None):
+    action = api_actions.CreateVmBackupAction()
+    action.backupStorageUuid = backup_option.get_backupStorage_uuid()
+    action.rootVolumeUuid = backup_option.get_volume_uuid()
+    action.name = backup_option.get_name()
+    action.mode = backup_option.get_mode()
+    if not action.name:
+        action.name = 'backup_for_vm_%s' % action.rootVolumeUuid
+    action.description = backup_option.get_description()
+    action.timeout = 240000
+    if backup_option.get_session_uuid():
+        session_uuid = backup_option.get_session_uuid()
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    backup = evt.inventories
+    return backup
+
+def create_database_backup(name, bs_uuid, session_uuid=None):
+    action = api_actions.CreateDatabaseBackupAction()
+    action.name = name
+    action.backupStorageUuid = bs_uuid
+    action.timeout = 240000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def delete_vm_backup(bs_uuids=None, group_uuid=None, session_uuid=None):
+    action = api_actions.DeleteVmBackupAction()
+    action.groupUuid = group_uuid
+    action.backupStorageUuids = bs_uuids
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def delete_volume_backup(bs_uuids=None, uuid=None, session_uuid=None):
+    action = api_actions.DeleteVolumeBackupAction()
+    action.uuid = uuid
+    action.backupStorageUuids = bs_uuids
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def revert_volume_from_backup(backup_uuid, session_uuid=None):
+    action = api_actions.RevertVolumeFromVolumeBackupAction()
+    action.uuid = backup_uuid
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('Revert [volume_uuid:] %s ' %  backup_uuid)
+    return evt.inventory
+
+
+def revert_vm_from_backup(group_uuid, session_uuid=None):
+    action = api_actions.RevertVmFromVmBackupAction()
+    action.groupUuid = group_uuid
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid) 
+    test_util.test_logger('Revert [volume_uuid:] %s ' %  group_uuid)
+    return evt.inventory
+    
+def sync_volume_backup_to_remote(backup_uuid, src, dst, session_uuid=None):
+    action = api_actions.SyncBackupFromImageStoreBackupStorageAction()
+    action.uuid = backup_uuid
+    action.srcBackupStorageUuid = src
+    action.dstBackupStorageUuid = dst
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def recover_volume_backup_from_remote(backup_uuid, src, dst, session_uuid=None):
+    action = api_actions.RecoverBackupFromImageStoreBackupStorageAction()
+    action.uuid = backup_uuid
+    action.srcBackupStorageUuid = src
+    action.dstBackupStorageUuid = dst
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def sync_vm_backup(imagestore_uuid, session_uuid=None):
+    action = api_actions.SyncVmBackupAction()
+    action.imageStoreUuid = imagestore_uuid
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Sync Vm Backup')
+    return evt
+
+def sync_volume_backup(imagestore_uuid, session_uuid=None):
+    action = api_actions.SyncVolumeBackupAction()
+    action.imageStoreUuid = imagestore_uuid
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Sync Volume Backup')
+    return evt
+
+def sync_database_backup(imagestore_uuid, session_uuid=None):
+    action = api_actions.SyncDatabaseBackupAction()
+    action.imageStoreUuid = imagestore_uuid
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.test_logger('Sync Database Backup')
+    return evt
+
+def sync_vm_backup_to_remote(group_uuid, src, dst, session_uuid=None):
+    action = api_actions.SyncVmBackupFromImageStoreBackupStorageAction()
+    action.groupUuid = group_uuid
+    action.srcBackupStorageUuid = src
+    action.dstBackupStorageUuid = dst
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def recover_vm_backup_from_remote(group_uuid, src, dst, session_uuid=None):
+    action = api_actions.RecoverVmBackupFromImageStoreBackupStorageAction()
+    action.groupUuid = group_uuid
+    action.srcBackupStorageUuid = src
+    action.dstBackupStorageUuid = dst
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def create_vm_from_vm_backup(name, group_uuid, instanceOfferingUuid, defaultL3NetworkUuid, l3NetworkUuids, session_uuid=None):
+    action = api_actions.CreateVmFromVmBackupAction()
+    action.name = name
+    action.groupUuid = group_uuid
+    action.instanceOfferingUuid = instanceOfferingUuid
+    action.l3NetworkUuids = l3NetworkUuids
+    action.defaultL3NetworkUuid = defaultL3NetworkUuid
+    action.timeout = 1800000
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+    
 def create_snapshot_scheduler(snapshot_option, type, name, start_time=None, interval=None, repeatCount=None, cron=None, session_uuid=None):
     action = api_actions.CreateVolumeSnapshotSchedulerAction()
     action.volumeUuid = snapshot_option.get_volume_uuid()
@@ -149,15 +370,23 @@ def create_snapshot_scheduler(snapshot_option, type, name, start_time=None, inte
 def delete_snapshot(snapshot_uuid, session_uuid=None):
     action = api_actions.DeleteVolumeSnapshotAction()
     action.uuid = snapshot_uuid
-    action.timeout = 240000
+    action.timeout = 600000
     test_util.action_logger('Delete [Snapshot:] %s ' % snapshot_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def batch_delete_snapshot(snapshot_uuid_list, session_uuid=None):
+    action = api_actions.BatchDeleteVolumeSnapshotAction()
+    action.uuids = snapshot_uuid_list
+    action.timeout = 300000
+    test_util.action_logger('Batch Delete [Snapshots:] %s ' % snapshot_uuid_list)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
 def use_snapshot(snapshot_uuid, session_uuid=None):
     action = api_actions.RevertVolumeFromSnapshotAction()
     action.uuid = snapshot_uuid
-    action.timeout = 24000
+    action.timeout = 240000
     test_util.action_logger('Revert Volume by [Snapshot:] %s ' % snapshot_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
@@ -209,6 +438,7 @@ def create_volume_offering(disk_offering_option, \
     action.name = disk_offering_option.get_name()
     action.description = disk_offering_option.get_description()
     action.allocatorStrategy = disk_offering_option.get_allocatorStrategy()
+    action.systemTags = disk_offering_option.get_system_tags()
     test_util.action_logger('Create disk offering: name: %s, diskSize: %d' \
             % (action.name, action.diskSize))
     evt = account_operations.execute_action_with_session(action, session_uuid)
@@ -258,5 +488,86 @@ def get_volume_migratable_host(volume_uuid, session_uuid = None):
     action = api_actions.LocalStorageGetVolumeMigratableHostsAction()
     action.volumeUuid = volume_uuid
     test_util.action_logger('Get Volume: %s Migratable Volume for Local Storage:' % volume_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventories
+
+def sync_volume_size(volume_uuid, session_uuid = None):
+    action = api_actions.SyncVolumeSizeAction()
+    action.uuid = volume_uuid
+    test_util.action_logger('Sync Volume: %s Size' % volume_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def update_volume(volume_uuid, name, description, session_uuid = None):
+    action = api_actions.UpdateVolumeAction()
+    action.uuid = volume_uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update Volume: %s' % volume_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def update_snapshot(volume_uuid, name, description, session_uuid = None):
+    action = api_actions.UpdateVolumeSnapshotAction()
+    action.uuid = volume_uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update Snapshot: %s' % volume_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def check_volume_snapshot_group_availability(uuids=None, session_uuid=None):
+    action = api_actions.CheckVolumeSnapshotGroupAvailabilityAction()
+    if isinstance(uuids, list):
+        action.uuids = uuids
+    else:
+        action.uuids = [uuids]
+
+    test_util.action_logger("Check volume snapshot group availability: [%s]") % str(uuids)
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.results
+
+def create_volume_snapshot_group(name, rootVolumeUuid, description=None, session_uuid=None):
+    action = api_actions.CreateVolumeSnapshotGroupAction()
+    action.name = name
+    action.rootVolumeUuid = rootVolumeUuid
+    if description:
+        action.description = description
+
+    test_util.test_logger("Create volume [%s] snapshot group" % rootVolumeUuid)
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def revert_vm_from_snapshot_group(uuid, session_uuid=None):
+    action = api_actions.RevertVmFromSnapshotGroupAction()
+    action.uuid = uuid
+    test_util.test_logger("revert vm snapshot group [%s]" % uuid)
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.results
+
+def ungroup_volume_snapshot_group(uuid, session_uuid=None):
+    action = api_actions.UngroupVolumeSnapshotGroupAction()
+    action.uuid = uuid
+    test_util.test_logger("ungroup vm snapshot group [%s]" % uuid)
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.success
+
+def delete_volume_snapshot_group(uuid, session_uuid=None):
+    action = api_actions.DeleteVolumeSnapshotGroupAction()
+    action.uuid = uuid
+    test_util.test_logger("delete vm snapshot group [%s]" % uuid)
+
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.results
+
+def get_data_volume_attachable_vm(volumeUuid, session_uuid=None):
+    action = api_actions.GetDataVolumeAttachableVmAction()
+    action.volumeUuid = volumeUuid
+    test_util.test_logger("get datavolume [%s] attachable vm" % volumeUuid)
+
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventories

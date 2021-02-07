@@ -6,10 +6,11 @@ Test Create Image Template from Root Volume
 '''
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
-import test_stub
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm
+
+test_stub = test_lib.lib_get_specific_stub()
 
 #test_obj_dict is to track test resource. They will be cleanup if there will be any exception in testing.
 test_obj_dict = test_state.TestStateDict()
@@ -49,7 +50,7 @@ def test():
     vm2.check()
     vm1.start()
     vm1.check()
-    
+
     vm2.destroy()
     vm1.destroy()
     image.delete()
@@ -61,3 +62,4 @@ def test():
 def error_cleanup():
     global test_obj_dict
     test_lib.lib_error_cleanup(test_obj_dict)
+

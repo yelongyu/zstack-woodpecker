@@ -26,6 +26,7 @@ max_attempts = None
 storagechecker_timeout = None
 test_stub = test_lib.lib_get_test_stub()
 
+
 def test():
     global vm
     global host_uuid
@@ -34,7 +35,10 @@ def test():
     global max_attempts
     global storagechecker_timeout
 
-    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint']
+    host_username = os.environ.get('hostUsername')
+    host_password = os.environ.get('hostPassword')
+
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, inventory.NFS_PRIMARY_STORAGE_TYPE, 'SharedMountPoint', 'AliyunNAS']
     test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
 
     if test_lib.lib_get_ha_enable() != 'true':
@@ -55,7 +59,8 @@ def test():
     #        vm_ops.start_vm(vr.uuid)
     #time.sleep(60)
 
-    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    #mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    mn_ip = test_stub.get_mn_host_management_ip()
     conditions = res_ops.gen_query_conditions('type', '=', 'UserVm')
     instance_offering_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING, conditions)[0].uuid
     conditions = res_ops.gen_query_conditions('state', '=', 'Enabled')
@@ -81,19 +86,17 @@ def test():
     test_util.test_logger("host %s is disconnecting" %(host_ip))
     host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     ha_ops.set_vm_instance_ha_level(vm.get_vm().uuid, "NeverStop")
-#    l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
+    #l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
     #l2interface = test_lib.lib_get_l2s_by_vm(vm.get_vm())[0].physicalInterface
     l2_network_interface = test_stub.get_host_l2_nic_name("br_eth0")
-    cmd = "ifconfig %s down && sleep 180 && ifconfig %s up" % (l2_network_interface, l2_network_interface)
-    host_username = os.environ.get('hostUsername')
-    host_password = os.environ.get('hostPassword')
+    cmd = "ifconfig %s down && sleep 300 && ifconfig %s up && ip route add default via 172.20.0.1 dev %s" % (l2_network_interface, l2_network_interface, l2_network_interface)
     rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 240)
     if not rsp:
 	test_util.test_logger("host is expected to shutdown after its network down for a while")
 
     #test_util.test_logger("wait for 600 seconds")
-    test_util.test_logger("wait for 180 seconds")
-    time.sleep(180)
+    test_util.test_logger("wait for 300 seconds")
+    time.sleep(300)
     vm.update()
     if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
 	test_util.test_fail("VM is expected to start running on another host")

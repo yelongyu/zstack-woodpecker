@@ -1,17 +1,8 @@
 <integrationTest>
-    <suite name="multi clusters test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="2">
+    <suite name="multi clusters test" setupCase="suite_setup.py" teardownCase="suite_teardown.py" repeat="1" parallel="1">
         <case timeout='300' repeat='1'>test_create_vm.py</case>
         <case timeout='300' repeat='1' noparallel='True'>test_detach_l2_vr.py</case>
         <case timeout='300' repeat='1'>migrate/test_migrate_vm.py</case>
         <case timeout='300' repeat='1' noparallel='True'>test_restore_mysql.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrate_vm.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrate_data_volume.py</case>
-        <case timeout='600' repeat='1' noparallel='True'>data_migration/test_migrate_image.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_get_migration_candidate﻿.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrated_vm_crt_sp.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrated_vm_crt_image.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrated_data_volume_crt_sp.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_clone_migrated_vm.py</case>
-        <case timeout='600' repeat='1'>data_migration/test_migrate_cloned_vm.py</case>
     </suite>
 </integrationTest>

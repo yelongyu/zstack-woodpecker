@@ -39,7 +39,7 @@ def test():
     test_stub.make_ssh_no_password(vm_ip, tmp_file)
 
     test_util.test_dsc('Update MN IP')
-    test_stub.update_mn_ip(vm_ip, vm_ip, tmp_file)
+    test_stub.update_mn_ip(vm_ip, tmp_file)
     test_stub.start_mn(vm_ip, tmp_file)
     test_stub.check_installation(vm_ip, tmp_file)
     #test_stub.create_sftp_backup_storage(vm_ip, tmp_file)
@@ -49,6 +49,7 @@ def test():
     test_stub.upgrade_zstack(vm_ip, zstack_latest_path, tmp_file) 
     test_stub.check_zstack_version(vm_ip, tmp_file, zstack_latest_version)
     test_stub.start_mn(vm_ip, tmp_file)
+    test_stub.check_mn_running(vm_ip, tmp_file)
     #test_stub.check_zstack_or_mevoco(vm_ip, tmp_file, 'ZStack-enterprise')
     #test_stub.check_zstack_or_mevoco(vm_ip, tmp_file, 'ZStack')
     test_stub.check_installation(vm_ip, tmp_file)

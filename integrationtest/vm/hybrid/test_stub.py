@@ -23,8 +23,10 @@ import zstackwoodpecker.operations.net_operations as net_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.hybrid_operations as hyb_ops
+import zstackwoodpecker.operations.nas_operations as nas_ops
 import zstackwoodpecker.operations.ipsec_operations as ipsec_ops
 from multiprocessing import Process
+from jinja2.bccache import Bucket
 
 Port = test_state.Port
 
@@ -44,7 +46,8 @@ target_ports = rule1_ports + rule2_ports + rule3_ports + rule4_ports + rule5_por
 
 datacenter_type = os.getenv('datacenterType')
 _postfix = time.strftime('%m%d-%H%M%S', time.localtime())
-
+TEST_ECS_NAME = 'ZStack-Hybrid-Test-ECS-Instance'
+ECS_IMAGE_NAME = 'zstack-test-ecs-image'
 
 class HybridObject(object):
     def __init__(self):
@@ -56,7 +59,9 @@ class HybridObject(object):
         self.vswitch = None
         self.vpn = None
         self.eip = None
+        self.eip_create = None
         self.sg = None
+        self.sg_create = None
         self.sg_rule = None
         self.vm = None
         self.vr = None
@@ -66,6 +71,8 @@ class HybridObject(object):
         self.oss_bucket_create = None
         self.ecs_instance = None
         self.ecs_image = None
+        self.disk = None
+        self.snapshot = None
         self.vpn_gateway = None
         self.user_vpn_gateway = None
         self.user_gw_ip = None
@@ -74,13 +81,20 @@ class HybridObject(object):
         self.vpn_connection = None
         self.cond_image_system = res_ops.gen_query_conditions('type', '=', 'system')
 
-
-    def add_ks(self):
-        ks_existed = hyb_ops.query_aliyun_key_secret()
-        if ks_existed:
-            self.ks = ks_existed[0]
-        else:
-            self.ks = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+    def add_ks(self, ks2):
+        ks_existed = hyb_ops.query_hybrid_key_secret()
+        for ks in ks_existed:
+            if ks.name == 'test_hybrid2' and ks2:
+                self.ks = ks
+            elif ks.name == 'test_hybrid' and not ks2:
+                self.ks = ks
+        if not self.ks:
+            if ks2:
+                self.ks = hyb_ops.add_hybrid_key_secret('test_hybrid2', 'test for hybrid', os.getenv('aliyunKey2'), os.getenv('aliyunSecret2'))
+            else:
+                self.ks = hyb_ops.add_hybrid_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+        hyb_ops.attach_hybrid_key(self.ks.uuid)
+        time.sleep(5)
 
     def clean_datacenter(self):
         '''
@@ -91,8 +105,8 @@ class HybridObject(object):
             for d in datacenter_local:
                 hyb_ops.del_datacenter_in_local(d.uuid)
 
-    def add_datacenter_iz(self, add_datacenter_only=False, check_vpn_gateway=False, region_id=None, check_ecs=False, check_prepaid_ecs=False):
-        self.add_ks()
+    def add_datacenter_iz(self, add_datacenter_only=False, check_vpn_gateway=False, region_id=None, check_ecs=False, check_prepaid_ecs=False, ks2=None):
+        self.add_ks(ks2=ks2)
         self.clean_datacenter()
         if region_id:
             self.datacenter = hyb_ops.add_datacenter_from_remote(datacenter_type, region_id, 'datacenter for test')
@@ -108,6 +122,7 @@ class HybridObject(object):
                 datacenter = hyb_ops.add_datacenter_from_remote(datacenter_type, r, 'datacenter for test')
             except hyb_ops.ApiError, e:
                 err_list.append(e)
+                continue
             if datacenter and add_datacenter_only:
                 self.datacenter = datacenter
                 self.region_id = r
@@ -115,8 +130,8 @@ class HybridObject(object):
             elif len(err_list) == len(regions):
                 raise hyb_ops.ApiError("Failed to add DataCenter: %s" % err_list)
             # Add Identity Zone
-            iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, r)
-            vpn_gateway_list = []
+            iz_list = hyb_ops.get_identity_zone_from_remote(datacenter_type, r, datacenter.uuid)
+            vpn_gateway_normal = []
             prepaid_ecs_list = []
             for iz in iz_list:
                 if not iz.availableInstanceTypes:
@@ -124,10 +139,11 @@ class HybridObject(object):
                 iz_inv = hyb_ops.add_identity_zone_from_remote(datacenter_type, datacenter.uuid, iz.zoneId)
                 if check_vpn_gateway:
                     vpn_gateway_list = hyb_ops.sync_vpc_vpn_gateway_from_remote(datacenter.uuid)
-                    if iz_inv and vpn_gateway_list:
+                    vpn_gateway_normal = [gw for gw in vpn_gateway_list if gw.businessStatus == 'Normal']
+                    if iz_inv and vpn_gateway_normal:
                         self.datacenter = datacenter
                         self.iz = iz_inv
-                        self.vpn_gateway = vpn_gateway_list[0]
+                        self.vpn_gateway = vpn_gateway_normal[0]
                         return
                     else:
                         self.del_iz(iz_inv.uuid)
@@ -156,13 +172,13 @@ class HybridObject(object):
                     self.dc_uuid = datacenter.uuid
                     self.zone_id = iz_inv.zoneId
                     return
-            if check_vpn_gateway and vpn_gateway_list:
+            if check_vpn_gateway and vpn_gateway_normal:
                 break
             elif check_prepaid_ecs and prepaid_ecs_list:
                 break
             else:
                 hyb_ops.del_datacenter_in_local(datacenter.uuid)
-        if check_vpn_gateway and not vpn_gateway_list:
+        if check_vpn_gateway and not vpn_gateway_normal:
             test_util.test_fail("VpnGate for ipsec vpn connection was not found in all available dataCenter")
         elif check_prepaid_ecs and not prepaid_ecs_list:
             test_util.test_fail("Prepaid ECS was not found in all available dataCenter")
@@ -211,9 +227,12 @@ class HybridObject(object):
             condition = res_ops.gen_query_conditions('zoneId', '=', self.iz.zoneId)
             assert not hyb_ops.query_iz_local(condition)
 
-    def check_resource(self, ops, cond_name, cond_val, query_method):
+    def check_resource(self, ops, cond_name, cond_val, query_method, aliyun_nas=False):
         condition = res_ops.gen_query_conditions(cond_name, '=', cond_val)
-        query_str = 'hyb_ops.%s(condition)' % query_method
+        if aliyun_nas:
+            query_str = 'nas_ops.%s(condition)' % query_method
+        else:
+            query_str = 'hyb_ops.%s(condition)' % query_method
         if ops == 'create':
             assert eval(query_str)
         elif ops == 'delete':
@@ -221,19 +240,25 @@ class HybridObject(object):
         elif ops == 'sync':
             return eval(query_str)[0]
 
-    def create_bucket(self):
+    def create_bucket(self, gc=False):
+        if gc:
+            bucket_remote = hyb_ops.get_oss_bucket_name_from_remote(self.datacenter.uuid)
+            if bucket_remote:
+                for bucket in bucket_remote:
+                    if 'zstack-test-oss-bucket' in bucket.bucketName:
+                        self.del_bucket(bucket.bucketName)
         self.bucket_name = 'zstack-test-oss-bucket-%s-%s' % (_postfix, self.region_id)
         self.oss_bucket = hyb_ops.create_oss_bucket_remote(self.datacenter.uuid, self.bucket_name, 'created-by-zstack-for-test')
         self.oss_bucket_create = True
         self.check_resource('create', 'bucketName', self.bucket_name, 'query_oss_bucket_file_name')
 
-    def add_bucket(self):
+    def add_bucket(self, gc=False):
         bucket_remote = hyb_ops.get_oss_bucket_name_from_remote(self.datacenter.uuid)
-        if bucket_remote:
+        if bucket_remote and not gc:
             self.bucket_name = bucket_remote[0].bucketName
             self.oss_bucket = hyb_ops.add_oss_bucket_from_remote(self.datacenter.uuid, self.bucket_name)
         else:
-            self.create_bucket()
+            self.create_bucket(gc=gc)
         bucket_local = hyb_ops.query_oss_bucket_file_name()
         bucket_name_local = [bk.bucketName for bk in bucket_local]
         assert self.bucket_name in bucket_name_local
@@ -260,16 +285,18 @@ class HybridObject(object):
                 oss_bucket_attr_eq = "self.oss_bucket.%s == '%s'" % (k, oss_bucket_attr[k])
                 assert eval(oss_bucket_attr_eq)
 
-    def del_bucket(self, remote=True):
+    def del_bucket(self, bucket_name=None, remote=True):
+        bucket_name = bucket_name if bucket_name else self.bucket_name
         if remote:
-            condition = res_ops.gen_query_conditions('bucketName', '=', self.bucket_name)
+            condition = res_ops.gen_query_conditions('bucketName', '=', bucket_name)
             if not hyb_ops.query_oss_bucket_file_name(condition):
-                self.oss_bucket = hyb_ops.add_oss_bucket_from_remote(self.datacenter.uuid, self.bucket_name)
-            bucket_file = hyb_ops.get_oss_bucket_file_from_remote(self.oss_bucket.uuid).files
-            if bucket_file:
+                self.oss_bucket = hyb_ops.add_oss_bucket_from_remote(self.datacenter.uuid, bucket_name)
+            bucket_file = hyb_ops.get_oss_bucket_file_from_remote(self.oss_bucket.uuid)
+            files = bucket_file.files
+            if files:
                 time.sleep(20)
-                for i in bucket_file:
-                    hyb_ops.del_oss_bucket_file_remote(self.oss_bucket.uuid, i)
+                for f in files:
+                    hyb_ops.del_oss_bucket_file_remote(self.oss_bucket.uuid, f)
             time.sleep(10)
             hyb_ops.del_oss_bucket_remote(self.oss_bucket.uuid)
         else:
@@ -277,21 +304,28 @@ class HybridObject(object):
                 hyb_ops.del_oss_bucket_name_in_local(self.oss_bucket.uuid)
             elif self.oss_bucket_create:
                 hyb_ops.del_oss_bucket_name_in_local(self.oss_bucket_create.uuid)
-        self.check_resource('delete', 'bucketName', self.bucket_name, 'query_oss_bucket_file_name')
+        self.check_resource('delete', 'bucketName', bucket_name, 'query_oss_bucket_file_name')
 
-    def create_aliyun_disk(self):
+    def create_aliyun_disk(self, gc=True):
+        if gc:
+            vol_remote = hyb_ops.sync_aliyun_disk_from_remote(self.iz.uuid)
+            for vol in vol_remote:
+                if vol.diskType != 'system':
+                    self.del_aliyun_disk(vol_uuid=vol.uuid, check=False)
         disk_name = 'zstack-test-aliyun-disk-%s' % _postfix
         self.disk = hyb_ops.create_aliyun_disk_remote(disk_name, self.iz.uuid, 20, disk_category='cloud_efficiency')
         self.check_resource('create', 'diskId', self.disk.diskId, 'query_aliyun_disk_local')
         time.sleep(10)
 
-    def del_aliyun_disk(self, remote=True):
+    def del_aliyun_disk(self, remote=True, vol_uuid=None, check=True):
+        disk_uuid = vol_uuid if vol_uuid else self.disk.uuid
         if remote:
-            hyb_ops.del_aliyun_disk_remote(self.disk.uuid)
+            hyb_ops.del_aliyun_disk_remote(disk_uuid)
             hyb_ops.sync_aliyun_disk_from_remote(self.iz.uuid)
         else:
             hyb_ops.del_aliyun_disk_in_local(self.disk.uuid)
-        self.check_resource('delete', 'diskId', self.disk.diskId, 'query_aliyun_disk_local')
+        if check:
+            self.check_resource('delete', 'diskId', self.disk.diskId, 'query_aliyun_disk_local')
 
     def attach_aliyun_disk(self):
         hyb_ops.attach_aliyun_disk_to_ecs(self.ecs_instance.uuid, disk_uuid=self.disk.uuid)
@@ -333,8 +367,18 @@ class HybridObject(object):
                     disk_attr_eq = "self.disk.%s == '%s'" % (k, disk_attr[k])
                     assert eval(disk_attr_eq)
 
-    def create_aliyun_snapshot(self, disk_type='data'):
-        snapshot_name = 'zstack-test-aliyun-snapshot-%s' % _postfix
+    def create_aliyun_snapshot(self, disk_type='data', gc=False):
+        sp_name_prefix = 'zstack-test-aliyun-snapshot-'
+        snapshot_name = sp_name_prefix + _postfix
+        if gc:
+            last_sps = hyb_ops.sync_aliyun_snapshot_from_remote(self.datacenter.uuid)
+            if last_sps:
+                for sp in last_sps:
+                    if sp_name_prefix in sp.name:
+                        try:
+                            hyb_ops.del_aliyun_snapshot_remote(sp.uuid)
+                        except:
+                            pass
         if disk_type == 'system':
             condition = res_ops.gen_query_conditions('ecsInstanceUuid', '=', self.ecs_instance.uuid)
             self.system_disk = hyb_ops.query_aliyun_disk_local(condition)[0]
@@ -360,13 +404,15 @@ class HybridObject(object):
                 snapshot_attr_eq = "self.snapshot.%s == '%s'" % (k, snapshot_attr[k])
                 assert eval(snapshot_attr_eq)
 
-    def del_aliyun_snapshot(self, remote=True):
+    def del_aliyun_snapshot(self, remote=True, sp_uuid=None):
+        spuuid = sp_uuid if sp_uuid else self.snapshot.uuid
         if remote:
-            hyb_ops.del_aliyun_snapshot_remote(self.snapshot.uuid)
+            hyb_ops.del_aliyun_snapshot_remote(spuuid)
             hyb_ops.sync_aliyun_snapshot_from_remote(self.datacenter.uuid)
         else:
             hyb_ops.del_aliyun_snapshot_in_local(self.snapshot.uuid)
-        self.check_resource('delete', 'snapshotId', self.snapshot.snapshotId, 'query_aliyun_snapshot_local')
+        if not sp_uuid:
+            self.check_resource('delete', 'snapshotId', self.snapshot.snapshotId, 'query_aliyun_snapshot_local')
 
     def sync_vpn_gateway(self):
         hyb_ops.sync_vpc_vpn_gateway_from_remote(self.datacenter.uuid)
@@ -378,8 +424,6 @@ class HybridObject(object):
         self.check_resource('delete', 'gatewayId', self.vpn_gateway.gatewayId, 'query_vpc_vpn_gateway_local')
 
     def update_vpn_gateway(self, name=None, description=None):
-        name = 'vpn-gateway-%s' % _postfix
-        description = 'vpn-gateway-for-test-%s' % _postfix
         vpn_gateway_attr = {'name':name,
                             'description':description,
                             }
@@ -390,7 +434,12 @@ class HybridObject(object):
                 vpn_gateway_attr_eq = "self.vpn_gateway.%s == '%s'" % (k, vpn_gateway_attr[k])
                 assert eval(vpn_gateway_attr_eq)
 
-    def create_eip(self):
+    def create_eip(self, gc=True):
+        if gc:
+            self.sync_eip()
+            eip_local = hyb_ops.query_hybrid_eip_local()
+            for eip in eip_local:
+                self.del_eip(eip=eip)
         self.eip = hyb_ops.create_hybrid_eip(self.datacenter.uuid, 'zstack-test-eip', '1')
         self.eip_create = True
         self.check_resource('create', 'eipId', self.eip.eipId, 'query_hybrid_eip_local')
@@ -400,13 +449,14 @@ class HybridObject(object):
         if return_val:
             return self.check_resource('sync', 'eipId', self.eip.eipId, 'query_hybrid_eip_local')
 
-    def del_eip(self, remote=True):
+    def del_eip(self, eip=None, remote=True):
+        eip = eip if eip else self.eip
         if remote:
-            hyb_ops.del_hybrid_eip_remote(self.eip.uuid)
+            hyb_ops.del_hybrid_eip_remote(eip.uuid)
             self.sync_eip()
         else:
-            hyb_ops.del_hybrid_eip_local(self.eip.uuid)
-        self.check_resource('delete', 'eipId', self.eip.eipId, 'query_hybrid_eip_local')
+            hyb_ops.del_hybrid_eip_local(eip.uuid)
+        self.check_resource('delete', 'eipId', eip.eipId, 'query_hybrid_eip_local')
 
     def get_eip(self, in_use=False, sync_eip=False):
         self.sync_eip()
@@ -443,9 +493,10 @@ class HybridObject(object):
         self.get_eip(sync_eip=True)
         assert self.eip.status.lower() == 'available'
 
-    def check_eip_accessibility(self):
-        self.get_eip(in_use=True)
-        cmd = "sshpass -p Password123 ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % self.eip.eipAddress
+    def check_eip_accessibility(self, eip):
+#         self.get_eip(in_use=True)
+        password = 'ZStack_Test%ECS&Password123'
+        cmd = "sshpass -p '%s' ssh -o StrictHostKeyChecking=no root@%s 'ls /'" % (password, eip)
         for _ in xrange(60):
             cmd_status = commands.getstatusoutput(cmd)[0]
             if cmd_status == 0:
@@ -550,7 +601,11 @@ class HybridObject(object):
                 vswitch_attr_eq = "self.vswitch.%s == '%s'" % (k, vswitch_attr[k])
                 assert eval(vswitch_attr_eq)
 
-    def create_sg(self):
+    def create_sg(self, gc=False):
+        if gc:
+            sg_remote = hyb_ops.sync_ecs_security_group_from_remote(self.vpc.uuid)
+            for sg in sg_remote:
+                self.del_sg(sg_uuid=sg.uuid, check=False)
         sg_name = 'zstack-test-ecs-security-group-%s' % _postfix
         self.sg = hyb_ops.create_ecs_security_group_remote(sg_name, self.vpc.uuid)
         time.sleep(20)
@@ -562,13 +617,15 @@ class HybridObject(object):
         if return_val:
             return self.check_resource('sync', 'securityGroupId', self.sg.securityGroupId, 'query_ecs_security_group_local')
 
-    def del_sg(self, remote=True):
+    def del_sg(self, remote=True, sg_uuid=None, check=True):
+        sguuid = sg_uuid if sg_uuid else self.sg.uuid
         if remote:
-            self.sg = self.sync_sg(return_val=True)
-            hyb_ops.del_ecs_security_group_remote(self.sg.uuid)
+            self.sg = self.sync_sg(return_val=check)
+            hyb_ops.del_ecs_security_group_remote(sguuid)
         else:
             hyb_ops.del_ecs_security_group_in_local(self.sg.uuid)
-        self.check_resource('delete', 'securityGroupId', self.sg.securityGroupId, 'query_ecs_security_group_local')
+        if check:
+            self.check_resource('delete', 'securityGroupId', self.sg.securityGroupId, 'query_ecs_security_group_local')
 
     def get_sg(self):
         self.sync_sg()
@@ -640,22 +697,33 @@ class HybridObject(object):
             self.vbr_desc = self.vbr.description
 
     def update_vbr(self, name=None, description=None):
-        name = 'aliyun-vbr-%s' % _postfix
-        description = 'test-aliyun-vbr-%s' % _postfix
-        vbr_attr = {'name':name,
-                    'description':description,
-                    }
-        for k in vbr_attr.keys():
-            if vbr_attr[k]:
-                hyb_ops.update_vbr(self.vbr.uuid, **vbr_attr)
-                self.sync_vbr(get_org_name=False)
-                vbr_attr_eq = "self.vbr.%s == '%s'" % (k, vbr_attr[k])
-                assert eval(vbr_attr_eq)
-        hyb_ops.update_vbr(self.vbr.uuid, name=self.vbr_name, description=self.vbr_desc)
+        if name or description:
+            vbr_attr = {'name':name,
+                        'description':description,
+                        }
+            for k in vbr_attr.keys():
+                if vbr_attr[k]:
+                    hyb_ops.update_vbr(self.vbr.uuid, **vbr_attr)
+                    self.sync_vbr(get_org_name=False)
+                    vbr_attr_eq = "self.vbr.%s == '%s'" % (k, vbr_attr[k])
+                    assert eval(vbr_attr_eq)
+        else:
+            hyb_ops.update_vbr(self.vbr.uuid, name=self.vbr_name, description=self.vbr_desc)
 
-    def create_user_vpn_gateway(self):
+    def create_user_vpn_gateway(self, gc=False):
         if not self.user_gw_ip:
             self.user_gw_ip = '192.168.%s.%s' % (random.randint(1,254), random.randint(1,254))
+        if gc:
+            cond = res_ops.gen_query_conditions('name', '=', 'zstack-test-user-vpn-gateway')
+            cond2 = res_ops.gen_query_conditions('name', '=', 'Vpc-User-Vpn-Gateway')
+            self.sync_user_vpn_gateway()
+            user_vpn_local = hyb_ops.query_vpc_user_vpn_gateway_local(cond)
+            user_vpn_local.extend(hyb_ops.query_vpc_user_vpn_gateway_local(cond2))
+            for vpn in user_vpn_local:
+                try:
+                    hyb_ops.del_vpc_user_vpn_gateway_remote(vpn.uuid)
+                except:
+                    pass
         self.user_vpn_gateway = hyb_ops.create_vpc_user_vpn_gateway(self.datacenter.uuid, gw_ip=self.user_gw_ip, gw_name="zstack-test-user-vpn-gateway")
         time.sleep(10)
         self.check_resource('create', 'gatewayId', self.user_vpn_gateway.gatewayId, 'query_vpc_user_vpn_gateway_local')
@@ -666,13 +734,18 @@ class HybridObject(object):
             return self.check_resource('sync', 'gatewayId', self.user_vpn_gateway.gatewayId, 'query_vpc_user_vpn_gateway_local')
 
     def get_user_vpn_gateway(self, vip):
+        nated_vip_list = os.getenv('natedPubIP').split(',')
+        if vip.ip[-1] == '1':
+            vip = nated_vip_list[0]
+        else:
+            vip = nated_vip_list[-1]
         self.sync_user_vpn_gateway()
         user_vpn_gw_local = hyb_ops.query_vpc_user_vpn_gateway_local()
-        user_vpn_gw = [gw for gw in user_vpn_gw_local if gw.ip == vip.ip]
+        user_vpn_gw = [gw for gw in user_vpn_gw_local if gw.ip == vip]
         if user_vpn_gw:
             self.user_vpn_gateway = user_vpn_gw[0]
         else:
-            self.user_gw_ip = vip.ip
+            self.user_gw_ip = vip
             self.create_user_vpn_gateway()
 
     def update_user_vpn_gateway(self, name=None, description=None):
@@ -694,7 +767,19 @@ class HybridObject(object):
             hyb_ops.del_vpc_user_vpn_gateway_local(self.user_vpn_gateway.uuid)
         self.check_resource('delete', 'gatewayId', self.user_vpn_gateway.gatewayId, 'query_vpc_user_vpn_gateway_local')
 
-    def create_ecs_image(self, check_progress=False):
+    def create_ecs_image(self, check_progress=False, gc=True):
+        if gc:
+            hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid)
+            condition = res_ops.gen_query_conditions('name', '=', ECS_IMAGE_NAME)
+            ecs_img = hyb_ops.query_ecs_image_local(condition)
+            for img in ecs_img:
+                hyb_ops.del_ecs_image_remote(img.uuid)
+            sp_local = hyb_ops.sync_aliyun_snapshot_from_remote(self.datacenter.uuid)
+            for sp in sp_local:
+                try:
+                    self.del_aliyun_snapshot(sp_uuid=sp.uuid)
+                except:
+                    pass
         cond_image = res_ops.gen_query_conditions('name', '=', os.getenv('imageName_s'))
         image =  res_ops.query_resource(res_ops.IMAGE, cond_image)[0]
         bs_uuid = image.backupStorageRefs[0].backupStorageUuid
@@ -702,20 +787,20 @@ class HybridObject(object):
         if check_progress:
             create_image_pid = os.fork()
             if create_image_pid == 0:
-                self.ecs_image = hyb_ops.create_ecs_image_from_local_image(bs_uuid, self.datacenter.uuid, image.uuid, name='zstack-test-ecs-image')
+                self.ecs_image = hyb_ops.create_ecs_image_from_local_image(bs_uuid, self.datacenter.uuid, image.uuid, name=ECS_IMAGE_NAME)
                 sys.exit(0)
             for _ in xrange(600):
-                    image_progress = hyb_ops.get_create_ecs_image_progress(self.datacenter.uuid, image.uuid)
-                    if image_progress.progress.progress == "100%":
-                        break
-                    else:
-                        time.sleep(1)
+                image_progress = hyb_ops.get_create_ecs_image_progress(self.datacenter.uuid, image.uuid).progress
+                if image_progress and image_progress.progress == "99%":
+                    break
+                else:
+                    time.sleep(1)
             os.waitpid(create_image_pid, 0)
-            assert image_progress.progress.progress == "100%"
+            assert image_progress.progress == "99%"
         else:
-            self.ecs_image = hyb_ops.create_ecs_image_from_local_image(bs_uuid, self.datacenter.uuid, image.uuid, name='zstack-test-ecs-image')
+            self.ecs_image = hyb_ops.create_ecs_image_from_local_image(bs_uuid, self.datacenter.uuid, image.uuid, name=ECS_IMAGE_NAME)
             self.check_resource('create', 'ecsImageId', self.ecs_image.ecsImageId, 'query_ecs_image_local')
-        time.sleep(30)
+        time.sleep(300)
 
     def sync_ecs_image(self, return_val=False):
         hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid)
@@ -750,9 +835,17 @@ class HybridObject(object):
                 image_attr_eq = "self.ecs_image.%s == '%s'" % (k, image_attr[k])
                 assert eval(image_attr_eq)
 
-    def create_route_entry(self):
+    def create_route_entry(self, gc=False):
         self.get_vr()
         self.dst_cidr_block = '172.27.%s.0/24' % random.randint(1,254)
+        if gc:
+            route_entry = self.sync_route_entry(return_val=True)
+            for rt in route_entry:
+                if rt.nextHopType == 'VpnGateway':
+                    try:
+                        hyb_ops.del_aliyun_route_entry_remote(rt.uuid)
+                    except:
+                        pass
         self.route_entry = hyb_ops.create_aliyun_vpc_virtualrouter_entry_remote(self.dst_cidr_block, self.vr.uuid, vrouter_type='vrouter', next_hop_type='VpnGateway', next_hop_uuid=self.vpn_gateway.uuid)
         time.sleep(30)
         self.check_resource('create', 'destinationCidrBlock', self.dst_cidr_block, 'query_aliyun_route_entry_local')
@@ -760,17 +853,21 @@ class HybridObject(object):
     def del_route_entry(self, remote=True):
         if remote:
             hyb_ops.del_aliyun_route_entry_remote(self.route_entry.uuid)
+            time.sleep(20)
             hyb_ops.sync_route_entry_from_remote(self.vr.uuid, vrouter_type='vrouter')
         else:
             pass
         self.check_resource('delete', 'destinationCidrBlock', self.dst_cidr_block, 'query_aliyun_route_entry_local')
 
-    def sync_route_entry(self):
+    def sync_route_entry(self, return_val=False):
         hyb_ops.sync_route_entry_from_remote(self.vr.uuid, vrouter_type='vrouter')
         condition = res_ops.gen_query_conditions('virtualRouterUuid', '=', self.vr.uuid)
-        assert hyb_ops.query_aliyun_route_entry_local(condition)
+        route_entry = hyb_ops.query_aliyun_route_entry_local(condition)
+        assert route_entry
+        if return_val:
+            return route_entry
 
-    def create_ecs_instance(self, need_vpn_gateway=False, allocate_eip=False, region_id=None, connect=False):
+    def create_ecs_instance(self, need_vpn_gateway=False, allocate_eip=False, region_id=None, connect=False, gc=True):
         if need_vpn_gateway:
             self.add_datacenter_iz(check_vpn_gateway=True)
             self.get_vpc(has_vpn_gateway=True)
@@ -779,14 +876,25 @@ class HybridObject(object):
         else:
             self.add_datacenter_iz()
             self.get_vpc()
+        if gc:
+            self.sync_ecs_instance()
+            ecs_local = hyb_ops.query_ecs_instance_local()
+            for ecs in ecs_local:
+                self.del_ecs_instance(ecs_instance=ecs)
         self.get_vswitch()
         if connect:
-            self.create_sg()
+            self.create_sg(gc=True)
         else:
             self.get_sg()
         self.get_sg_rule()
         # Get ECS Instance Type
         ecs_instance_type = hyb_ops.get_ecs_instance_type_from_remote(self.iz.uuid)
+        for ecs_inst in ecs_instance_type:
+            if ecs_inst.cpu == 1 and ecs_inst.memory == 0:
+                ecs_instance = ecs_inst
+                break
+        else:
+            ecs_instance = ecs_instance_type[0]
         # Get ECS Image
         hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid)
         hyb_ops.sync_ecs_image_from_remote(self.datacenter.uuid, image_type='system')
@@ -800,14 +908,16 @@ class HybridObject(object):
         ecs_image_self = hyb_ops.query_ecs_image_local(cond_image_self)
         ecs_image_system_all = hyb_ops.query_ecs_image_local(cond_image_system)
         ecs_image_system_64 = [i for i in ecs_image_system_all if '64' in i.name]
+        ecs_image_system_centos = [i for i in ecs_image_system_all if i.platform == 'CentOS' and 'vhd' in i.name]
+        image = ecs_image_system_centos[0]
         if not allocate_eip:
-            image = ecs_image_self[0] if ecs_image_self else ecs_image_centos_64[0]
-            self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
-                                                                 instance_type=ecs_instance_type[0].typeId, name='zstack-test-ecs-instance', ecs_console_password='A1B2c3')
+#             image = ecs_image_self[0] if ecs_image_self else ecs_image_centos_64[0]
+            self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('ZStack_Test%ECS&Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
+                                                                 instance_type=ecs_instance.typeId, name=TEST_ECS_NAME, ecs_console_password='A1B2c3')
         else:
-            image = ecs_image_system_64[0]
-            self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
-                                                                 instance_type=ecs_instance_type[0].typeId, allocate_public_ip='true', name='zstack-test-ecs-instance', ecs_console_password='a1B2c3')
+#             image = ecs_image_system_64[0]
+            self.ecs_instance = hyb_ops.create_ecs_instance_from_ecs_image('ZStack_Test%ECS&Password123', image.uuid, self.vswitch.uuid, ecs_bandwidth=1, ecs_security_group_uuid=self.sg.uuid, 
+                                                                 instance_type=ecs_instance.typeId, allocate_public_ip='true', name=TEST_ECS_NAME, ecs_console_password='a1B2c3')
         time.sleep(10)
         self.ecs_create = True
 
@@ -862,33 +972,34 @@ class HybridObject(object):
         time.sleep(5)
         self.wait_ecs_running()
 
-    def del_ecs_instance(self, remote=True):
+    def del_ecs_instance(self, ecs_instance=None, remote=True):
+        if not ecs_instance:
+            ecs_instance = self.sync_ecs_instance(return_val=True)
         if remote:
-#             self.stop_ecs()
-            self.ecs_instance = self.sync_ecs_instance(return_val=True)
-            hyb_ops.del_ecs_instance(self.ecs_instance.uuid)
+            hyb_ops.del_ecs_instance(ecs_instance.uuid)
             self.sync_ecs_instance()
         else:
-            hyb_ops.del_ecs_instance_local(self.ecs_instance.uuid)
-        self.check_resource('delete', 'ecsInstanceId', self.ecs_instance.ecsInstanceId, 'query_ecs_instance_local')
+            hyb_ops.del_ecs_instance_local(ecs_instance.uuid)
+        self.check_resource('delete', 'ecsInstanceId', ecs_instance.ecsInstanceId, 'query_ecs_instance_local')
 
     def create_ipsec(self, pri_l3_uuid, vip):
         ipsec_conntion = hyb_ops.query_ipsec_connection()
         if ipsec_conntion:
             self.ipsec = ipsec_conntion[0]
         else:
-            self.ipsec = ipsec_ops.create_ipsec_connection('ipsec', pri_l3_uuid, self.vpn_gateway.publicIp, 'ZStack.Hybrid.Test123789', vip.uuid, [self.vswitch.cidrBlock],
+            self.ipsec = ipsec_ops.create_ipsec_connection('ipsec', pri_l3_uuid, self.vpn_gateway.publicIp, 'ZStack.Hybrid.Test123789', vip.uuid, [self.vpc.cidrBlock],
                                                           ike_dh_group=2, ike_encryption_algorithm='3des', policy_encryption_algorithm='3des', pfs='dh-group2')
 
     def create_vpn_connection(self, auth_alg_1='sha1', auth_alg_2='sha1'):
-        vpn_ike_config = hyb_ops.create_vpn_ike_ipsec_config(name='zstack-test-vpn-ike-config', psk='ZStack.Hybrid.Test123789', local_ip=self.vpn_gateway.publicIp, remote_ip=self.user_vpn_gateway.ip, auth_alg=auth_alg_1)
+        vpn_ike_config = hyb_ops.create_vpn_ike_ipsec_config(name='zstack-test-vpn-ike-config', psk='ZStack.Hybrid.Test123789', local_ip=self.vpn_gateway.publicIp,
+                                                             remote_ip=self.user_vpn_gateway.ip, auth_alg=auth_alg_1, mode='main')
         vpn_ipsec_config = hyb_ops.create_vpn_ipsec_config(name='zstack-test-vpn-ike-config', auth_alg=auth_alg_2)
-        self.vpn_connection = hyb_ops.create_vpc_vpn_connection(self.user_vpn_gateway.uuid, self.vpn_gateway.uuid, 'zstack-test-ipsec-vpn-connection', self.vswitch.cidrBlock,
+        self.vpn_connection = hyb_ops.create_vpc_vpn_connection(self.user_vpn_gateway.uuid, self.vpn_gateway.uuid, 'zstack-test-ipsec-vpn-connection', self.vpc.cidrBlock,
                                                   self.zstack_cidrs, vpn_ike_config.uuid, vpn_ipsec_config.uuid)
         time.sleep(10)
         self.check_resource('create', 'connectionId', self.vpn_connection.connectionId, 'query_vpc_vpn_connection_local')
 
-    def create_ipsec_vpn_connection(self, check_connectivity=True, check_status=False):
+    def create_ipsec_vpn_connection(self, check_connectivity=True, check_status=False, use_1_vip=False):
         self.vm = create_vlan_vm(os.environ.get('l3VlanNetworkName1'))
 #     test_obj_dict.add_vm(self.vm)
         self.vm.check()
@@ -896,12 +1007,15 @@ class HybridObject(object):
         pri_l3_uuid = self.vm.vm.vmNics[0].l3NetworkUuid
         vr = test_lib.lib_find_vr_by_l3_uuid(pri_l3_uuid)[0]
         l3_uuid = test_lib.lib_find_vr_pub_nic(vr).l3NetworkUuid
-        vip_existed = res_ops.query_resource(res_ops.VIP)
-        # Create Vip
-        if vip_existed:
-            vip = vip_existed[0]
+        vip_for_vr = [vip for vip in res_ops.query_resource(res_ops.VIP) if 'vip-for-vrouter' in vip.name]
+        if use_1_vip:
+            vip = vip_for_vr[0]
         else:
-            vip = create_vip('ipsec_vip', l3_uuid).get_vip()
+            vip_not_for_vr = [vip for vip in res_ops.query_resource(res_ops.VIP) if 'vip-for-vrouter' not in vip.name]
+            if vip_not_for_vr:
+                vip = vip_not_for_vr[0]
+            else:
+                vip = create_vip('ipsec_vip', l3_uuid).get_vip()
         cond = res_ops.gen_query_conditions('uuid', '=', pri_l3_uuid)
         self.zstack_cidrs = res_ops.query_resource(res_ops.L3_NETWORK, cond)[0].ipRanges[0].networkCidr
         self.dst_cidr_block = self.zstack_cidrs.replace('1/', '0/')
@@ -909,8 +1023,9 @@ class HybridObject(object):
     #     cmd = 'ip a add dev br_eth0_1101 %s' % _vm_ip
         time.sleep(10)
         if check_connectivity:
-            self.create_ecs_instance(need_vpn_gateway=True, allocate_eip=True, connect=True)
-            self.get_eip(in_use=True)
+            self.create_ecs_instance(need_vpn_gateway=True, connect=True)
+            self.get_eip()
+            self.attach_eip_to_ecs()
         else:
             self.add_datacenter_iz(check_vpn_gateway=True)
             self.get_vpc(has_vpn_gateway=True)
@@ -930,7 +1045,7 @@ class HybridObject(object):
             # ZStack VM ping Ecs
             ping_ecs_cmd_status = commands.getstatusoutput(ping_ecs_cmd)[0]
             assert ping_ecs_cmd_status == 0
-            ping_vm_cmd = "sshpass -p Password123 ssh -o StrictHostKeyChecking=no root@%s 'ping %s -c 5 | grep time='" % (self.eip.eipAddress, vm_ip)
+            ping_vm_cmd = "sshpass -p ZStack_Test%ECS&Password123 ssh -o StrictHostKeyChecking=no root@%s 'ping %s -c 5 | grep time='" % (self.eip.eipAddress, vm_ip)
             # Ecs ping ZStack VM
             ping_vm_cmd_status = commands.getstatusoutput(ping_vm_cmd)[0]
             assert ping_vm_cmd_status == 0
@@ -967,6 +1082,24 @@ class HybridObject(object):
         response = urllib2.urlopen(req)
         assert response.code == 200
 
+    def tear_down(self):
+        # sync ecs instance only if identity zone added
+        if self.iz:
+            self.sync_ecs_instance()
+        ecs_local = hyb_ops.query_ecs_instance_local()
+        ecs_to_clear = [e for e in ecs_local if e.name == TEST_ECS_NAME]
+        for ecs in ecs_to_clear:
+            self.ecs_instance = ecs
+            self.del_ecs_instance()
+        res = [self.sg_create, self.disk, self.snapshot, self.eip_create, self.user_vpn_gateway, self.ecs_image]
+        res_del_func = [self.del_sg, self.del_aliyun_disk, self.del_aliyun_snapshot, self.del_eip, self.del_user_vpn_gateway, self.del_ecs_image]
+        for i in xrange(len(res)):
+            if res[i]:
+                time.sleep(120)
+                try:
+                    res_del_func[i]()
+                except:
+                    pass
 
 def create_vlan_vm(l3_name=None, disk_offering_uuids=None, system_tags=None, session_uuid = None, instance_offering_uuid = None):
     image_name = os.environ.get('imageName_net')

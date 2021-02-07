@@ -18,6 +18,17 @@ test_stub = test_lib.lib_get_test_stub()
 test_obj_dict = test_state.TestStateDict()
 session_to = None
 session_mc = None
+def create_snapshot(snapshots, index):
+    snapshot_name = 'create_snapshot%s' % str(index)
+    try:
+        snapshots.create_snapshot(snapshot_name)
+    except:
+        while True:
+            cond = res_ops.gen_query_conditions('name', '=', snapshot_name)
+            sps_num = res_ops.query_resource_count(res_ops.VOLUME_SNAPSHOT, cond)
+            if sps_num == 1:
+                break
+            time.sleep(5)
 
 def test():
     global session_to
@@ -44,7 +55,7 @@ def test():
     ori_num = 100
     index = 1
     while index < 101:
-        thread = threading.Thread(target=snapshots.create_snapshot, args=('create_snapshot%s' % str(index),))
+        thread = threading.Thread(target=create_snapshot, args=(snapshots, index,))
         thread.start()
         index += 1
 
@@ -74,7 +85,10 @@ def test():
     if sps_num != ori_num:
         test_util.test_fail('Create %d snapshots, but only %d snapshots were successfully created' % (ori_num, sps_num))
 
-    test_lib.lib_robot_cleanup(test_obj_dict)
+    try:
+        test_lib.lib_robot_cleanup(test_obj_dict)
+    except:
+        test_lib.test_logger('Delete VM may timeout')
     test_util.test_pass('Test create 100 snapshots simultaneously success')
 
 def error_cleanup():

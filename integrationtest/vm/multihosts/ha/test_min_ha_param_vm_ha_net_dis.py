@@ -75,7 +75,7 @@ def set_quick_ha_properties():
     if test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10) == False:
         test_util.test_fail("CMD:%s execute failed on %s" %(cmd, mn_ip))
 
-    cmd = "echo \"RESTFacade.readTimeout = 5000\" >>" + properties_file
+    cmd = "echo \"RESTFacade.readTimeout = 10000\" >>" + properties_file
     if test_lib.lib_execute_ssh_cmd(mn_ip, host_username, host_password, cmd,  timeout = 10) == False:
         test_util.test_fail("CMD:%s execute failed on %s" %(cmd, mn_ip))
 
@@ -107,6 +107,8 @@ def test():
     set_quick_ha_properties()
     set_quick_ha_params()
     
+    bs = res_ops.query_resource(res_ops.BACKUP_STORAGE, [], None)[0]
+    test_stub.ensure_bss_connected()
     vm_creation_option = test_util.VmOption()
     image_name = os.environ.get('imageName_net')
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid

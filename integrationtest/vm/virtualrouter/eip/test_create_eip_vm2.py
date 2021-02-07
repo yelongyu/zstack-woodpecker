@@ -59,6 +59,8 @@ def test():
     ssh_cmd = 'ssh -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null'
     cmd = 'ping -c 8 %s' % (eip.get_eip().vipIp)
     shell.call("%s %s %s" % (ssh_cmd, vm_ip, cmd))
+    cmd = '''"echo quit | timeout 4 telnet %s 22|grep 'Escape character'"''' % (eip.get_eip().vipIp)
+    shell.call("%s %s %s" % (ssh_cmd, vm_ip, cmd))
     vm.destroy()
     test_obj_dict.rm_vm(vm)
     vip.check()

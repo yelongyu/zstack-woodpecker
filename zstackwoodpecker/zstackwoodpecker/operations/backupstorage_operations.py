@@ -46,9 +46,10 @@ def create_image_store_backup_storage(backup_storage_option, session_uuid=None):
     action.hostname = backup_storage_option.get_hostname()
     action.username = backup_storage_option.get_username()
     action.password = backup_storage_option.get_password()
-    action.sshPort = backup_storage_option.get_sshport()
+    action.sshPort = backup_storage_option.get_sshPort()
     action.resourceUuid = backup_storage_option.get_resource_uuid()
     action.importImages = backup_storage_option.get_import_images()
+    action.systemTags = backup_storage_option.get_system_tags()
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Sftp Backup Storage [uuid:] %s [name:] %s' % \
             (evt.inventory.uuid, action.name))
@@ -105,6 +106,31 @@ def detach_backup_storage(backup_storage_uuid, zone_uuid, \
             (backup_storage_uuid, zone_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def change_backup_storage_state(backup_storage_uuid, state, session_uuid=None):
+    # ENABLE = 'enable'
+    # DISABLE = 'disable'
+    action = api_actions.ChangeBackupStorageStateAction()
+    action.uuid = backup_storage_uuid
+    action.stateEvent = state
+    action.timeout = 300000
+    test_util.action_logger('Change BackupStorageStateAction [uuid:] %s to [state:] %s' % (backup_storage_uuid, state))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def update_image_store_backup_storage_info(backup_storage_uuid, infoType, infoValue, session_uuid = None):
+    action = api_actions.UpdateImageStoreBackupStorageAction()
+    action.uuid = backup_storage_uuid
+    if infoType == 'password':
+        action.password = infoValue
+    elif infoType == 'hostname':
+        action.hostname = infoValue
+    elif infoType == 'sshPort':
+        action.sshPort = infoValue
+    elif infoType == 'username':
+        action.username = infoValue
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
 
 def update_sftp_backup_storage_info(sftpUuid, infoType, infoValue, session_uuid = None):
     action = api_actions.UpdateSftpBackupStorageAction()
@@ -167,3 +193,50 @@ def add_disaster_image_store_bs(url, hostname, username, password, sshport=None,
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.test_logger('[Disaster ImageStore Backup Storage] %s is added' %action.name )
     return evt.inventory
+
+def get_trash_on_backup_storage(backup_storage_uuid, session_uuid=None):
+    action = api_actions.GetTrashOnBackupStorageAction()
+    action.uuid = backup_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Get Trash On Backup Storage [uuid:] %s' % backup_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.storageTrashSpecs
+
+def clean_up_trash_on_backup_storage(backup_storage_uuid, trash_id=None, session_uuid=None):
+    action = api_actions.CleanUpTrashOnBackupStorageAction()
+    action.uuid = backup_storage_uuid
+    action.trashId = trash_id
+    action.timeout = 6000000
+    test_util.action_logger('Clean Up Trash On Backup Storage [uuid:] %s' % backup_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def reclaim_space_from_bs(backup_storage_uuid, session_uuid=None):
+    action = api_actions.ReclaimSpaceFromImageStoreAction()
+    action.uuid = backup_storage_uuid
+    test_util.action_logger('Reclaim Space From Backup Storage [uuid:] %s' % backup_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def create_image_replication_group(name, description=None, session_uuid=None):
+    action = api_actions.CreateImageReplicationGroupAction()
+    action.name = name
+    action.description = description
+    test_util.action_logger('Create Image Replication Group [name:] %s' % name)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def del_image_replication_group(uuid, session_uuid=None):
+    action = api_actions.DeleteImageReplicationGroupAction()
+    action.uuid = uuid
+    test_util.action_logger('Delete Image Replication Group [uuid:] %s' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def add_bs_to_image_replication_group(replication_group_uuid, bs_uuids, session_uuid=None):
+    action = api_actions.AddBackupStoragesToReplicationGroupAction()
+    action.replicationGroupUuid = replication_group_uuid
+    action.backupStorageUuids = bs_uuids
+    test_util.action_logger('Add Backup Storages [uuid:] %s to Image Replication Group [uuid:] %s' % (bs_uuids, replication_group_uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt

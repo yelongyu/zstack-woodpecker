@@ -7,10 +7,11 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.test_state as test_state
 import zstackwoodpecker.operations.primarystorage_operations as ps_ops
+import apibinding.inventory as inventory
 import random
 
 _config_ = {
-        'timeout' : 3000,
+        'timeout' : 7200,
         'noparallel' : True
         }
 
@@ -23,8 +24,12 @@ VOLUME_NUMBER = 100
 
 def test():
     test_util.test_dsc("Create {0} volume in the first primaryStorage".format(VOLUME_NUMBER))
+    ps_env = test_stub.PSEnvChecker()
     ps_list = res_ops.get_resource(res_ops.PRIMARY_STORAGE)
-    first_ps = random.choice(ps_list)
+    if ps_env.is_sb_ceph_env:
+        first_ps = random.choice([ps for ps in ps_list if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE])
+    else:
+        first_ps = random.choice(ps_list)
     volume_list = test_stub.create_multi_volumes(count=VOLUME_NUMBER, ps=first_ps)
     for volume in volume_list:
         test_obj_dict.add_volume(volume)

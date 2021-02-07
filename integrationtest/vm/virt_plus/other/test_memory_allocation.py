@@ -59,7 +59,7 @@ def test():
     rounds = 0
     while (rounds < 3):
         times = 1
-        while (times <= (target_vm_num+3)):
+        while (times <= (target_vm_num)):
             try:
                 vm = test_stub.create_vm(vm_name = 'mem_reclaim_vm_%d' % times, \
                         host_uuid = host.uuid, \

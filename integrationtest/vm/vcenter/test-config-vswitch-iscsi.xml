@@ -1,0 +1,6 @@
+<testConfig>
+    <deployConfig>deploy-vcenter-vswitch-iscsi.xml</deployConfig>
+    <deployConfigTemplate>deploy.tmpt</deployConfigTemplate>
+    <!-- suite special test variables -->
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

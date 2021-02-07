@@ -8,8 +8,9 @@ New Integration Test for Request access multiple KVM VM console.
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
 import zstacklib.utils.shell as shell
-import test_stub
 import zstackwoodpecker.operations.account_operations as acc_ops
+
+test_stub = test_lib.lib_get_specific_stub()
 
 vms = []
 
@@ -42,3 +43,4 @@ def error_cleanup():
     for vm in vms:
         if vm:
             vm.destroy()
+

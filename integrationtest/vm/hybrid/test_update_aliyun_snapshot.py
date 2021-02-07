@@ -19,7 +19,7 @@ def test():
     test_obj_dict.add_hybrid_obj(hybrid)
     hybrid.create_aliyun_disk()
     hybrid.attach_aliyun_disk()
-    hybrid.create_aliyun_snapshot()
+    hybrid.create_aliyun_snapshot(gc=True)
 
     hybrid.update_aliyun_snapshot(name='Aliyun-Snapshot')
     hybrid.update_aliyun_snapshot(description='test-Aliyun-Snapshot')
@@ -27,14 +27,10 @@ def test():
     test_util.test_pass('Update Aliyun Snapshot Test Success')
 
 def env_recover():
-    if hybrid.disk:
-        time.sleep(30)
-        hybrid.del_aliyun_disk()
-
-    if hybrid.ecs_instance:
-        hybrid.del_ecs_instance()
+    hybrid.tear_down()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global test_obj_dict
+    hybrid.tear_down()
     test_lib.lib_error_cleanup(test_obj_dict)

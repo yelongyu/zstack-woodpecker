@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-3-networks-separated.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-3-networks-separated.tmpt</scenarioConfigTemplate>
+</testConfig>

@@ -71,8 +71,11 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
 
-    test_stub.ensure_host_not_nfs_provider(host_uuid)
-    test_stub.ensure_host_has_no_vr(host_uuid)
+    vr_hosts = test_stub.get_host_has_vr()
+    mn_hosts = test_stub.get_host_has_mn()
+    nfs_hosts = test_stub.get_host_has_nfs()
+    if not test_stub.ensure_vm_not_on(vm.get_vm().uuid, vm.get_vm().hostUuid, vr_hosts+mn_hosts+nfs_hosts):
+        test_util.test_fail("Not find out a suitable host")
 
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
@@ -83,7 +86,7 @@ def test():
 #    l2_network_interface = os.environ.get('l2ManagementNetworkInterface')
     #l2interface = test_lib.lib_get_l2s_by_vm(vm.get_vm())[0].physicalInterface
     l2_network_interface = test_stub.get_host_l2_nic_name("br_eth0")
-    cmd = "ifconfig %s down && sleep 180 && ifconfig %s up" % (l2_network_interface, l2_network_interface)
+    cmd = "ifconfig %s down && sleep 300 && ifconfig %s up" % (l2_network_interface, l2_network_interface)
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
     rsp = test_lib.lib_execute_ssh_cmd(host_ip, host_username, host_password, cmd, 240)
@@ -91,8 +94,8 @@ def test():
 	test_util.test_logger("host is expected to shutdown after its network down for a while")
 
     #test_util.test_logger("wait for 600 seconds")
-    test_util.test_logger("wait for 180 seconds")
-    time.sleep(180)
+    test_util.test_logger("wait for 300 seconds")
+    time.sleep(300)
     vm.update()
     if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
 	test_util.test_fail("VM is expected to start running on another host")

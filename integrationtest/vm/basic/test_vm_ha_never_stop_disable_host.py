@@ -7,11 +7,13 @@ New Integration Test for VM ha never stop operation with host disabled
 
 import zstackwoodpecker.test_util as test_util
 import zstackwoodpecker.test_lib as test_lib
-import test_stub
 import zstackwoodpecker.header.vm as vm_header
+import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.ha_operations as ha_ops
 import zstackwoodpecker.operations.host_operations as host_ops
 import time
+
+test_stub = test_lib.lib_get_specific_stub()
 
 vm = None
 
@@ -19,6 +21,9 @@ def test():
     global vm
     if test_lib.lib_get_ha_enable() != 'true':
         test_util.test_skip("vm ha not enabled. Skip test")
+    hosts = res_ops.query_resource(res_ops.HOST)
+    if len(hosts) < 2:
+        test_util.test_skip("Not available host to do ha, since there are not 2 hosts")
 
     vm = test_stub.create_vm()
     vm.check()
@@ -42,3 +47,4 @@ def error_cleanup():
     global vm
     if vm:
         vm.destroy()
+

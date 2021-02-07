@@ -1,6 +1,6 @@
 '''
 
-Test EIP connectability during VM migration. 
+Test EIP connectability during VM migration.
 
 Test step:
     1. Create a VM
@@ -21,9 +21,9 @@ test_obj_dict = test_state.TestStateDict()
 
 def test():
     test_util.test_dsc('Create test vm migration with EIP and check.')
-    vm = test_stub.create_vr_vm('migrate_vm', 'imageName_s', 'l3VlanNetwork2')
+    vm = test_stub.create_vr_vm('migrate_vm', 'imageName_net', 'l3VlanNetwork2')
     test_obj_dict.add_vm(vm)
-    
+
     pri_l3_name = os.environ.get('l3VlanNetwork2')
     pri_l3_uuid = test_lib.lib_get_l3_by_name(pri_l3_name).uuid
 
@@ -35,18 +35,26 @@ def test():
     vip = test_stub.create_vip('create_eip_test', pub_l3_uuid)
     test_obj_dict.add_vip(vip)
     eip = test_stub.create_eip('create eip test', vip_uuid=vip.get_vip().uuid, vnic_uuid=vm_nic_uuid, vm_obj=vm)
-    
+
     vip.attach_eip(eip)
-    
+
     vm.check()
 
+    ping_ret = []
+    cycle = 180
     migration_pid = os.fork()
     if migration_pid == 0:
         test_stub.migrate_vm_to_random_host(vm)
         sys.exit(0)
-    for _ in xrange(300):
-        if not test_lib.lib_check_directly_ping(vip.get_vip().ip):
-            test_util.test_fail('expected to be able to ping vip while it fail')
+    for _ in xrange(cycle):
+        ping_ret.append(test_lib.lib_check_directly_ping(vip.get_vip().ip))
+        time.sleep(1)
+
+    package_loss = float(cycle - ping_ret.count(True)) / cycle
+
+    if package_loss > 0.03:
+        test_util.test_fail('expected to be able to ping vip while it fail')
+
     vm.destroy()
     test_obj_dict.rm_vm(vm)
 

@@ -65,6 +65,7 @@ class TestCase(object):
         self.special = False
         self.setup_case = False
         self.teardown_case = False
+        self.flavors = []
 
     def analyze_test_case(self, candidate):
         self.rla_path = candidate
@@ -103,6 +104,12 @@ class TestCase(object):
 
     def get_suite(self):
         return self.suite
+
+    def get_flavor(self):
+        return True if self.flavors else False
+
+    def set_flavor(self, flavor):
+        self.flavors.insert(0, flavor)
 
 class TestLib(object):
     '''
@@ -235,9 +242,21 @@ class TestLib(object):
 
         for case in cases:
             case = case.strip()
+            flavor = None
+            if "::" in case:
+                case, flavor = case.split("::")
             try:
                 if case in self.all_cases_name:
-                    self.target_case_list.append(self.test_case_lib[self._find_case_num(case)])
+                    case_obj = self.test_case_lib[self._find_case_num(case)]
+                    if flavor:
+                        if self.exclude_case_list == [None]:
+                            case_obj.set_flavor(flavor)
+                            self.target_case_list.append(case_obj)
+                        elif "{}::{}".format(case.split('/')[-1], flavor) not in [item.split('/')[-1] for item in self.exclude_case_list]:
+                            case_obj.set_flavor(flavor)
+                            self.target_case_list.append(case_obj)
+                    else:
+                        self.target_case_list.append(case_obj)
                 elif int(case) in self.test_case_lib.keys():
                     self.target_case_list.append(self.test_case_lib[int(case)])
                 else:
@@ -247,7 +266,16 @@ class TestLib(object):
                 #following code will time consuming, so only move in exception.
                 for real_case_name in self.all_cases_name:
                     if case in real_case_name:
-                        self.target_case_list.append(self.test_case_lib[self._find_case_num(real_case_name)])
+                        case_obj = self.test_case_lib[self._find_case_num(real_case_name)]
+                        if flavor:
+                            if self.exclude_case_list == [None]:
+                                case_obj.set_flavor(flavor)
+                                self.target_case_list.append(case_obj)
+                            elif "{}::{}".format(case.split('/')[-1], flavor) not in [item.split('/')[-1] for item in self.exclude_case_list]:
+                                case_obj.set_flavor(flavor)
+                                self.target_case_list.append(case_obj)
+                        else:
+                            self.target_case_list.append(case_obj)
                         break
                 else:
                     for real_case_name_no_exclude in self.all_cases_name_no_exclude:
@@ -304,7 +332,11 @@ class TestLib(object):
             print_info("Not find test suite name, which is start with '%s'" % suiteList)
             return 
 
-        ht, wt = os.popen('stty size', 'r').read().split()
+        try:
+            ht, wt = os.popen('stty size', 'r').read().split()
+        except:
+            ht = '57'
+            wt = '237'
         print_info('Available ZStack Integration Test Cases:')
         print '='*int(wt)
         _print_head(wt)
@@ -351,7 +383,10 @@ class TestLib(object):
 
         print_info("Following cases will be executed:")
         for case in self.target_case_list:
-            print "\t%s" % case.get_name_with_suite()
+            if case.get_flavor():
+                print "\t{}::{}".format(case.get_name_with_suite(), case.flavors[-1])
+            else:
+                print "\t%s" % case.get_name_with_suite()
             suite_name = case.get_suite()
             if not suite_name in suite_dict.keys():
                 suite = etree.SubElement(root, "suite")
@@ -370,7 +405,10 @@ class TestLib(object):
                     suite.set("teardownCase", os.path.join(self.test_case_dir, case.get_name_with_suite()))
             else:
                 case_e = etree.SubElement(suite, "case")
-                case_e.text = os.path.join(self.test_case_dir, case.get_name_with_suite())
+                if case.get_flavor():
+                    case_e.text = os.path.join(self.test_case_dir, "{}::{}".format(case.get_name_with_suite(), case.flavors.pop()))
+                else:
+                    case_e.text = os.path.join(self.test_case_dir, case.get_name_with_suite())
                 if repeat:
                     case_e.set("repeat", "%s" % repeat)
 
@@ -455,8 +493,10 @@ class TestLib(object):
                 suite_item.set("path", "%s/%s" % (self.test_case_dir, suite))
                 for case_item in suite_item.getchildren():
                     for exclude_case in self.exclude_case_list:
-			if exclude_case == None:
+                        if exclude_case == None:
                             continue
+                        if "::" in exclude_case:
+                            exclude_case = exclude_case.split("::")[0] + ".py::" + exclude_case.split("::")[1].split('.')[0]
                         if case_item.text == exclude_case or case_item.text == '%s.py' % (exclude_case) or '/%s.py' % (exclude_case) in case_item.text or '/%s' % (case_item.text) in '%s.py' % (exclude_case):
                             suite_item.remove(case_item)
                             break
@@ -472,13 +512,37 @@ class TestLib(object):
         self.test_xml = os.path.join(self.current_dir, CONFIG_XML, "test_suite.xml")
         tree.write(self.test_xml)
 
+    def print_all_cases(self, parallel=None):
+        suites = self.suite_list
+        for suite in suites:
+            if suite == '':
+                continue
+            suite_config = None
+            suite = suite.strip()
+            real_suite = self.find_real_suite(suite)
+            suite_config = os.path.join(self.test_case_dir, real_suite, INTEGRATION_TEST_CONFIG)
+
+            if suite_config:
+                new_suite_config = os.path.join(self.current_dir, CONFIG_XML, '%s_%s' % (real_suite, INTEGRATION_TEST_CONFIG))
+                try:
+                    suite_content = etree.parse(suite_config)
+                except:
+                    continue
+                suite_item = suite_content.find('suite')
+                print real_suite, "suite_setup"
+                for case_item in suite_item.getchildren():
+		    print real_suite, case_item.text.replace('.py', '')
+                print real_suite, "suite_teardown"
+            else:
+                print('suite: %s is not found' % suite)
+
 def print_info(information):
     print '\n\033[1m - %s\033[0m\n' % information
 
 def print_warn(information):
     print '\n\033[31m WARN: %s\033[0m\n' % information
 
-def print_runtime_test_log(folder):
+def print_runtime_test_log(folder, nofollow=False):
     import glob
     def _find_latest_file(t_folder):
         latest_result = max(glob.iglob('%s/*' % t_folder), key=os.path.getctime)
@@ -489,7 +553,10 @@ def print_runtime_test_log(folder):
     test_result_folder = '%s/%s/test-result/latest/logs' % (folder, CONFIG_XML)
     latest_log = _find_latest_file(test_result_folder)
         
-    os.system('tail -f %s' % latest_log)
+    if nofollow:
+        os.system('tail -n 100 %s' % latest_log)
+    else:
+        os.system('tail -f %s' % latest_log)
 
 def parse_test_args(options):
     test_args = []
@@ -605,6 +672,13 @@ def main():
             help="[Optional] list test cases and exit. For example: `zstest.py -l` will list all integration test cases; `zstest.py -l -s basic` will list case name in basic test suite; `zstest.py -l -c 1` will list case 1 description.")
 
     parser.add_option(
+            "--list-default-cases", 
+            dest="listDefaultCases", 
+            default=None, 
+            action='store_true', 
+            help="[Optional] list default test cases and exit. For example: `zstest.py --list-default-cases` will list all integration test cases listed in integration.xml;")
+
+    parser.add_option(
             "-P", "--http-proxy", 
             dest="httpProxy", 
             default=None, 
@@ -651,6 +725,12 @@ def main():
             default=None, 
             action='store_true', 
             help="[Optional] print current test case log. When next test case is run, this command needs to reexecuted to get related log.")
+
+    parser.add_option(
+            "--no-follow", dest="noFollow", 
+            default=None, 
+            action='store_true', 
+            help="[Optional] do not follow logs when print current test case log.")
 
     option_group = optparse.OptionGroup(parser, "Test Options", "Following options are only available when run initegration test case or test suite.")
 
@@ -785,6 +865,10 @@ def main():
     test_lib.analyze_exclude_case_list(options.excludeCaseList)
     test_lib.find_test_case()
 
+    if options.listDefaultCases:
+        test_lib.print_all_cases(parallel=options.parallel)
+        sys.exit(0)
+
     if options.listCase:
         if options.suiteList:
             test_lib.print_test_case(suiteList=options.suiteList)
@@ -805,7 +889,7 @@ def main():
         os.environ['ZSTACK_PYPI_URL'] = options.pypiIndex
 
     if options.showLog:
-        print_runtime_test_log(current_folder)
+        print_runtime_test_log(current_folder, options.noFollow)
 
     if options.needBuild or options.needBuildPremium:
         if options.vrImagePath:
@@ -829,6 +913,8 @@ def main():
             raise TestExc('Build ZStack Failure, can not continue testing. Exit code: %s' % ret)
 
         print_info('ZStack Build And Deployment Completed')
+    else:
+        os.system("touch /tmp/woodpecker_setup")
 
     if options.restartZstack:
         test_lib.restart_zstack(options.restartZstack)

@@ -21,7 +21,7 @@ class ZstackTestImage(image_header.TestImage):
         self.delete_policy = test_lib.lib_get_delete_policy('image')
         self.delete_delay_time = test_lib.lib_get_expunge_time('image')
 
-    def create(self, apiid=None):
+    def create(self, apiid=None, root=True):
         '''
         Create image template from Root Volume using CreateRootVolumeTemplateFromRootVolume
         '''
@@ -31,16 +31,32 @@ class ZstackTestImage(image_header.TestImage):
             else:
                 self.image = img_ops.create_root_volume_template_apiid(self.image_creation_option, apiid)
         else:
-            self.image = img_ops.create_root_volume_template_apiid(self.image_creation_option, apiid)
+            if root:
+                self.image = img_ops.create_root_volume_template_apiid(self.image_creation_option, apiid)
+            else:
+                self.image = img_ops.create_data_volume_template(self.image_creation_option)
         super(ZstackTestImage, self).create()
 
     def delete(self):
         img_ops.delete_image(self.image.uuid)
         super(ZstackTestImage, self).delete()
 
+    def recover(self):
+        img_ops.recover_image(self.image.uuid)
+        super(ZstackTestImage, self).recover()
+
     def expunge(self, bs_uuid_list = None):
         img_ops.expunge_image(self.image.uuid, bs_uuid_list)
         super(ZstackTestImage, self).expunge()
+
+    def update(self):
+        if self.get_state() != image_header.EXPUNGED:
+            updated_image = test_lib.lib_get_image_by_uuid(self.image.uuid)
+            if updated_image:
+                self.image = updated_image
+            else:
+                self.set_state(image_header.EXPUNGED)
+        return self.image
 
     def clean(self):
         if self.delete_policy != zstack_header.DELETE_DIRECT:

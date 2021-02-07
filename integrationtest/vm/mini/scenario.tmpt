@@ -1,0 +1,15 @@
+import ../scenario.tmpt
+import ./deploy.tmpt
+vmName1 = test_vm1
+vmName2 = test_vm2
+vmName3 = test_vm3
+vmName4 = test_vm4
+vmName5 = test_vm5
+vmName6 = test_vm6
+vmName7 = test_vm7
+vmName8 = test_vm8
+vmName9 = test_vm9
+vmName10 = test_vm10
+vmInstranceOfferingUuid2 = 234567
+vm2haHostInstranceOfferingUuid = 567890
+imageUuid2 = 234567

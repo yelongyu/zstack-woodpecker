@@ -16,7 +16,7 @@ import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm_header
 import zstackwoodpecker.zstack_test.zstack_test_image as test_image
 import zstackwoodpecker.zstack_test.zstack_test_vm as test_vm
 
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 test_obj_dict = test_state.TestStateDict()
 
 def test():

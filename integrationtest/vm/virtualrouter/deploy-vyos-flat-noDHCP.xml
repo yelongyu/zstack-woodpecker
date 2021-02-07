@@ -238,7 +238,6 @@
                 <serviceType>Eip</serviceType> 
               </networkService>
               <networkService provider="Flat Network Service Provider">
-                <serviceType>DHCP</serviceType>
                 <serviceType>Userdata</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
@@ -263,7 +262,6 @@
                 <serviceType>Eip</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
-                <serviceType>DHCP</serviceType>
                 <serviceType>Userdata</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
@@ -291,7 +289,6 @@
               <networkService provider="SecurityGroup">
                 <serviceType>SecurityGroup</serviceType>-->
               <networkService provider="Flat Network Service Provider">
-                <serviceType>DHCP</serviceType>
                 <serviceType>Userdata</serviceType>
               </networkService> 
             </l3BasicNetwork>
@@ -313,7 +310,6 @@
                 <serviceType>Eip</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
-                <serviceType>DHCP</serviceType>
                 <serviceType>Userdata</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
@@ -334,7 +330,6 @@
                 netmask="$vlanIpRangeNetmask5"/>
               <dns>$DNSServer</dns> 
               <networkService provider="Flat Network Service Provider">
-                <serviceType>DHCP</serviceType>
                 <serviceType>Userdata</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">
@@ -363,7 +358,6 @@
                 <serviceType>LoadBalancer</serviceType>
               </networkService>
               <networkService provider="Flat Network Service Provider">
-                <serviceType>DHCP</serviceType>
                 <serviceType>Userdata</serviceType>
               </networkService>
               <networkService provider="SecurityGroup">

@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-imagestore-vyos-flat-dhcp-2local-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-vyos-flat-dhcp-2local-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

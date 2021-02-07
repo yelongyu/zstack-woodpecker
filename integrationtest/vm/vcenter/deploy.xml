@@ -72,35 +72,49 @@
         memoryCapacity="$instanceOfferingMemory_s" 
         cpuNum="$instanceOfferingCpuNum_s"
         />
-      <instanceOffering name="$instanceOfferingName_m"
-        description="Test2" 
-        memoryCapacity="$instanceOfferingMemory_m" 
-        cpuNum="$instanceOfferingCpuNum_m"
-        />
+      <virtualRouterOffering name="$virtualRouterOfferingName_s"
+        memoryCapacity="$virtualRouterOfferingMemory_s" 
+        cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
+        <zoneRef>$zoneName</zoneRef>
+        <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
+        <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
+        <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
+        <imageRef>$virtualRouterImageName</imageRef>
+      </virtualRouterOffering>
     </instanceOfferings>
   
     <backupStorages>
-      <sftpBackupStorage name="$sftpBackupStorageName"
-        description="Test" url="$sftpBackupStorageUrl" 
-        username="$sftpBackupStorageUsername" 
-        password="$sftpBackupStoragePassword" 
-        hostname="$sftpBackupStorageHostname" />
+      <imageStoreBackupStorage name="$sftpBackupStorageName"
+        description="Test" url="$sftpBackupStorageUrl"
+	username="$sftpBackupStorageUsername"
+	password="$sftpBackupStoragePassword"
+	hostname="$sftpBackupStorageHostname"
+	port="$sftpBackupStoragePort"/>
     </backupStorages>
   
     <images>
-      <!--<image name="$imageName_i_c7" description="Centos7 Test Image1" 
-        format="$rootImageFormat" url="$imageUrl_i_c7" 
-        mediaType="$rootMediaType" systemTags="qemuga"
+      <image name="$imageName_s" description="Test Image1" 
+        format="$rootImageFormat" url="$imageUrl_s" 
+        mediaType="$rootMediaType"
         username="$imageUsername" password="$imagePassword">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
-      </image>-->
+      </image>
+      <image name="$imageName_net" description="Test Image2" 
+        format="$rootImageFormat" url="$imageUrl_net" 
+        mediaType="$rootMediaType"
+        username="$imageUsername" password="$imagePassword">
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      </image>
+      <image name="$virtualRouterImageName"
+        description="virtual router image" format="$rootImageFormat"
+        username="$vrImageUsername" password="$vrImagePassword"
+        mediaType="$rootMediaType"
+        hypervisorType='KVM' url="$virtualRouterImageUrl" system="True">
+        <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
+      </image>
     </images>
   
     <diskOfferings>
-      <diskOffering name="$rootDiskOfferingName" 
-        description="Root Disk Offering"
-        diskSize="$rootDiskOfferingSize" />
-
       <diskOffering name="$largeDiskOfferingName" 
         description="large Disk Offering" 
         diskSize="$largeDiskOfferingSize" />
@@ -115,84 +129,92 @@
     </diskOfferings>
   
     <zones>
-      <zone name="$zoneName" description="Test Zone">
+      <zone name="$zoneName" description="Test">
         <backupStorageRef>$sftpBackupStorageName</backupStorageRef>
         <primaryStorages>
-          <localPrimaryStorage name="$localPrimaryStorageName"
-            description="Test Local Primary Storage" 
-            url="$localPrimaryStorageUrl"
-          />
+	  <localPrimaryStorage name="$localPrimaryStorageName"
+            description="Test Local Primary Storage"
+            url="$localPrimaryStorageUrl" />
         </primaryStorages>
   
         <clusters>
-          <cluster name="$clusterName" description="Test Cluster"
+          <cluster name="$clusterName" description="Test"
             hypervisorType="$clusterHypervisorType">
             <hosts>
               <host name="$hostName" description="Test" managementIp="$hostIp"
-                  username="$hostUsername" password="$hostPassword" />
-              <!--
-              <host name="$hostName2" description="Test2" managementIp="$hostIp2"
                 username="$hostUsername" password="$hostPassword" />
-              <host name="$hostName3" description="Test3" managementIp="$hostIp3"
-                username="$hostUsername" password="$hostPassword" />
-              <host name="$hostName4" description="Test4" managementIp="$hostIp4"
-                username="$hostUsername" password="$hostPassword" />
-            -->
             </hosts>
             <primaryStorageRef>$localPrimaryStorageName</primaryStorageRef>
+            <!--<l2NetworkRef>$l2ManagementNetworkName</l2NetworkRef>-->
             <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
-            <l2NetworkRef>$l2VlanNetworkName1</l2NetworkRef>
           </cluster>
         </clusters>
-  
         <l2Networks>
           <l2NoVlanNetwork name="$l2PublicNetworkName"
-            description="Test" 
+            description="Test"
             physicalInterface="$l2PublicNetworkInterface">
             <l3Networks>
-              <l3BasicNetwork name="$l3PublicNetworkName" category="Public" 
-                description="Public Network">
-                <ipRange name="$ipRangeName" description="Test L3"
-                  startIp="$ipRangeStartIp" 
-                  endIp="$ipRangeEndIp" 
-                  gateway="$ipRangeGateway"
+              <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Public Network">
+                <ipRange name="$ipRangeName" description="Test"
+                  startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
                   netmask="$ipRangeNetmask" />
                 <dns>$DNSServer</dns>
-          
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Userdata</serviceType>
-                </networkService>
               </l3BasicNetwork>
             </l3Networks>
           </l2NoVlanNetwork>
-          <l2VlanNetwork name="$l2VlanNetworkName1" description="guest l2 vlan network"
-            physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan1">
-            <l3Networks>
-              <l3BasicNetwork name="$l3VlanNetworkName1" description = "guest test vlan network with DHCP Userdata and Eip" domain_name="$L3VlanNetworkDomainName1">
-                <ipRange name="$vlanIpRangeName1" startIp="$vlanIpRangeStart1" endIp="$vlanIpRangeEnd1"
-                 gateway="$vlanIpRangeGateway1" netmask="$vlanIpRangeNetmask1"/>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Userdata</serviceType>
-                  <serviceType>Eip</serviceType> 
-                </networkService>
-              </l3BasicNetwork>
-              <!--
-              <l3BasicNetwork name="$l3VlanNetworkName2" description = "guest test vlan network with DHCP Userdata and Eip" domain_name="$L3VlanNetworkDomainName2">
-                <ipRange name="$vlanIpRangeName2" startIp="$vlanIpRangeStart2" endIp="$vlanIpRangeEnd2"
-                 gateway="$vlanIpRangeGateway2" netmask="$vlanIpRangeNetmask2"/>
-                <networkService provider="Flat Network Service Provider">
-                  <serviceType>DHCP</serviceType>
-                  <serviceType>Userdata</serviceType>
-                  <serviceType>Eip</serviceType> 
-                </networkService>
-              </l3BasicNetwork>
-              -->
-            </l3Networks>
-          </l2VlanNetwork>
         </l2Networks>
+
       </zone>
     </zones>
+   
+    <vcenter name="$vcenter" domainName="$vcenter" username="$vcenteruser" password="$vcenterpwd">
+      <images>
+        <image name="$image_dhcp_name" description="Test Image1"
+          format="$vcenterrootImageFormat" url="$image_centos_dhcp"
+          mediaType="$rootMediaType" systemTags="vcenter::datacenter::undefined">
+          <backupStorageRef>$vcvmfsdatastore</backupStorageRef>
+        </image>
+        <image name="$image_static_name" description="Test Image2"
+          format="$vcenterrootImageFormat" url="$image_centos_static"
+          mediaType="$rootMediaType" systemTags="vcenter::datacenter::undefined">
+          <backupStorageRef>$vcvmfsdatastore</backupStorageRef>
+        </image>
+      </images>
+      <zoneRef>$zoneName</zoneRef>
+      <datacenters>
+        <datacenter name="$vcdatacenterName">
+          <!--dswitch name="$dswitch">
+            <dportgroups>
+              <dportgroup name="$dportgroup" vlanId="$dvlanid0"></dportgroup>
+            </dportgroups>
+          </dswitch-->
+          <clusters>
+            <cluster name="$vcclusterName">
+	      <templates>
+                <template path="$templatepath"></template>
+              </templates>
+              <hosts>
+                  <host name="$hostName2" ref="$vmName2" username="$vchostUser" password="$vchostpwd" thumbprint="$vcsslthumbprint">
+                    <!--iScsiStorage target="$vciscsitarget">
+                      <vmfsdatastore name="$vcvmfsdatastore"/>
+                    </iScsiStorage-->
+                    <vswitchs>
+                      <vswitch name="$vswitch0">
+                        <portgroup vlanId="$vlanid0">$portgroup0</portgroup>
+                      </vswitch>
+                    </vswitchs>
+                    <vms>
+                      <vm name="$vcvm" >
+                        <portgroupRef>$portgroup0</portgroupRef>
+                        <!--dportgroupRef>$dportgroup</dportgroupRef-->
+                      </vm>
+                    </vms>
+                  </host>
+              </hosts>
+            </cluster>
+          </clusters>
+        </datacenter>
+      </datacenters>
+    </vcenter>
   </deployerConfig>
 </config>

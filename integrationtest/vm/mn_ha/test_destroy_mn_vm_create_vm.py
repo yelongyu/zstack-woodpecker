@@ -54,15 +54,14 @@ def test():
     elif len(new_mn_host) > 1:
         test_util.test_fail("management node VM runs on more than one host after its former host down")
 
-    try:
-        node_ops.wait_for_management_server_start(300)
-    except:
-        test_util.test_fail("management node does not recover after mn vm was destroyed")
+    #node_ops.wait_for_management_server_start(300)
+    test_stub.wrapper_of_wait_for_management_server_start(600)
 
     test_stub.ensure_hosts_connected()
     test_stub.ensure_pss_connected()
     test_stub.ensure_bss_connected()
 
+    test_stub.return_pass_ahead_if_3sites("TEST PASS")
     vm = test_stub.create_basic_vm()
     vm.check()
     vm.destroy()

@@ -51,8 +51,10 @@ def test():
     img_option = test_util.ImageOption()
     img_option.set_name('iso')
     img_option.set_backup_storage_uuid_list([bs_uuid])
-    os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso" % (os.environ.get('zstackInstallPath')))
-    img_option.set_url('http://%s:8080/zstack/static/test.iso' % (os.environ.get('node1Ip')))
+#    command = "echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso" % os.environ.get('zstackInstallPath')
+#    test_lib.lib_execute_ssh_cmd(os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'], 'root', 'password', command)
+#    img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']))
+    img_option.set_url(os.environ.get('imageServer')+'/iso/CentOS-x86_64-7.2-Minimal.iso')
     image_inv = img_ops.add_iso_template(img_option)
     image = test_image.ZstackTestImage()
     image.set_image(image_inv)
@@ -60,9 +62,10 @@ def test():
     test_obj_dict.add_image(image)
 
 
-    ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
-    ps_uuid = ps.uuid
-    ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    #ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
+    #ps_uuid = ps.uuid
+    #ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    test_stub.maintain_all_pss()
     if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
         test_util.test_fail('VM is expected to stop when PS change to maintain state')
     vm.set_state(vm_header.STOPPED)
@@ -74,13 +77,25 @@ def test():
     img_ops.attach_iso(iso_uuid, vm.vm.uuid)
 
 
-    ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    #ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    test_stub.enable_all_pss()
     host_ops.reconnect_host(host_uuid)
     test_stub.ensure_hosts_connected(120)
+    test_stub.ensure_pss_connected()
     #vm_ops.reconnect_vr(vr_uuid)
     vrs = test_lib.lib_get_all_vrs()
     for vr in vrs:
-        vm_ops.start_vm(vr.uuid)  
+        vr_cond = res_ops.gen_query_conditions('uuid', '=', vr.uuid)
+        vr_inv = res_ops.query_resource(res_ops.VM_INSTANCE, vr_cond)[0]
+        if vr_inv.state == 'Stopped':
+            vm_ops.start_vm(vr.uuid)
+        else:
+            test_lib.lib_wait_target_up(vr_inv.vmNics[0].ip, '22', 360)
+            for _ in xrange(100):
+                if res_ops.query_resource(res_ops.VM_INSTANCE, vr_cond)[0].state != 'Running':
+                    time.sleep(3)
+                else:
+                    break
 
     vm.start()
     vm.check()

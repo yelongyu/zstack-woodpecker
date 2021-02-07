@@ -30,4 +30,8 @@ def env_recover():
 #Will be called only if exception happens in test().
 def error_cleanup():
     global test_obj_dict
+    try:
+        hybrid.del_vpc()
+    except:
+        pass
     test_lib.lib_error_cleanup(test_obj_dict)

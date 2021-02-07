@@ -22,7 +22,7 @@ _config_ = {
         }
 
 test_obj_dict = test_state.TestStateDict()
-threads_num = 3
+threads_num = 3 
 images = [None] * threads_num
 image_jobs = [None] * threads_num
 threads = [None] * threads_num
@@ -38,27 +38,27 @@ def add_image(bs_uuid, index):
     image_option.set_mediaType('RootVolumeTemplate')
     image_option.set_url(os.environ.get('imageUrl_net'))
     image_option.set_backup_storage_uuid_list([bs_uuid])
+    image_option.set_timeout(600000)
 
     images[index] = zstack_image_header.ZstackTestImage()
     images[index].set_creation_option(image_option)
 
     image_jobs[index] = str(uuid.uuid4()).replace('-', '')
+    test_util.test_logger(str(index) *10 + image_jobs[index])
     images[index].add_root_volume_template_apiid(image_jobs[index])
     test_obj_dict.add_image(images[index])
 
 def check_add_image_progress(index):
-    for i in range(0, 100):
-        time.sleep(0.1)
-        image_cond = res_ops.gen_query_conditions("status", '=', "Downloading")
-        image_cond = res_ops.gen_query_conditions("name", '=', 'test_add_image_progress%s' % (index), image_cond)
-        image = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, \
+    image_cond = res_ops.gen_query_conditions("status", '=', "Downloading")
+    image_cond = res_ops.gen_query_conditions("name", '=', 'test_add_image_progress%s' % (index), image_cond)
+    image = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, \
                 None, fields=['uuid'])
-        if len(image) >= 1:
-            break
-
     if len(image) <= 0:
         test_util.test_fail("image is not in creating after 10 seconds")
-
+        exit()
+    if image[0].status == "Ready":
+	test_util.test_logger("image has been added")
+	exit()
     for i in range(0, 600):
         progresses = res_ops.get_progress(image_jobs[index])
         if len(progresses) <= 0:
@@ -75,11 +75,14 @@ def check_add_image_progress(index):
         test_util.test_fail("Progress of task should be between 0 and 100, while it actually is %s" % (progress.content))
 
     for i in range(0, 3600):
+        time.sleep(1)
+        test_util.test_logger(i)
         last_progress = progress
         progresses = res_ops.get_progress(image_jobs[index])
         if len(progresses) <= 0:
             break
         progress = progresses[0]
+        test_util.test_logger(progress.content)
 	if progress.content == None:
             break
 
@@ -87,8 +90,7 @@ def check_add_image_progress(index):
             test_util.test_fail("Progress (%s) of task is smaller than last time (%s)" % (progress.content, last_progress.content))
 
     image_cond = res_ops.gen_query_conditions("uuid", '=', image[0].uuid)
-    image_query2 = res_ops.query_resource_fields(res_ops.IMAGE, image_cond, \
-                   None, fields=['status'])
+    image_query2 = res_ops.query_resource_fields(res_ops.IMAGE, image_cond)
     time.sleep(1)
     if image_query2[0].status != "Ready":
         test_util.test_fail("Image should be ready when no progress anymore")
@@ -107,16 +109,18 @@ def test():
             test_util.test_skip("not find available imagestore or ceph backup storage. Skip test")
 
     for i in range(0, threads_num):
-        threads[i] = threading.Thread(target=add_image, args=(bss[0].uuid, i, ))
+        threads[i] = threading.Thread(target=add_image, args=(bss[0].uuid, i, ), name="add_image_"+str(i))
         threads[i].start()
+    time.sleep(2)
     for i in range(0, threads_num):
-        checker_threads[i] = threading.Thread(target=check_add_image_progress, args=(i, ))
+        checker_threads[i] = threading.Thread(target=check_add_image_progress, args=(i, ), name="progress_image_"+str(i))
+        # checker_threads[i].setDaemon(True)
         checker_threads[i].start()
 
     for i in range(0, threads_num):
-        checker_threads[i].join()
+	checker_threads[i].join()
         threads[i].join()
-        images[i].check()
+        images[i].check() 
         images[i].delete()
 
     for i in range(0, threads_num):

@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-iscsi.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-iscsi.tmpt</scenarioConfigTemplate>
+</testConfig>

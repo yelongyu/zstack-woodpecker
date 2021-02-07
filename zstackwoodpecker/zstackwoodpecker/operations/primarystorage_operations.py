@@ -41,6 +41,30 @@ def create_local_primary_storage(primary_storage_option, session_uuid=None):
             (evt.inventory.uuid, action.name))
     return evt.inventory
 
+def add_mon_to_ceph_primary_storage(mon_urls, ceph_ps_uuid, system_tag=None, user_tag=None, session_uuid=None):
+    action = api_actions.AddMonToCephPrimaryStorageAction()
+    action.timeout = 300000
+    action.monUrls = mon_urls
+    action.uuid = ceph_ps_uuid
+    action.systemTags = system_tag
+    action.userTags = user_tag
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add Mon To Ceph Primary Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
+    return evt.inventory
+
+def remove_mon_from_ceph_primary_storage(mon_hostnames, ceph_ps_uuid, system_tag=None, user_tag=None, session_uuid=None):
+    action = api_actions.RemoveMonFromCephBackupStorageAction()
+    action.timeout = 300000
+    action.monHostnames = mon_hostnames
+    action.uuid = ceph_ps_uuid
+    action.systemTags = system_tag
+    action.userTags = user_tag
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Add Mon To Ceph Primary Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
+    return evt.inventory
+
 def create_ceph_primary_storage(primary_storage_option, session_uuid=None):
     action = api_actions.AddCephPrimaryStorageAction()
     action.timeout = 300000
@@ -60,7 +84,7 @@ def create_ceph_primary_storage(primary_storage_option, session_uuid=None):
             (evt.inventory.uuid, action.name))
     return evt.inventory
 
-def add_ceph_primary_storage_pool(primary_storage_uuid, pool_name, aliasName=None, isCreate=None, resourceUuid=None, description=None, session_uuid=None):
+def add_ceph_primary_storage_pool(primary_storage_uuid, pool_name, aliasName=None, isCreate=None, resourceUuid=None, poolType="Root", description=None, session_uuid=None):
     action = api_actions.AddCephPrimaryStoragePoolAction()
     action.timeout = 300000
     action.primaryStorageUuid = primary_storage_uuid
@@ -68,10 +92,24 @@ def add_ceph_primary_storage_pool(primary_storage_uuid, pool_name, aliasName=Non
     action.aliasName = aliasName
     action.description = description
     action.isCreate = isCreate
+    action.type = poolType
     action.resourceUuid = resourceUuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     test_util.action_logger('Create Primary Storage [uuid:] %s Pool [uuid:] %s [name:] %s' % \
             (action.primaryStorageUuid, evt.inventory.uuid, action.poolName))
+    return evt.inventory
+
+
+def create_sharedblock_primary_storage(primary_storage_option, disk_uuid, session_uuid=None):
+    action = api_actions.AddSharedBlockGroupPrimaryStorageAction()
+    action.timeout = 300000
+    action.name = primary_storage_option.get_name()
+    action.zoneUuid = primary_storage_option.get_zone_uuid()
+    action.description = primary_storage_option.get_description()
+    action.diskUuids = disk_uuid
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger('Create SharedBlock Primary Storage [uuid:] %s [name:] %s' % \
+            (evt.inventory.uuid, action.name))
     return evt.inventory
 
 
@@ -102,7 +140,7 @@ def attach_primary_storage(primary_storage_uuid, cluster_uuid, session_uuid=None
     action = api_actions.AttachPrimaryStorageToClusterAction()
     action.clusterUuid = cluster_uuid
     action.primaryStorageUuid = primary_storage_uuid
-    action.timeout = 30000
+    action.timeout = 300000
     test_util.action_logger('Attach Primary Storage [uuid:] %s to Cluster [uuid:] %s' % \
             (primary_storage_uuid, cluster_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
@@ -151,3 +189,20 @@ def reconnect_primary_storage(primary_storage_uuid, session_uuid=None):
     test_util.action_logger('Reconnect Primary Storage [uuid:] %s' % primary_storage_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
+
+def get_trash_on_primary_storage(primary_storage_uuid, session_uuid=None):
+    action = api_actions.GetTrashOnPrimaryStorageAction()
+    action.uuid = primary_storage_uuid
+    action.timeout = 6000000
+    test_util.action_logger('Get Trash On Primary Storage [uuid:] %s' % primary_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt
+
+def clean_up_trash_on_primary_storage(primary_storage_uuid, trash_id=None, session_uuid=None):
+    action = api_actions.CleanUpTrashOnPrimaryStorageAction()
+    action.uuid = primary_storage_uuid
+    action.trashId = trash_id
+    action.timeout = 6000000
+    test_util.action_logger('Clean Up Trash On Primary Storage [uuid:] %s' % primary_storage_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt

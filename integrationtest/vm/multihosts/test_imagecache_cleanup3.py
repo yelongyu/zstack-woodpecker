@@ -87,33 +87,92 @@ def test():
     test_obj_dict.add_volume(volume1)
     volume1.attach(vm2)
 
+    if ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+        test_util.test_skip('ceph is not directly using image cache, skip test.')
+
+    if ps.type == "SharedBlock":
+        path = "/dev/" + ps.uuid + '/' + new_image.image.uuid
+        if not test_lib.lib_check_sharedblock_file_exist(host, path):
+            test_util.test_fail('image cache is expected to exist')
+    else:
+        if ps.type == "AliyunNAS":
+            image_cache_path = "%s/datas/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
+        else:
+            image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
+        if not test_lib.lib_check_file_exist(host, image_cache_path):
+            test_util.test_fail('image cache is expected to exist')
+        if bss[0].type == inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE:
+            image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
+            if not test_lib.lib_check_file_exist(host, image_cache_path):
+                test_util.test_fail('image cache is expected to exist') 
+
     new_image.delete()
     new_image.expunge()
 
-    if ps.type == 'SharedMountPoint':
-        test_util.test_skip('CleanUpImageCacheOnPrimaryStorage not supported on SMP storage, skip test.')
-    elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
-        test_util.test_skip('ceph is not directly using image cache, skip test.')
-
     ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
     if ps.type == inventory.LOCAL_STORAGE_TYPE:
-        image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
-        if test_lib.lib_check_file_exist(host, image_cache_path):
-            test_util.test_fail('image cache is expected to be deleted')
+        count = 0
+        while True:
+            image_cache_path = "%s/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
+            if not test_lib.lib_check_file_exist(host, image_cache_path):
+                break
+            elif count > 5:
+                test_util.test_fail('image cache is expected to be deleted')
+            test_util.test_logger('check %s times: image cache still exist' % (count))
+            time.sleep(5)
+            count += 1
 
     vm2.destroy()
     vm2.expunge()
-    ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)
-    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+    ps_ops.cleanup_imagecache_on_primary_storage(ps.uuid)    
+
+    if ps.type == "SharedBlock":
+        image_cache_path = "/dev/" + ps.uuid + '/' + new_image.image.uuid
+        count = 0
+        while True:
+            if not test_lib.lib_check_sharedblock_file_exist(host, image_cache_path):
+                break
+            elif count > 5:
+                test_util.test_fail('image cache is expected to be deleted')
+            test_util.test_logger('check %s times: image cache still exist' % (count))
+            time.sleep(10)
+            count += 1
+        test_util.test_pass('imagecache cleanup Pass.')
+
+    if ps.type == "AliyunNAS":
+        count = 0
+        while True:
+            image_cache_path = "%s/datas/imagecache/template/%s/%s.qcow2" % (ps.mountPath, new_image.image.uuid, new_image.image.uuid)
+            if not test_lib.lib_check_file_exist(host, image_cache_path):
+                break
+            elif count > 5:
+                test_util.test_fail('image cache is expected to be deleted')
+            test_util.test_logger('check %s times: image cache still exist' % (count))
+            time.sleep(5)
+            count += 1
+        test_util.test_pass('imagecache cleanup Pass.')
+
+    count = 0
+    while True:
         image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
-        if test_lib.lib_check_file_exist(host2, image_cache_path):
+        if not test_lib.lib_check_file_exist(host, image_cache_path):
+            break
+        elif count > 5:
             test_util.test_fail('image cache is expected to be deleted')
-    elif ps.type == inventory.NFS_PRIMARY_STORAGE_TYPE:
-        image_cache_path = "%s/imagecache/template/%s" % (ps.mountPath, new_image.image.uuid)
-        if test_lib.lib_check_file_exist(host2, image_cache_path):
+        test_util.test_logger('check %s times: image cache still exist' % (count))
+        time.sleep(5)
+        count += 1
+    
+    count = 0
+    while True:
+        image_cache_path = "%s/zstore-cache/%s" % (ps.mountPath, new_image.image.uuid)
+        if not test_lib.lib_check_file_exist(host, image_cache_path):
+            break
+        elif count > 5:
             test_util.test_fail('image cache is expected to be deleted')
-#    elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
-#    elif ps.type == 'SharedMountPoint':
+        test_util.test_logger('check %s times: image cache still exist' % (count))
+        time.sleep(5)
+        count += 1
 
     test_util.test_pass('imagecache cleanup Pass.')
 

@@ -9,7 +9,7 @@ import zstackwoodpecker.test_state as test_state
 import random
 
 _config_ = {
-        'timeout' : 3000,
+        'timeout' : 7200,
         'noparallel' : True
         }
 
@@ -23,16 +23,27 @@ def test():
     ps, another = ps_env.get_two_ps()
     disk_offering_uuids = [random.choice(res_ops.get_resource(res_ops.DISK_OFFERING)).uuid]
 
-    vm = test_stub.create_vm_with_random_offering(vm_name='test_vm', l3_name='l3VlanNetworkName1')
+    if ps_env.is_sb_ceph_env:
+        ps_uuid = random.choice([ps.uuid, another.uuid])
+        if ps_uuid == ps.uuid:
+            vm = test_stub.create_vm_with_random_offering(vm_name='test_vm', l3_name='l3VlanNetworkName1', ps_uuid=ps_uuid, bs_type='ImageStoreBackupStorage')
+        else:
+            vm = test_stub.create_vm_with_random_offering(vm_name='test_vm', l3_name='l3VlanNetworkName1', ps_uuid=ps_uuid, bs_type='Ceph')
+    else:
+        vm = test_stub.create_vm_with_random_offering(vm_name='test_vm', l3_name='l3VlanNetworkName1')
     test_obj_dict.add_vm(vm)
 
     for root_volume_ps_uuid in [None, ps.uuid]:
         for data_vol_ps_uuid in [None, another.uuid]:
+            if ps_env.is_local_shared_env or ps_env.is_sb_ceph_env:
+                if type(root_volume_ps_uuid) != type(data_vol_ps_uuid):
+                    continue
             vm = test_stub.create_vm_with_random_offering(vm_name='test_vm',
-                                                          disk_offering_uuids=disk_offering_uuids,
+                                                          disk_offering_uuids=disk_offering_uuids if data_vol_ps_uuid else None,
                                                           ps_uuid=root_volume_ps_uuid,
                                                           l3_name='l3VlanNetworkName1',
-                                                          system_tags=['primaryStorageUuidForDataVolume::{}'.format(data_vol_ps_uuid)] if data_vol_ps_uuid else None)
+                                                          system_tags=['primaryStorageUuidForDataVolume::{}'.format(data_vol_ps_uuid)] if data_vol_ps_uuid else None,
+                                                          bs_type='ImageStoreBackupStorage')
             if root_volume_ps_uuid:
                 root_vol = test_lib.lib_get_root_volume(vm.get_vm())
                 assert root_vol.primaryStorageUuid == ps.uuid

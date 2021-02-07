@@ -1,6 +1,7 @@
 import os
 import sys
 import traceback
+import urllib2
 
 import zstackwoodpecker.header.checker as checker_header
 import zstackwoodpecker.header.vm as vm_header
@@ -39,6 +40,51 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
             self.check_file_exist(volume, volume_installPath, host)
         elif ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
             self.check_ceph(volume, volume_installPath, ps)
+        elif ps.type == 'SharedBlock':
+            self.check_sharedblock(volume, volume_installPath, ps)
+        elif ps.type == 'AliyunEBS':
+            self.check_ebs(ps, volume_installPath)
+        elif ps.type == 'MiniStorage':
+            self.check_mini(volume, volume_installPath, ps)
+
+    def check_ebs(self, ps, volume_installPath):
+        import zstackwoodpecker.operations.scenario_operations as sce_ops
+        url = ps.url.replace('ocean/api', 'auto/test')
+        req = urllib2.Request(url)
+        ebs_domain = urllib2.urlopen(req).read().split('"')[-2]
+        vol_name = volume_installPath.split(';')[1].replace('volumeId=', 'ebs-test-disk-')
+        cond = res_ops.gen_query_conditions('name', 'like', vol_name + '%')
+        ret = sce_ops.query_resource(ebs_domain, res_ops.VOLUME, cond).inventories
+        if ret:
+            return self.judge(True)
+        else:
+            return self.judge(False)
+
+    def check_sharedblock(self, volume, volume_installPath, ps):
+        devPath = "/dev/" + volume_installPath.split("sharedblock://")[1]
+        cmd = 'lvscan'
+        conditions = res_ops.gen_query_conditions('primaryStorage.uuid', '=', ps.uuid)
+        cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
+        conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
+        host = res_ops.query_resource(res_ops.HOST, conditions)[0]
+        result = test_lib.lib_execute_ssh_cmd(host.managementIp, 'root', 'password', cmd)
+        if devPath in result:
+            return self.judge(True)
+        else:
+            return self.judge(False)
+
+    def check_mini(self, volume, volume_installPath, ps):
+        devPath = "/dev/" + volume_installPath.split("mini://")[1]
+        cmd = 'lvscan'
+        conditions = res_ops.gen_query_conditions('primaryStorage.uuid', '=', ps.uuid)
+        cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
+        conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster.uuid)
+        host = res_ops.query_resource(res_ops.HOST, conditions)[0]
+        result = test_lib.lib_execute_ssh_cmd(host.managementIp, host.username, os.environ.get('hostPassword'), cmd)
+        if devPath in result:
+            return self.judge(True)
+        else:
+            return self.judge(False)
 
     def check_iscsi(self, volume, volume_installPath, ps):
         host = test_lib.lib_find_host_by_iscsi_ps(ps)
@@ -52,7 +98,8 @@ class zstack_kvm_volume_file_checker(checker_header.TestChecker):
     def check_ceph(self, volume, volume_installPath, ps):
         monHost = ps.mons[0].hostname
         for key in os.environ.keys():
-            if monHost in os.environ.get(key):
+            if monHost in os.environ.get(key) and ":" in os.environ.get(key) and "@" in os.environ.get(key):
+                print "debug message monHost and key is %s and %s" % (monHost,key)
                 ceph_host, username, password = \
                         test_lib.lib_get_ceph_info(os.environ.get(key))
                 break
@@ -127,6 +174,20 @@ class zstack_kvm_volume_attach_checker(checker_header.TestChecker):
             volume_installPath = volume_installPath.split('ceph://')[1]
         elif volume_installPath.startswith('fusionstor'):
             volume_installPath = volume_installPath.split('fusionstor://')[1]
+        elif volume_installPath.startswith('sharedblock'):
+            volume_installPath = "/dev/" + volume_installPath.split('sharedblock://')[1]
+        elif volume_installPath.startswith('mini'):
+            _cmd = "drbdsetup show %s | grep device | awk -F';' '{print $1}' | awk '{print $3}'" % volume.uuid
+            result = test_lib.lib_execute_ssh_cmd(host.managementIp,host.username, os.environ.get('hostPassword'), _cmd, 180)
+            volume_installPath = '/dev/drbd' + result.strip()
+        elif volume_installPath.startswith('ebs'):
+            ps_uuid = volume.primaryStorageUuid
+            ps = test_lib.lib_get_primary_storage_by_uuid(ps_uuid)
+            url = ps.url.replace('ocean/api', 'dev/name')
+            vol_id = volume_installPath.split(';')[1].split('volumeId=')[-1]
+            req = urllib2.Request(url, headers={'Volumeid': vol_id})
+            volume_installPath = '/dev/' + urllib2.urlopen(req).read().split('"')[-2]
+
 
 
         if volume_installPath in output:

@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy-vyos.xml</deployConfig>
     <deployConfigTemplate>deploy-vyos.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>

@@ -29,7 +29,13 @@ def test():
         file_license = base64.b64encode('%s' % file_license1)
     node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
     lic_ops.update_license(node_uuid, file_license)
-    test_stub.check_license(None, None, 1, False, 'Trial')
+    test_stub.check_license('woodpecker@zstack.io', None, 1, False, 'Trial')
+
+    node_uuid = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].uuid
+    test_util.test_logger('start to delete the license')
+    uuid = test_stub.get_license_info().uuid
+    lic_ops.delete_license(node_uuid, uuid)
+    test_util.test_logger('delete the license [uuid:] %s' % uuid)
 
     test_util.test_pass('Check License Test Success')
 

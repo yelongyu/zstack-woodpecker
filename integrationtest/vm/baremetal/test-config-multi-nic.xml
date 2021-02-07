@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-multi-nic.xml</deployConfig>
+    <deployConfigTemplate>deploy-multi-nic.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

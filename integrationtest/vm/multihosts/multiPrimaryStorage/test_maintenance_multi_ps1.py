@@ -23,7 +23,6 @@ VOLUME_NUMBER = 10
 maintenance_ps_list = []
 
 
-@test_stub.skip_if_local_nfs
 @test_stub.skip_if_only_one_ps
 def test():
     ps_env = test_stub.PSEnvChecker()
@@ -32,9 +31,15 @@ def test():
     vm_list = []
     for root_vol_ps in [ps1, ps2]:
         for data_vol_ps in [ps1, ps2]:
+            if root_vol_ps.type == "SharedBlock":
+                bs_type = "ImageStoreBackupStorage"
+            elif root_vol_ps.type == inventory.CEPH_PRIMARY_STORAGE_TYPE:
+                bs_type = "Ceph"
+            else:
+                bs_type = None
             vm = test_stub.create_multi_vms(name_prefix='test_vm', count=1,
                                             ps_uuid=root_vol_ps.uuid, data_volume_number=VOLUME_NUMBER,
-                                            ps_uuid_for_data_vol=data_vol_ps.uuid)[0]
+                                            ps_uuid_for_data_vol=data_vol_ps.uuid, timeout=1200000, bs_type=bs_type)[0]
             test_obj_dict.add_vm(vm)
             vm_list.append(vm)
 
@@ -42,14 +47,14 @@ def test():
 
     ps_ops.change_primary_storage_state(state='maintain', primary_storage_uuid=ps2.uuid)
     maintenance_ps_list.append(ps2)
-    time.sleep(30)
+    time.sleep(60)
 
     vr_vm_list = test_lib.lib_find_vr_by_vm(vm1.get_vm())
     vr_vm = None
     if vr_vm_list:
         vr_vm = vr_vm_list[0]
         if vr_vm.allVolumes[0].primaryStorageUuid == ps2.uuid:
-            assert vr_vm.state == inventory.STOPPED
+            assert vr_vm.state == inventory.STOPPED  or vr_vm.state == inventory.STOPPING
         else:
             assert vr_vm.state == inventory.RUNNING
             vm1.check()

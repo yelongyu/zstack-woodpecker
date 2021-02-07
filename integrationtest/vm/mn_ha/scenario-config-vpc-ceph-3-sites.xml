@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-vpc-ceph-3-sites.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-vpc-ceph-3-sites.tmpt</scenarioConfigTemplate>
+</testConfig>

@@ -1,0 +1,27 @@
+import ./deploy.tmpt
+import ../multihosts/deploy.tmpt
+
+miniPrimaryStorageName = PS-1
+miniBackupStorageName = BS-1
+zoneName = Zone-1
+l2Vlan21 = 1121
+imageStoreBackupStorageName2 = BS-2
+imageStoreBackupStorageName = BS-1
+hostPort = 22
+instanceOfferingMemory_l = 2G
+instanceOfferingCpuNum_l = 2
+imageUrl_vdbench = http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2
+
+imageName_i_c6 = centos6-installation-test
+imageUrl_i_c6 = http://192.168.200.100/mirror/diskimages/centos6.6-qga.qcow2
+
+imageName_i_c7 = centos7-installation-test
+imageUrl_i_c7 = http://192.168.200.100/mirror/diskimages/CentOS7.4-Cloudinit-QGA-8G.qcow2
+
+batch_test_image = batch-image
+batchImageUrl = http://192.168.200.100/mirror/diskimages/CentOS7.2_Minimal_40G.qcow2
+
+imageName_windows = windows
+imageUrl_windows = http://192.168.200.100/mirror/diskimages/windows-2012-cn-qcow2.qcow2
+winImageUsername = Administrator
+winImagePassword = linux@123

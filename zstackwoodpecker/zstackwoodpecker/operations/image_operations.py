@@ -14,7 +14,7 @@ def add_data_volume_template(image_option):
     action = api_actions.AddImageAction()
     action.name = image_option.get_name()
     action.url = image_option.get_url()
-    action.mediaType = 'DataVolumnTemplate'
+    action.mediaType = 'DataVolumeTemplate'
     if image_option.get_mediaType() and \
             action.mediaType != image_option.get_mediaType():
         test_util.test_warn('image type %s was not %s' % \
@@ -36,6 +36,8 @@ def add_image(image_option):
     action.format = image_option.get_format()
     action.platform = image_option.get_platform()
     action.backupStorageUuids = image_option.get_backup_storage_uuid_list()
+    action.resourceUuid = image_option.get_uuid()
+    action.timeout = image_option.get_timeout()
     test_util.action_logger('Add [Image:] %s from [url:] %s ' % (action.name, action.url))
     evt = account_operations.execute_action_with_session(action, image_option.get_session_uuid())
     test_util.test_logger('[image:] %s is added.' % evt.inventory.uuid)
@@ -122,6 +124,7 @@ def create_root_volume_template(image_creation_option):
     Create Root Volume Template from a root volume
     '''
     action = api_actions.CreateRootVolumeTemplateFromRootVolumeAction()
+    action.resourceUuid = image_creation_option.get_uuid()
     action.rootVolumeUuid = image_creation_option.get_root_volume_uuid()
     action.backupStorageUuids = image_creation_option.get_backup_storage_uuid_list()
 
@@ -134,6 +137,7 @@ def create_root_volume_template(image_creation_option):
     action.guestOsType = image_creation_option.get_guest_os_type()
     action.system = image_creation_option.get_system()
     action.platform = image_creation_option.get_platform()
+    action.timeout = image_creation_option.get_timeout()
 
     description = image_creation_option.get_description()
     if not description:
@@ -187,6 +191,8 @@ def create_root_volume_template_apiid(image_creation_option, apiid):
     action.guestOsType = image_creation_option.get_guest_os_type()
     action.system = image_creation_option.get_system()
     action.platform = image_creation_option.get_platform()
+    action.resourceUuid = image_creation_option.get_uuid()
+    action.timeout = image_creation_option.get_timeout()
 
     description = image_creation_option.get_description()
     if not description:
@@ -206,6 +212,15 @@ def delete_image(image_uuid, backup_storage_uuid_list=None, session_uuid=None):
     test_util.action_logger('Delete [image:] %s' % image_uuid)
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
+
+def recover_image(image_uuid, backup_storage_uuid_list=None, session_uuid=None):
+    action = api_actions.RecoverImageAction()
+    action.imageUuid = image_uuid
+    action.backupStorageUuids = backup_storage_uuid_list
+
+    test_util.action_logger('recover image: %s' % image_uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory
 
 def expunge_image(image_uuid, backup_storage_uuid_list=None, session_uuid=None):
     action = api_actions.ExpungeImageAction()
@@ -248,6 +263,28 @@ def create_template_from_snapshot(image_creation_option, session_uuid=None):
     evt = account_operations.execute_action_with_session(action, image_creation_option.get_session_uuid())
     return evt.inventory
 
+def create_root_template_from_backup(backupStorageUuid,backupUuid,name=None,session_uuid=None):
+    action = api_actions.CreateRootVolumeTemplateFromVolumeBackupAction()
+    action.backupStorageUuid = backupStorageUuid
+    action.backupUuid = backupUuid
+    if not name:
+        name = "backup_image_%s" % backupUuid
+    action.name = name
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("Create image from [backup:] %s in [backup Storage:] %s" % (backupUuid, backupStorageUuid))
+    return evt.inventory    
+
+def create_data_template_from_backup(backupStorageUuid,backupUuid,name=None,session_uuid=None):
+    action = api_actions.CreateDataVolumeTemplateFromVolumeBackupAction()
+    action.backupStorageUuid = backupStorageUuid
+    action.backupUuid = backupUuid
+    if not name:
+        name = "backup_image_%s" % backupUuid
+    action.name = name
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    test_util.action_logger("Create image from [backup:] %s in [backup Storage:] %s" % (backupUuid, backupStorageUuid))
+    return evt.inventory
+
 def reconnect_sftp_backup_storage(bs_uuid, session_uuid = None):
     action = api_actions.ReconnectSftpBackupStorageAction()
     action.uuid = bs_uuid
@@ -264,6 +301,7 @@ def commit_volume_as_image(image_creation_option, session_uuid = None):
     action.guestOsType = image_creation_option.get_guest_os_type()
     action.system = image_creation_option.get_system()
     action.platform = image_creation_option.get_platform()
+    action.resourceUuid = image_creation_option.get_uuid()
 
     description = image_creation_option.get_description()
     if not description:
@@ -284,6 +322,8 @@ def commit_volume_as_image_apiid(image_creation_option, apiid, session_uuid = No
     action.guestOsType = image_creation_option.get_guest_os_type()
     action.system = image_creation_option.get_system()
     action.platform = image_creation_option.get_platform()
+    action.resourceUuid = image_creation_option.get_uuid()
+    action.timeout = image_creation_option.get_timeout()
 
     description = image_creation_option.get_description()
     if not description:
@@ -326,15 +366,16 @@ def attach_iso(iso_uuid, vm_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def detach_iso(vm_uuid, session_uuid = None):
+def detach_iso(vm_uuid, iso_uuid=None, session_uuid = None):
     '''
     Detach iso from vm
     '''
     action = api_actions.DetachIsoFromVmInstanceAction()
     action.vmInstanceUuid = vm_uuid
+    action.isoUuid = iso_uuid
     test_util.action_logger('Detach ISO from VM[UUID: %s]' % (vm_uuid))
     evt = account_operations.execute_action_with_session(action, session_uuid)
-    return evt.inventory    
+    return evt.inventory
 
 def get_image_qga_enable(img_uuid, session_uuid = None):
     action = api_actions.GetImageQgaEnableAction()
@@ -356,11 +397,15 @@ def set_image_qga_disable(img_uuid, session_uuid = None):
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
 
-def sync_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img_uuid, session_uuid=None):
+def sync_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img_uuid, name=None, session_uuid=None):
     action = api_actions.SyncImageFromImageStoreBackupStorageAction()
     action.dstBackupStorageUuid = dst_bs_uuid
     action.srcBackupStorageUuid = src_bs_uuid
     action.uuid = img_uuid
+    if name != None:
+        action.name = name
+    else:
+        action.name = 'backup_image'
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
@@ -376,9 +421,33 @@ def recovery_image_from_image_store_backup_storage(dst_bs_uuid, src_bs_uuid, img
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt.inventory
 
-def list_image_from_image_store_backup_storage(uuid, session_uuid=None):
-    action = api_actions.ListImagesFromImageStoreBackupStorageAction()
+def get_images_from_image_store_backup_storage(uuid, session_uuid=None):
+    action = api_actions.GetImagesFromImageStoreBackupStorageAction()
     action.uuid = uuid
     evt = account_operations.execute_action_with_session(action, session_uuid)
     return evt
-    
+
+def update_image_platform(uuid, platform, session_uuid=None):
+    action = api_actions.UpdateImageAction()
+    action.uuid = uuid
+    action.platform = platform
+    test_util.action_logger('Update [image %s] platform' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory   
+
+def change_image_state(uuid, state, session_uuid):
+    action = api_actions.ChangeImageStateAction()
+    action.uuid = uuid
+    action.stateEvent = state
+    test_util.action_logger('Change [image %s] state' % (uuid))
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory   
+
+def update_image(uuid, name, description, session_uuid = None):
+    action = api_actions.UpdateImageAction()
+    action.uuid = uuid
+    action.name = name
+    action.description = description
+    test_util.action_logger('Update image: %s Size' % uuid)
+    evt = account_operations.execute_action_with_session(action, session_uuid)
+    return evt.inventory

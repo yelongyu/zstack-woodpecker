@@ -14,6 +14,7 @@ random_strategy = 'random'
 fair_strategy = 'fair'
 weight_fair_strategy = 'weight_fair'
 path_strategy = 'path_strategy'
+resource_path_strategy = 'resource_path_strategy'
 default_strategy = random_strategy
 
 class ActionPriority(object):
@@ -302,6 +303,7 @@ action_selector_table = {
         random_strategy: RandomActionSelector,
         fair_strategy: FairActionSelector,
         weight_fair_strategy: WeightFairActionSelector,
-        path_strategy: PathActionSelector
+        path_strategy: PathActionSelector,
+        resource_path_strategy: PathActionSelector
         }
 

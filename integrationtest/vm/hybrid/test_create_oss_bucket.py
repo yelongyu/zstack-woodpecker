@@ -18,7 +18,7 @@ hybrid = test_stub.HybridObject()
 def test():
     hybrid.add_datacenter_iz(add_datacenter_only=True)
     hybrid.create_bucket()
-    time.sleep(10)
+    time.sleep(90)
     hybrid.del_bucket()
     test_util.test_pass('Create OSS Bucket Test Success')
 

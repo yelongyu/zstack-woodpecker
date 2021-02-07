@@ -30,6 +30,9 @@ def test():
     global ps_uuid
     global host_uuid
     global vr_uuid
+    allow_ps_list = [inventory.CEPH_PRIMARY_STORAGE_TYPE, "SharedBlock"]
+    test_lib.skip_test_when_ps_type_not_in_list(allow_ps_list)
+
     test_util.test_dsc('Create test vm and check')
 
     bs_cond = res_ops.gen_query_conditions("status", '=', "Connected")
@@ -37,9 +40,6 @@ def test():
             None)
     if not bss:
         test_util.test_skip("not find available backup storage. Skip test")
-
-    if bss[0].type != inventory.CEPH_BACKUP_STORAGE_TYPE:
-        test_util.test_skip("not find available imagestore or ceph backup storage. Skip test")
 
     l3_1_name = os.environ.get('l3VlanNetworkName1')
     vm = test_stub.create_vlan_vm(l3_name=l3_1_name)
@@ -61,9 +61,10 @@ def test():
     volume.check()
     volume.attach(vm)
 
-    ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
-    ps_uuid = ps.uuid
-    ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    #ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
+    #ps_uuid = ps.uuid
+    #ps_ops.change_primary_storage_state(ps_uuid, 'maintain')
+    test_stub.maintain_all_pss()
     if not test_lib.lib_wait_target_down(vm.get_vm().vmNics[0].ip, '22', 90):
         test_util.test_fail('VM is expected to stop when PS change to maintain state')
 
@@ -71,12 +72,13 @@ def test():
     vm.check()
     volume.detach(vm.get_vm().uuid)
 
-    ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    #ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    test_stub.enable_all_pss()
     host_ops.reconnect_host(host_uuid)
     #vm_ops.reconnect_vr(vr_uuid)
-    vrs = test_lib.lib_get_all_vrs()
-    for vr in vrs:
-        vm_ops.start_vm(vr.uuid)  
+    #vrs = test_lib.lib_get_all_vrs()
+    #for vr in vrs:
+    #    vm_ops.start_vm(vr.uuid)  
 
     vm.start()
     vm.check()

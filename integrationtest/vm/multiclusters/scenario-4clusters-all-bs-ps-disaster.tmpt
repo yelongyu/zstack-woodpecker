@@ -1,0 +1,14 @@
+import ../scenario.tmpt
+import ./deploy-4clusters-all-bs-ps-disaster.tmpt
+
+vmName1 = test_vm1
+vmName2 = test_vm2
+vmName3 = test_vm3
+vmName4 = test_vm4
+vmName5 = test_vm5
+vmName6 = test_vm6
+vmInstranceOfferingUuid3 = 234567
+imageUuid2 = 234567
+
+cephStorageOfferingUuid = 123456
+volumeName = test_volume

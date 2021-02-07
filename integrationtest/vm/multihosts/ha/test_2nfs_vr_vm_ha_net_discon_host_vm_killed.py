@@ -80,7 +80,12 @@ def test():
     vm3.set_creation_option(vm_creation_option)
     vm3.create()
 
-    test_stub.ensure_host_not_nfs_provider(host_uuid)
+    vr_hosts = test_stub.get_host_has_vr()
+    mn_hosts = test_stub.get_host_has_mn()
+    nfs_hosts = test_stub.get_host_has_nfs()
+    if not test_stub.ensure_vm_not_on(vm.get_vm().uuid, vm.get_vm().hostUuid, vr_hosts+mn_hosts+nfs_hosts):
+        test_util.test_fail("Not find out a suitable host")
+    host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid
     test_stub.ensure_all_vrs_on_host(host_uuid)
     #vrs = test_lib.lib_find_vr_by_l3_uuid(l3_net_uuid)
     #target_host_uuid = test_lib.lib_find_host_by_vm(vm.get_vm()).uuid

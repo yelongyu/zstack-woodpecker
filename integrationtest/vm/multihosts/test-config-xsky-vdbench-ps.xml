@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-xsky-vdbench-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-xsky-vdbench-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

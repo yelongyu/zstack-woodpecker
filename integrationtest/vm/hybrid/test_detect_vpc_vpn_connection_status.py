@@ -19,7 +19,7 @@ hybrid = test_stub.HybridObject()
 
 def test():
     hybrid.create_ipsec_vpn_connection(check_connectivity=False, check_status=True)
-    time.sleep(30)
+    time.sleep(60)
     hybrid.sync_vpn_connection()
     assert hybrid.vpn_connection.status == 'ipsec_sa_established'
     test_util.test_pass('Detect VPN Connection Status Test Success')
@@ -35,9 +35,14 @@ def env_recover():
         hybrid.del_vpn_connection()
 
     if hybrid.user_vpn_gateway:
-        hybrid.del_user_vpn_gateway()
+        try:
+            hybrid.del_user_vpn_gateway()
+        except:
+            pass
+    hybrid.tear_down()
 
 #Will be called only if exception happens in test().
 def error_cleanup():
     global test_obj_dict
+    hybrid.tear_down()
     test_lib.lib_error_cleanup(test_obj_dict)

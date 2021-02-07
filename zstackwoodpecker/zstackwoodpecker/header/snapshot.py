@@ -4,6 +4,7 @@ CREATED = 'created' #just created and only in primary storage
 BACKUPED ='backuped'    #in both primary and backup storage
 DELETED = 'deleted'     #neither in primary storage nor backup storage
 PS_DELETED = 'deleted_from_primary_storage' #only in backup storage 
+md5sum = ''
 
 class TestSnapshot(zstack_header.ZstackObject):
 
@@ -71,10 +72,11 @@ class TestSnapshot(zstack_header.ZstackObject):
 
     def set_target_volume(self, target_volume):
         self.target_volume = target_volume
-        if target_volume.get_volume().type == volume_header.ROOT_VOLUME:
-            self.set_volume_type(volume_header.ROOT_VOLUME)
-        else:
-            self.set_volume_type(volume_header.DATA_VOLUME)
+        if target_volume:
+            if target_volume.get_volume().type == volume_header.ROOT_VOLUME:
+                self.set_volume_type(volume_header.ROOT_VOLUME)
+            else:
+                self.set_volume_type(volume_header.DATA_VOLUME)
 
     def get_target_volume(self):
         return self.target_volume
@@ -84,3 +86,9 @@ class TestSnapshot(zstack_header.ZstackObject):
 
     def get_volume_type(self):
         return self.volume_type
+
+    def set_md5sum(self, md5sum):
+        self.md5sum = md5sum
+
+    def get_md5sum(self):
+        return self.md5sum

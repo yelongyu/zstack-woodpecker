@@ -58,18 +58,20 @@ def test():
             test_util.test_fail("management node VM runs on more than one host after its former host down")
 
         test_util.test_logger("wait for 5 minutes to see if management node starts again")
-        try:
-            node_ops.wait_for_management_server_start(300)
-        except:
-            test_util.test_fail("management node does not recover after mn vm was destroyed")
+        #node_ops.wait_for_management_server_start(300)
+        test_stub.wrapper_of_wait_for_management_server_start(600)
     
         test_stub.ensure_hosts_connected()
         test_stub.ensure_pss_connected()
         test_stub.ensure_bss_connected()
 
-        vm = test_stub.create_basic_vm()
-        vm.check()
-        vm.destroy()
+        test_stub.return_pass_ahead_if_3sites("TEST PASS") 
+        if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+            pass
+        else:
+            vm = test_stub.create_basic_vm()
+            vm.check()
+            vm.destroy()
 
     test_util.test_pass('Create VM Test Success')
 

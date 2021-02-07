@@ -129,20 +129,22 @@ class zstack_share_volume_attach_db_checker(checker_header.TestChecker):
 
         if not share_volume_vm_uuids:
             #update self.test_obj, due to vm destroyed. 
-            if self.test_obj.target_vm.state == vm_header.DESTROYED or \
-                    self.test_obj.target_vm.state == vm_header.EXPUNGED:
-                test_util.test_warn('Update test [volume:] %s state, since attached VM was destroyed.' % volume.uuid)
-                self.test_obj.update()
-            else:
-                test_util.test_warn('Check warn: [volume:] %s state is not aligned with DB. DB did not record any attached VM, but test volume has attached vm record: %s.' % (volume.uuid, volume.vmInstanceUuid))
+            for vm in self.test_obj.sharable_target_vms:
+                if vm.state == vm_header.DESTROYED or \
+                        vm.state == vm_header.EXPUNGED:
+                    test_util.test_warn('Update test [volume:] %s state, since attached VM was destroyed.' % volume.uuid)
+                    self.test_obj.update()
+                else:
+                    test_util.test_warn('Check warn: [volume:] %s state is not aligned with DB. DB did not record any attached VM, but test volume has attached vm record: %s.' % (volume.uuid, volume.vmInstanceUuid))
             test_util.test_logger('Check result: [volume:] %s does NOT have vmInstanceUuid in Database. It is not attached to any vm.' % volume.uuid)
             return self.judge(False)
 
-        if not self.test_obj.target_vm:
+        if not self.test_obj.sharable_target_vms:
             test_util.test_logger('Check result: test [volume:] %s does NOT have vmInstance record in test structure. Can not do furture checking.' % volume.uuid)
             return self.judge(False)
 
-        vm = self.test_obj.target_vm.vm
+        # Take only one VM for check
+        vm = self.test_obj.sharable_target_vms[0].vm
 
         if vm.uuid not in share_volume_vm_uuids:
             test_util.test_logger('Check result: [volume:] %s is attached to [vm:] %s in zstack database.' % (volume.uuid, vm.uuid))
@@ -256,3 +258,51 @@ class zstack_alone_lb_vr_db_checker(checker_header.TestChecker):
                 % (lb_inv.uuid, vr_uuid))
         return self.judge(True)
 
+class zstack_vid_attr_db_checker(checker_header.TestChecker):
+    '''check virtual id attribute existence in database. If it is in DB,
+        return self.judge(True). If not, return self.judge(False)'''
+    def check(self):
+        super(zstack_vid_attr_db_checker, self).check()
+        try:
+            conditions = res_ops.gen_query_conditions('uuid', '=', self.test_obj.get_vid().uuid)
+            vid = res_ops.query_resource(res_ops.IAM2_VIRTUAL_ID, conditions)[0]
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            test_util.test_logger('Check result: [vid Inventory uuid:] %s does not exist in database.' % self.test_obj.get_vid().uuid)
+            return self.judge(False)
+
+        for lst in vid.attributes:
+            for attr_lst in self.test_obj.get_vid_attributes():
+                if lst['name'] == attr_lst['name']:
+                    test_util.test_logger('Check result: [vid Inventory attribute:] exist in database.')
+                    return self.judge(True)
+        return self.judge(False)
+
+class zstack_vid_policy_db_checker(checker_header.TestChecker):
+    '''check virtual id policy existence in database. If it is in DB,
+        return self.judge(True). If not, return self.judge(False)'''
+    def check(self):
+        import json
+        import zstacklib.utils.jsonobject as jsonobject
+        super(zstack_vid_policy_db_checker, self).check()
+        try:
+            conditions = res_ops.gen_query_conditions('uuid', '=', self.test_obj.get_vid().uuid)
+            vid = res_ops.query_resource(res_ops.IAM2_VIRTUAL_ID, conditions)[0]
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            test_util.test_logger('Check result: [vid Inventory uuid:] %s does not exist in database.' % self.test_obj.get_vid().uuid)
+            return self.judge(False)
+
+        conditions = res_ops.gen_query_conditions('virtualIDs.uuid', '=', self.test_obj.get_vid().uuid)
+        role_statements = res_ops.query_resource(res_ops.ROLE, conditions)[0].statements 
+        for state_lst in self.test_obj.get_vid_statements()[0]['actions']:
+            test_result = False
+            for statement in role_statements:
+                atatement_dict = json.loads(jsonobject.dumps(statement))['statement']
+                for lst in atatement_dict['actions']:
+                    if lst == state_lst:
+                        test_result = True
+            if test_result == False:
+                test_util.test_logger('Check result: [vid Inventory statement:] does not exist in database.')
+                return self.judge(False)
+        return self.judge(True)

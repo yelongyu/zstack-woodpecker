@@ -1,5 +1,5 @@
 <testConfig>
     <deployConfig>deploy-vm-check.xml</deployConfig>
     <deployConfigTemplate>deploy-vm-check.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.yyk.net</pingTestTarget>
+    <pingTestTarget>zstack.org</pingTestTarget>
 </testConfig>

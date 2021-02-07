@@ -28,7 +28,7 @@ def test():
     vm.destroy()
     vm.recover()
     time.sleep(60)
-    vm.set_state(vm_header.RUNNING)
+    vm.set_state(vm_header.STOPPED)
     vm.check()
     vm.destroy()
     vm.set_delete_policy(delete_policy)

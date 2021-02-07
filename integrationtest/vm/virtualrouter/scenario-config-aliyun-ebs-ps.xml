@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-aliyun-ebs-ps.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-aliyun-ebs-ps.tmpt</scenarioConfigTemplate>
+</testConfig>

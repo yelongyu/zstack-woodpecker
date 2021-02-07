@@ -1,5 +1,0 @@
-<testConfig>
-    <deployConfig>deploy-vyos-fusionstor-ps.xml</deployConfig>
-    <deployConfigTemplate>deploy-fusionstor-ps.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.org</pingTestTarget>
-</testConfig>

@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-2centos-host.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-2centos-host.tmpt</scenarioConfigTemplate>
+</testConfig>

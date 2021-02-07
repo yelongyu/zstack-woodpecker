@@ -22,13 +22,14 @@ disabled_ps_list = []
 
 @test_stub.skip_if_multi_nfs
 @test_stub.skip_if_only_one_ps
+@test_stub.skip_if_not_have_local
 def test():
     ps_env = test_stub.PSEnvChecker()
 
     local_nfs_env = ps_env.is_local_nfs_env
+    local_smp_env = ps_env.is_local_smp_env
 
-    local_ps = ps_env.get_random_local()
-    another_ps = ps_env.get_random_nfs() if local_nfs_env else random.choice([ps for ps in ps_env.ps_list if ps.uuid != local_ps.uuid])
+    local_ps, another_ps = ps_env.get_two_ps()
 
     vm = test_stub.create_multi_vms(name_prefix='test-', count=1)[0]
     test_obj_dict.add_vm(vm)
@@ -70,7 +71,7 @@ def test():
     for volume in volume_in_local:
         vol_ops.migrate_volume(volume.get_volume().uuid, target_host.uuid)
 
-    if not local_nfs_env:
+    if not (local_nfs_env or local_smp_env):
         for volume in volume_in_another:
             vol_ops.migrate_volume(volume.get_volume().uuid, target_host.uuid)
 

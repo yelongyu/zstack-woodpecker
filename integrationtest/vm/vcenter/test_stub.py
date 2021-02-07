@@ -20,7 +20,10 @@ import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
+import zstackwoodpecker.operations.vcenter_operations as vc_ops
+import zstackwoodpecker.operations.deploy_operations as dep_ops
 import apibinding.api_actions as api_actions
+import zstacklib.utils.xmlobject as xmlobject
 
 
 original_root_password = "password"
@@ -46,7 +49,7 @@ def create_vm(vm_name='virt-vm', \
     image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
     if not instance_offering_uuid:
-	instance_offering_name = os.environ.get('instanceOfferingName_m')
+	instance_offering_name = os.environ.get('instanceOfferingName_s')
         instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(instance_offering_name).uuid
 
     vm_creation_option = test_util.VmOption()
@@ -87,6 +90,7 @@ def create_vm_in_vcenter(vm_name='vcenter-vm', \
         instance_offering_uuid = None, \
         host_uuid = None, \
         disk_offering_uuids=None, system_tags=None, \
+        timeout = 1200000, \
         root_password=None, session_uuid = None):
 
 
@@ -98,10 +102,24 @@ def create_vm_in_vcenter(vm_name='vcenter-vm', \
     if not l3_name:
         l3_name = os.environ.get('l3PublicNetworkName')
 
-    image_uuid = test_lib.lib_get_image_by_name(image_name).uuid
+    image = test_lib.lib_get_image_by_name(image_name)
+    image_uuid = image.uuid
     l3_net_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+    datastore_type = vc_ops.get_datastore_type(os.environ['vcenter'])
+    if datastore_type == 'local':
+        cond = res_ops.gen_query_conditions('image.uuid', '=', image_uuid)
+        vcbs = res_ops.query_resource(res_ops.VCENTER_BACKUP_STORAGE, cond)[0]
+        vcps = vc_ops.lib_get_vcenter_primary_storage_by_name(vcbs.name)
+        cond = res_ops.gen_query_conditions("name", '=', l3_name)
+        l3_inv = res_ops.query_resource(res_ops.L3_NETWORK, cond)
+        for l3_net in l3_inv:
+            cond = res_ops.gen_query_conditions("uuid", '=', l3_net.l2NetworkUuid)
+            l2 = res_ops.query_resource(res_ops.L2_NETWORK, cond)[0]
+            if l2.attachedClusterUuids == vcps.attachedClusterUuids:
+                l3_net_uuid = l3_net.uuid
+                break   
     if not instance_offering_uuid:
-	instance_offering_name = os.environ.get('instanceOfferingName_m')
+	instance_offering_name = os.environ.get('instanceOfferingName_s')
         instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(instance_offering_name).uuid
 
     vm_creation_option = test_util.VmOption()
@@ -111,6 +129,7 @@ def create_vm_in_vcenter(vm_name='vcenter-vm', \
     vm_creation_option.set_name(vm_name)
     vm_creation_option.set_system_tags(system_tags)
     vm_creation_option.set_data_disk_uuids(disk_offering_uuids)
+    vm_creation_option.set_timeout(timeout)
     if root_password:
         vm_creation_option.set_root_password(root_password)
     if host_uuid:
@@ -166,5 +185,207 @@ def share_admin_resource(account_uuid_list):
         share_list.append(l3net_uuid)
     acc_ops.share_resources(account_uuid_list, share_list)
 
+#To get common pgs amoung all the host with the same vswitch and the same pgs
+#vsdic example
+# vsdic = {'host3': {'switch2': ['pg5', 'pg6'], 'switch1': ['pg1', 'pg2', 'pg4'], 'switch3': ['pg9']}, 'host2': {'switch1': ['pg2', 'pg3'], 'switch2': ['pg5'], 'switch3': ['pg9']}, 'host1': {'switch1': ['pg1', 'pg2'], 'switch2': ['pg5', 'pg6']}}
+def get_pgs(vsdic):
+    res1 = []
+    res2 = []
+    #tmp_switches get common vswitches
+    tmp_switches = None
+    for host, v in vsdic.items():
+        tmp_switches = (set(v.keys()) if not tmp_switches else tmp_switches & set(v.keys()))
+
+    for host, v in vsdic.items():
+        non_common_switches = (tmp_switches ^ set(v.keys()))
+        for non_common_switch in non_common_switches:
+            if vsdic[host][non_common_switch]:
+                res2.extend(vsdic[host][non_common_switch])
+
+    for switch in tmp_switches:
+        #tmp_pgs get common pgs
+        tmp_pgs = None
+        for host in vsdic:
+            tmp_pgs = (set(vsdic[host][switch]) if not tmp_pgs else tmp_pgs & set(vsdic[host][switch]))
+        if tmp_pgs:
+            res1.extend(list(tmp_pgs))
+        for host in vsdic:
+            non_common_pgs = (set(vsdic[host][switch]) ^ tmp_pgs)
+            if non_common_pgs:
+                res2.extend(non_common_pgs)
+    
+    return res1, res2
 
 
+
+def check_deployed_vcenter(deploy_config, scenario_config = None, scenario_file = None):
+    vc_name = os.environ.get('vcenter')
+    vslist = {}
+
+    if xmlobject.has_element(deploy_config, 'vcenter.datacenters.datacenter'):
+        assert deploy_config.vcenter.name_ == vc_ops.lib_get_vcenter_by_name(vc_name).name
+
+    for datacenter in xmlobject.safe_list(deploy_config.vcenter.datacenters.datacenter):
+        dportgroup_list = []
+        if xmlobject.has_element(datacenter, 'dswitch'):
+            for dswitch in xmlobject.safe_list(datacenter.dswitch):
+                for dportgroup in xmlobject.safe_list(dswitch.dportgroups.dportgroup):
+                    dportgroup_list.append(dportgroup.name_)
+        for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
+            sign = None
+            assert cluster.name_ == vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).name
+            cluster_uuid = vc_ops.lib_get_vcenter_cluster_by_name(cluster.name_).uuid
+            for host in xmlobject.safe_list(cluster.hosts.host):
+                vslist[host.name_] = {'vSwitch0':['VM Network.0']}
+                managementIp = dep_ops.get_host_from_scenario_file(host.name_, scenario_config, scenario_file, deploy_config)
+                assert managementIp == vc_ops.lib_get_vcenter_host_by_ip(managementIp).name
+                assert vc_ops.lib_get_vcenter_host_by_ip(managementIp).hypervisorType == "ESX"
+                if xmlobject.has_element(host, "iScsiStorage.vmfsdatastore"):
+                    assert host.iScsiStorage.vmfsdatastore.name_ == vc_ops.lib_get_vcenter_primary_storage_by_name(host.iScsiStorage.vmfsdatastore.name_).name
+                    assert vc_ops.lib_get_vcenter_primary_storage_by_name(host.iScsiStorage.vmfsdatastore.name_).type == "VCenter"
+                    assert host.iScsiStorage.vmfsdatastore.name_ == vc_ops.lib_get_vcenter_backup_storage_by_name(host.iScsiStorage.vmfsdatastore.name_).name
+                    assert vc_ops.lib_get_vcenter_backup_storage_by_name(host.iScsiStorage.vmfsdatastore.name_).type == "VCenter"
+                if xmlobject.has_element(host, "vswitchs"):
+                    for vswitch in xmlobject.safe_list(host.vswitchs.vswitch):
+                        if vswitch.name_ == "vSwitch0":
+                            for port_group in xmlobject.safe_list(vswitch.portgroup):
+                                vslist[host.name_]['vSwitch0'].append(port_group.text_ + '.' + port_group.vlanId_)
+                        else:
+                            vslist[host.name_][vswitch.name_] = []
+                            for port_group in xmlobject.safe_list(vswitch.portgroup):
+                                vslist[host.name_][vswitch.name_].append(port_group.text_ + '.' + port_group.vlanId_)
+                if xmlobject.has_element(host, "dswitchRef"):
+                    sign = 1
+                for vm in xmlobject.safe_list(host.vms.vm):
+                    assert vc_ops.lib_get_vm_by_name(vm.name_) == None
+            if xmlobject.has_element(cluster, "templates"):
+                for template in xmlobject.safe_list(cluster.templates.template):
+                    templ_name = template.path_
+                    tp_name = templ_name.split('/')[-1].split('.')[0]
+                    assert tp_name == vc_ops.lib_get_root_image_by_name(tp_name).name
+            for dportgroup_name in dportgroup_list:
+               if sign:
+                    l2 = vc_ops.lib_get_vcenter_l2_by_name_and_cluster(dportgroup_name, cluster_uuid)
+                    assert dportgroup_name == l2.name
+                    assert "L3-" + dportgroup_name == vc_ops.lib_get_vcenter_l3_by_name_and_l2("L3-" + dportgroup_name, l2.uuid).name
+            pg_vlan_list, non_pg_vlan_list = get_pgs(vslist)
+            for pg_vlan in pg_vlan_list:
+                pg = pg_vlan.split('.')[0]
+                vlan = pg_vlan.split('.')[1]
+                l2 = vc_ops.lib_get_vcenter_l2_by_name_and_cluster(pg, cluster_uuid)
+                assert pg == l2.name
+                if l2.vlan:                    
+                    assert vlan == str(l2.vlan)
+                assert "L3-" + pg == vc_ops.lib_get_vcenter_l3_by_name_and_l2("L3-" + pg, l2.uuid).name
+            for non_pg_vlan in non_pg_vlan_list:
+                non_pg = non_pg_vlan.split('.')[0]
+                assert vc_ops.lib_get_vcenter_l2_by_name_and_cluster(non_pg, cluster_uuid) == None
+
+                
+
+
+def create_volume(volume_creation_option=None, session_uuid = None):
+    if not volume_creation_option:
+        disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('smallDiskOfferingName'))
+        volume_creation_option = test_util.VolumeOption()
+        volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+        volume_creation_option.set_name('test_vcenter_volume')
+
+    volume_creation_option.set_session_uuid(session_uuid)
+    volume = zstack_volume_header.ZstackTestVolume()
+    volume.set_creation_option(volume_creation_option)
+    volume.create()
+    return volume
+
+def set_httpd_in_vm(vm, ip):
+    cmd = "systemctl start httpd; iptables -F; echo %s > /var/www/html/index.html" % ip
+    test_lib.lib_execute_command_in_vm(vm, cmd)
+
+def set_flat_vm_ip(vm,ipaddr,gateway,netmask):
+    from pyVmomi import vim
+    import datetime
+    import urllib2
+    import ssl
+
+    ssl._create_default_https_context = ssl._create_unverified_context
+
+    vm = get_obj(content, [vim.VirtualMachine], name=vm.name)
+    if isinstance(vm, list):
+        test_util.test_fail("there is no vm uuid:%s" % vm.uuid)
+
+    auth = vim.vm.guest.NamePasswordAuthentication(password="password", username="root")
+    path = '/tmp/netcfg.sh'
+    data = """echo "DEVICE=eno16777984 \nBOOTPROTO=static\nNAME=eno16777984\nIPADDR=$1\nNETMASK=$2\nGATEWAY=$3\nONBOOT=yes\nTYPE=Ethernet">/etc/sysconfig/network-scripts/ifcfg-eno16777984;
+        systemctl restart network.service;
+    """
+    fattr = vim.vm.guest.FileManager.PosixFileAttributes(
+        accessTime=datetime.datetime.now(),
+        modificationTime=datetime.datetime.now(),
+        permissions=744)
+
+    url = content.guestOperationsManager.fileManager.InitiateFileTransferToGuest(
+        vm=vm, auth=auth, guestFilePath=path, fileAttributes=fattr, fileSize=len(data), overwrite=True)
+
+    request = urllib2.Request(url=url,data=data,unverifiable=True)
+    request.get_method = lambda: 'PUT'
+    response = urllib2.urlopen(request)
+
+    arguments = "%s %s %s" % (ipaddr,gateway,netmask)
+    content.guestOperationsManager.processManager.StartProgramInGuest(
+        vm=vm, auth=auth, spec=vim.vm.guest.ProcessManager.ProgramSpec(arguments=arguments, programPath=path))
+
+def execute_shell_in_process(cmd, timeout=10, logfd=None):
+    if not logfd:
+        process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, universal_newlines=True)
+    else:
+        process = subprocess.Popen(cmd, executable='/bin/sh', shell=True, stdout=logfd, stderr=logfd, universal_newlines=True)
+
+    start_time = time.time()
+    while process.poll() is None:
+        curr_time = time.time()
+        TEST_TIME = curr_time - start_time
+        if TEST_TIME > timeout:
+            process.kill()
+            test_util.test_logger('[shell:] %s timeout ' % cmd)
+            return False
+        time.sleep(1)
+
+    test_util.test_logger('[shell:] %s is finished.' % cmd)
+    return process.returncode
+
+def rerun_logjobs(jobUuid, session_uuid = None):
+    action = api_actions.rerunLongJobAction()
+    action.jobUuid = jobUuid
+    test_util.action_logger('Rerun longjob [uuid:] %s' % jobUuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def convert_vm_from_foreign_hypervisor(name, url, cpuNum, memorySize, primaryStorageUuid, l3NetworkUuids, cluster_uuid = None, conversionHostUuid = None, convertStrategy = None, type = None, platform = None, strategy = None, systemTags = None, session_uuid = None):
+    action = api_actions.ConvertVmFromForeignHypervisorAction()
+    action.name = name
+    action.url = url
+    action.cpuNum = cpuNum
+    action.memorySize = memorySize
+    action.primaryStorageUuid = primaryStorageUuid
+    action.l3NetworkUuids = l3NetworkUuids
+    action.clusterUuid = cluster_uuid
+    action.convertStrategy = convertStrategy
+    action.type = type
+    action.platform = platform
+    action.conversionHostUuid = conversionHostUuid
+    action.strategy = strategy
+    action.systemTags = systemTags
+    test_util.action_logger('Convert Vm From Foreign Hypervisor.')
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory
+
+def add_v2v_conversion_host(name, hostUuid, storagePath, type, systemTags = None, session_uuid = None):
+    action = api_actions.AddV2VConversionHostAction()
+    action.name = name
+    action.hostUuid = hostUuid
+    action.storagePath = storagePath
+    action.type = type
+    action.systemTags = systemTags
+    test_util.action_logger('Add v2v Conversion Host [uuid:] %s' % hostUuid)
+    evt = acc_ops.execute_action_with_session(action, session_uuid)
+    return evt.inventory

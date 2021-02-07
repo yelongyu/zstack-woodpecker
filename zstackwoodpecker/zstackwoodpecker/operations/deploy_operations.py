@@ -13,19 +13,66 @@ import zstacklib.utils.sizeunit as sizeunit
 import zstacklib.utils.jsonobject as jsonobject
 import zstacklib.utils.xmlobject as xmlobject
 import zstacklib.utils.lock as lock
+import zstacklib.utils.http as http
 import apibinding.inventory as inventory
+import zstacklib.utils.ssh as ssh
 import os
 import sys
 import traceback
 import threading
+import urllib3
+import types
+import simplejson
 import time
+import nas_operations as nas_ops
+import hybrid_operations as hyb_ops
+import config_operations as cfg_ops
+import backupstorage_operations as bs_ops
 
 #global exception information for thread usage
 exc_info = []
-AddKVMHostTimeOut = 10*60*1000
+AddKVMHostTimeOut = 30*60*1000
 IMAGE_THREAD_LIMIT = 2
 DEPLOY_THREAD_LIMIT = 500
+irg_uuid = None
+bs_uuid_list = []
 
+
+def install_mini_server():
+    vm_ip = os.getenv('ZSTACK_BUILT_IN_HTTP_SERVER_IP')
+    mini_server_url = os.getenv('MINI_SERVER_URL')
+    http = urllib3.PoolManager()
+    rsp = http.request('GET', mini_server_url)
+    data = rsp.data.split('"')
+    ms_bins = [m for m in data if '.bin' in m]
+    bin_url = os.path.join(mini_server_url, ms_bins[-2])
+    install_cmd = 'wget -c %s -P /tmp; bash /tmp/%s' % (bin_url, ms_bins[-2])
+    ssh.execute(install_cmd, vm_ip, 'root', 'password')
+
+def deploy_selenium_docker():
+    with open('/home/upload_test_result/test_target', 'r') as f:
+            test_browser = f.readline().strip()
+    if test_browser and test_browser.lower() == 'firefox':
+        selenium_standalone = 'standalone-firefox-debug'
+    else:
+        selenium_standalone = 'standalone-chrome-debug'
+    zs_node_ip = os.getenv('ZSTACK_BUILT_IN_HTTP_SERVER_IP')
+    remote_registry = os.getenv('REMOTE_REGISTRY')
+    with open('/home/mn_node_ip', 'w') as nip_file:
+        nip_file.write(zs_node_ip)
+    if os.getenv('ZSTACK_SIMULATOR') == 'yes':
+        install_docker_cmd = 'yum --enablerepo=* clean all && yum --disablerepo=* --enablerepo=zstack-local install -y docker'
+    else:
+        install_docker_cmd = 'yum --enablerepo=* clean all && yum --disablerepo=* --enablerepo=zstack-mn,qemu-kvm-ev-mn install -y docker'
+    pull_workaround_cmd = '''echo '{ "insecure-registries":["%s:5000"]}' > /etc/docker/daemon.json;
+                            systemctl enable docker; systemctl start docker''' % remote_registry
+    pull_image_cmd = 'docker pull %s:5000/selenium/%s' % (remote_registry, selenium_standalone)
+#     selenium_hub_run_cmd = 'docker run -d -p 4444:4444 --name selenium-hub selenium/hub'
+#     selenium_docker_run_cmd = 'docker run -d -p 4444:4444 -p 5900:5900 -v /dev/shm:/dev/shm -e SCREEN_WIDTH=1920 \
+#                                -e SCREEN_HEIGHT=1080 -e SCREEN_DEPTH=24 selenium/%s' % selenium_standalone
+    selenium_docker_run_cmd = 'docker run -d -p 4444:4444 -p 5900:5900 -v /dev/shm:/dev/shm -e SCREEN_WIDTH=1920 -e SCREEN_HEIGHT=1080 -e SCREEN_DEPTH=24 `docker images -q`'
+    for cmd in [install_docker_cmd, pull_workaround_cmd, pull_image_cmd, selenium_docker_run_cmd]:
+        ssh.execute(cmd, zs_node_ip, 'root', 'password')
 
 def get_first_item_from_list(list_obj, list_obj_name, list_obj_value, action_name):
     '''
@@ -73,6 +120,7 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
         return []
 
     import scenario_operations as sce_ops
+    import zstackwoodpecker.test_lib as test_lib
     zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
     ip_list = []
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
@@ -85,6 +133,9 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
                         scenario_file = xmlobject.loads(xmlstr)
                         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                             if s_vm.name_ == vm.name_:
+                                if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
+            	                    ip_list.append(s_vm.storageIp_)
+                                    continue
                                 if vm.backupStorageRef.type_ == 'ceph':
                                     nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
                                     if nic_id == None:
@@ -105,8 +156,20 @@ def get_backup_storage_from_scenario_file(backupStorageRefName, scenarioConfig, 
                                         ip_list.append(s_vm.ip_)
     return ip_list
 
+def get_vm_ip_from_scenariofile(scenarioFile):
+    vm_ip_list = []
+    with open(scenarioFile, 'r') as fd:
+        xmlstr = fd.read()
+        scenario_file = xmlobject.loads(xmlstr)
+        for vm in xmlobject.safe_list(scenario_file.vms.vm):
+            vm_ip_list.append(vm.ip__)
+    return vm_ip_list
+
+
 #Add Backup Storage
 def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    global irg_uuid
+    global bs_uuid_list
     if xmlobject.has_element(deployConfig, 'backupStorages.sftpBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.sftpBackupStorage):
             action = api_actions.AddSftpBackupStorageAction()
@@ -146,16 +209,66 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
                 action.hostname = bs.hostname_
             else:
                 action.hostname = hostname_list[0]
-
-	    if hasattr(bs, 'port_'):
+            if hasattr(bs, 'port_'):
                 action.port = bs.port_
                 action.sshport = bs.port_
                 action.sshPort = bs.port_
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
             action.type = inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
-            thread = threading.Thread(target = _thread_for_action, args = (action, ))
+            thread = threading.Thread(target = _thread_for_action, args = (action, True))
             wait_for_thread_queue()
             thread.start()
+
+    if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+        if os.getenv('ZSTACK_SIMULATOR') == 'yes':
+            vm_ip_list = []
+        else:
+            vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
+        bs_uuid_list = []
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.miniBackupStorage):
+            action = api_actions.AddImageStoreBackupStorageAction()
+            action.sessionUuid = session_uuid
+            action.name = bs.name_
+            bs_id = bs.id__
+            action.description = bs.description__
+            action.url = bs.url_
+            action.username = bs.username_
+            action.password = bs.password_
+            if len(vm_ip_list) == 0:
+                action.hostname = bs.hostname_
+            else:
+                action.hostname = vm_ip_list[int(bs_id)]
+
+            if hasattr(bs, 'port_'):
+                action.port = bs.port_
+                action.sshport = bs.port_
+                action.sshPort = bs.port_
+                action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
+                action.type = inventory.IMAGE_STORE_BACKUP_STORAGE_TYPE
+                thread = threading.Thread(target = _thread_for_action, args = (action, True))
+                wait_for_thread_queue()
+                thread.start()
+            wait_for_thread_done()
+            bs = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=bs.name_)[0].uuid
+            bs_uuid_list.append(bs)
+
+        action = api_actions.CreateImageReplicationGroupAction()
+        action.name = 'IRG'
+        action.sessionUuid = session_uuid
+        thread = threading.Thread(target = _thread_for_action, args = (action, True))
+        wait_for_thread_queue()
+        thread.start()
+        wait_for_thread_done()
+        irg_uuid = res_ops.get_resource(res_ops.REPLICATIONGROUP)[0].uuid
+
+# 	action = api_actions.AddBackupStoragesToReplicationGroupAction()
+#         action.replicationGroupUuid = irg_uuid
+#         action.backupStorageUuids = bs_uuid_list
+# 	action.sessionUuid = session_uuid
+# 	thread = threading.Thread(target = _thread_for_action, args = (action, True))
+# 	wait_for_thread_queue()
+# 	thread.start()
+#         wait_for_thread_done()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.cephBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.cephBackupStorage):
@@ -173,6 +286,30 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
                 action.monUrls = bs.monUrls_.split(';')
             if bs.poolName__:
                 action.poolName = bs.poolName_
+            action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
+            action.type = inventory.CEPH_BACKUP_STORAGE_TYPE
+            thread = threading.Thread(target = _thread_for_action, args = (action, ))
+            wait_for_thread_queue()
+            thread.start()
+
+    if xmlobject.has_element(deployConfig, 'backupStorages.xskycephBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.xskycephBackupStorage):
+            action = api_actions.AddCephBackupStorageAction()
+            action.sessionUuid = session_uuid
+            action.name = bs.name_
+            action.description = bs.description__
+            hostname_list = get_backup_storage_from_scenario_file(bs.name_, scenarioConfig, scenarioFile, deployConfig)
+            if len(hostname_list) != 0:
+                # TODO: username and password should be configarable
+                action.monUrls = []
+                for hostname in hostname_list:
+                    action.monUrls.append("root:password@%s" % (hostname))
+            else:
+                action.monUrls = bs.monUrls_.split(';')
+            xsky_mn_ip = hostname_list[1]
+            cmd = "rados lspools"
+            (retcode, output, erroutput) = ssh.execute(cmd, xsky_mn_ip, "root", "password", True, 22)
+            action.poolName = output
             action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
             action.type = inventory.CEPH_BACKUP_STORAGE_TYPE
             thread = threading.Thread(target = _thread_for_action, args = (action, ))
@@ -204,6 +341,47 @@ def add_backup_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid)
             wait_for_thread_queue()
             thread.start()
 
+    if xmlobject.has_element(deployConfig, 'backupStorages.aliyunEbsBackupStorage'):
+        # Add KS
+        hyb_ops.add_hybrid_key_secret(name='ks_for_ebs_test',
+                                      description='ks_for_ebs_test',
+                                      key= 'zstack',
+                                      secret='C8yz6qLPus7VuwLtGYdxUkMg',
+                                      ks_type=os.getenv('datacenterType'),
+                                      sync='false',
+                                      session_uuid=session_uuid)
+
+        # Add DataCenter
+        dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
+                                                description='dc_for_ebs_test',
+                                                region_id=os.getenv('regionId'),
+                                                end_point=os.getenv('ebsEndPoint'),
+                                                session_uuid=session_uuid)
+#         dc_inv = hyb_ops.query_datacenter_local()
+#         if dc_inv:
+#             dc_inv = dc_inv[0]
+#         else:
+#             test_util.test_fail("No datacenter found in local")
+
+        # Add OSS bucket
+        oss_buckt_inv = hyb_ops.add_oss_bucket_from_remote(data_center_uuid=dc_inv.uuid,
+                                                           oss_bucket_name='ebs',
+                                                           oss_domain=os.getenv('ebsOSSEndPoint'),
+                                                           oss_key='ebs',
+                                                           oss_secret='zstack')
+
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.aliyunEbsBackupStorage):
+            action = api_actions.AddAliyunEbsBackupStorageAction()
+            action.sessionUuid = session_uuid
+            action.ossBucketUuid = oss_buckt_inv.uuid
+            action.name = bs.name_
+            action.description = bs.description__
+            action.timeout = AddKVMHostTimeOut #for some platform slowly salt execution
+            action.type = 'AliyunEBS'
+            action.url = os.getenv('ebsEndPoint')
+            thread = threading.Thread(target = _thread_for_action, args = (action, ))
+            wait_for_thread_queue()
+            thread.start()
 
     if xmlobject.has_element(deployConfig, 'backupStorages.fusionstorBackupStorage'):
         for bs in xmlobject.safe_list(deployConfig.backupStorages.fusionstorBackupStorage):
@@ -292,6 +470,54 @@ def add_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name
 
         for i in range(duplication):
             thread = threading.Thread(target=_add_zone, args=(zone, i, ))
+            wait_for_thread_queue()
+            thread.start()
+
+    wait_for_thread_done()
+
+
+def attach_bs_to_zone(scenarioConfig, scenarioFile, deployConfig, session_uuid, zone_name = None):
+    def _attach_bs_to_zone(zone, zone_duplication):
+        if zone_duplication == 0:
+            zone_name = zone.name_
+            zone_description = zone.description__
+        else:
+            zone_name = generate_dup_name(zone.name_, zone_duplication, 'z')
+            zone_description = generate_dup_name(zone.description__, zone_duplication, 'zone')
+
+        zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=zone_name)
+        zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'attach backup storage to zone')
+
+        if xmlobject.has_element(zone, 'backupStorageRef'):
+            for ref in xmlobject.safe_list(zone.backupStorageRef):
+                bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=ref.text_)
+                bs = get_first_item_from_list(bss, 'Backup Storage', ref.text_, 'attach backup storage to zone')
+
+                action = api_actions.AttachBackupStorageToZoneAction()
+                action.sessionUuid = session_uuid
+                action.backupStorageUuid = bs.uuid
+                action.zoneUuid = zinv.uuid
+                try:
+                    evt = action.run()
+                    test_util.test_logger(jsonobject.dumps(evt))
+                except:
+                    exc_info.append(sys.exc_info())
+
+
+    if not xmlobject.has_element(deployConfig, 'zones.zone'):
+        return
+
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+        if zone_name and zone_name != zone.name_:
+            continue
+
+        if zone.duplication__ == None:
+            duplication = 1
+        else:
+            duplication = int(zone.duplication__)
+
+        for i in range(duplication):
+            thread = threading.Thread(target=_attach_bs_to_zone, args=(zone, i, ))
             wait_for_thread_queue()
             thread.start()
 
@@ -423,6 +649,7 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return []
 
+    import zstackwoodpecker.test_lib as test_lib
     ip_list = []
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
@@ -437,6 +664,10 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
                                 scenario_file = xmlobject.loads(xmlstr)
                                 for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                                     if s_vm.name_ == vm.name_:
+                                        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
+                                            ip_list.append(s_vm.storageIp_)
+                                            test_util.test_logger("@@@DEBUG->get ps->list@@@")
+                                            continue
                                         if xmlobject.has_element(vm, 'backupStorageRef') and vm.backupStorageRef.type_ == 'ceph':
                                             nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
                                             if nic_id == None:
@@ -453,6 +684,10 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
                             scenario_file = xmlobject.loads(xmlstr)
                             for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                                 if s_vm.name_ == vm.name_:
+                                    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
+                                        ip_list.append(s_vm.storageIp_)
+                                        test_util.test_logger("@@@DEBUG->get ps->not list@@@")
+                                        continue
                                     if xmlobject.has_element(vm, 'backupStorageRef') and vm.backupStorageRef.type_ == 'ceph':
                                         nic_id = get_ceph_storages_mon_nic_id(vm.backupStorageRef.text_, scenarioConfig)
                                         if nic_id == None:
@@ -462,6 +697,77 @@ def get_primary_storage_from_scenario_file(primaryStorageRefName, scenarioConfig
                                     else:
                                         ip_list.append(s_vm.ip_)
     return ip_list
+
+def get_disk_uuid(scenarioFile,zone = None,scenarioConfig = None):
+    import scenario_operations as sce_ops
+    import zstacklib.utils.ssh as ssh
+
+    if (zone != None  and scenarioConfig != None):
+        # get dict: vm_name_ip_dict
+        vm_name_ip_dict={}
+        with open(scenarioFile, 'r') as fd:
+            xmlstr = fd.read()
+            fd.close()
+            scenariofile = xmlobject.loads(xmlstr)
+            vm_name_ip_dict={vm.name_:vm.ip_ for vm in xmlobject.safe_list(scenariofile.vms.vm)}
+        # get dict: hostRef_vmObejct_dict
+        # attention: all the vm objects need to be in the same scenarioConfig.hosts.host.vm
+        hostRef_vmObject_dict={}
+        for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+            hostRef_vmObject_dict={vmObject.hostRef.text_:vmObject for vmObject in xmlobject.safe_list(host.vms.vm) if xmlobject.has_element(vmObject,"hostRef")}
+         
+        # get list: hostName
+        # attention: the iscsi server/client and sharedBlockPrimaryStorage's cluster have to be the same zone.
+        hostNameList=[]
+        for cluster in xmlobject.safe_list(zone.clusters.cluster):
+            hostNameList+=[host.name_ for host in xmlobject.safe_list(cluster.hosts.host)]
+	    
+        # get iscsiInitiator vm's ip and return the disk_uuid
+        list_index=len(hostNameList)-1
+        hostName=""
+        iscsiInitiatorNum=0
+        while(list_index >=0):
+            hostName = hostNameList[list_index]
+            if( hostRef_vmObject_dict.has_key(hostName) and hostRef_vmObject_dict[hostName].primaryStorageRef):
+                iscsiInitiatorNum= sum((1  for primaryStorageRef in xmlobject.safe_list(hostRef_vmObject_dict[hostName].primaryStorageRef) if primaryStorageRef.type_ == "iscsiInitiator"))
+                if (iscsiInitiatorNum >0):
+                    ip=vm_name_ip_dict[hostRef_vmObject_dict[hostName].name_]
+                    cmd = r"ls -l /dev/disk/by-id/ | grep wwn | awk '{print $9}'"
+                    ret, disk_uuid, stderr = ssh.execute(cmd, ip, "root", "password", True, 22)
+                    return disk_uuid.strip().split('\n')
+            list_index-=1
+					
+    host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
+    #Below is aim to migrate sanlock to a separated partition, don't delete!!!
+    #IF separated_partition:
+    #cmd = r"blkid|grep mpatha2|awk -F\" '{print $2}'"
+    #ELSE
+    cmd = r"ls -l /dev/disk/by-id/ | grep wwn | awk '{print $9}'"
+    #ENDIF
+    ret, disk_uuid, stderr = ssh.execute(cmd, host_ips[-1], "root", "password", True, 22)
+    return disk_uuid.strip().split('\n')
+
+def get_scsi_target_ip(scenarioFile,scenarioConfig = None):
+    import scenario_operations as sce_ops
+    if scenarioConfig!= None:
+        vm_name_ip_dict={}
+        with open(scenarioFile, 'r') as fd:
+            xmlstr = fd.read()
+            fd.close()
+            scenariofile = xmlobject.loads(xmlstr)
+            vm_name_ip_dict={vm.name_:vm.ip_ for vm in xmlobject.safe_list(scenariofile.vms.vm)}
+
+        iscsiServerList=[]
+        for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+            for vm in xmlobject.safe_list(host.vms.vm):
+                if not xmlobject.has_element(vm,"primaryStorageRef"):
+                    continue
+                if sum((1 for pr in xmlobject.safe_list(vm.primaryStorageRef) if pr.type_ =="iscsiTarget"))>=1:
+                    iscsiServerList.append(vm.name_)
+        return vm_name_ip_dict[iscsiServerList[0]]
+        
+    host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
+    return host_ips[0]
 
 #Add Primary Storage
 def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid, ps_name = None, \
@@ -520,6 +826,67 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 wait_for_thread_queue()
                 thread.start()
 
+        if xmlobject.has_element(zone, 'primaryStorages.sharedBlockPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+            if os.environ.get('ZSTACK_SIMULATOR') != "yes":
+                disk_uuids = get_disk_uuid(scenarioFile,zone = zone,scenarioConfig = scenarioConfig)
+            else:
+                # TODO: hardcoded right now
+                disk_uuids = ['1234567890'] * 1000
+
+            for pr in xmlobject.safe_list(zone.primaryStorages.sharedBlockPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                action = api_actions.AddSharedBlockGroupPrimaryStorageAction()
+                action.sessionUuid = session_uuid
+                action.name = pr.name_
+                action.description = pr.description__
+                action.zoneUuid = zinv.uuid
+                action.diskUuids = [disk_uuids.pop()]
+                if pr.hasattr('systemtags_'):
+                    action.systemTags = pr.systemtags_.split(',')
+                else:
+                    action.systemTags = ["primaryStorageVolumeProvisioningStrategy::ThinProvisioning", "forceWipe"]
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+
+        if xmlobject.has_element(zone, 'primaryStorages.miniPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+
+            for pr in xmlobject.safe_list(zone.primaryStorages.miniPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                action = api_actions.AddMiniStorageAction()
+                action.sessionUuid = session_uuid
+                action.name = pr.name_
+                action.description = pr.description__
+                action.diskIdentifier = pr.diskIdentifier__
+                action.url = pr.url__
+                action.zoneUuid = zinv.uuid
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+                wait_for_thread_done()
+
+            ps_uuid = res_ops.get_resource(res_ops.PRIMARY_STORAGE, session_uuid, name=pr.name_)[0].uuid
+            action = api_actions.CreateSystemTagAction()
+            action.sessionUuid = session_uuid
+            action.tag = "primaryStorage::gateway::cidr::99.99.99.130/24"
+            action.resourceUuid = ps_uuid
+            action.resourceType = "PrimaryStorageVO"
+            thread = threading.Thread(target=_thread_for_action, args=(action,))
+            wait_for_thread_queue()
+            thread.start()
+            wait_for_thread_queue()
+
+
         if xmlobject.has_element(zone, 'primaryStorages.localPrimaryStorage'):
             zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
                     name=zone.name_)
@@ -567,6 +934,91 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                     action.rootVolumePoolName = pr.rootVolumePoolName__
                 if pr.imageCachePoolName__:
                     action.imageCachePoolName = pr.imageCachePoolName__
+                action.zoneUuid = zinv.uuid
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+
+        if xmlobject.has_element(zone, 'primaryStorages.cephPrimaryMultipoolsStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+
+            for pr in xmlobject.safe_list(zone.primaryStorages.cephPrimaryMultipoolsStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                action = api_actions.AddCephPrimaryStorageAction()
+                action.sessionUuid = session_uuid
+                action.name = pr.name_
+                action.description = pr.description__
+                action.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
+                hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
+                if len(hostname_list) != 0:
+                    action.monUrls = []
+                    for hostname in hostname_list:
+                        action.monUrls.append("root:password@%s" % (hostname))
+                else:
+                    action.monUrls = pr.monUrls_.split(';')
+                if pr.dataVolumePoolName__:
+                    action.dataVolumePoolName = pr.dataVolumePoolName__
+                if pr.rootVolumePoolName__:
+                    action.rootVolumePoolName = pr.rootVolumePoolName__
+                if pr.imageCachePoolName__:
+                    action.imageCachePoolName = pr.imageCachePoolName__
+		
+                action.zoneUuid = zinv.uuid
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+                thread.join()
+            #add ceph pools
+            for pr in xmlobject.safe_list(zone.primaryStorages.cephPrimaryMultipoolsStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                cond = res_ops.gen_query_conditions('name', '=', pr.name_)
+                ps = res_ops.query_resource(res_ops.PRIMARY_STORAGE, cond)
+                action = api_actions.AddCephPrimaryStoragePoolAction()
+                action.sessionUuid = session_uuid
+                action.isCreate = True
+                if ps:
+                    action.primaryStorageUuid = ps[0].uuid
+                pool_type_list = ['Data', 'Root']
+                for pool_type in pool_type_list:
+                    for i in range(int(pr.poolNum__)):
+                        action.poolName = pr.poolPrefix__ + '-'+ pool_type +'-' + str(i+1) + '-' + ps[0].uuid
+                        action.type = pool_type
+                        thread = threading.Thread(target=_thread_for_action, args=(action,))
+                        wait_for_thread_queue()
+                        thread.start()
+                        thread.join()
+
+        if xmlobject.has_element(zone, 'primaryStorages.xskycephPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+            for pr in xmlobject.safe_list(zone.primaryStorages.xskycephPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+                action = api_actions.AddCephPrimaryStorageAction()
+                action.sessionUuid = session_uuid
+                action.name = pr.name_
+                action.description = pr.description__
+                action.type = inventory.CEPH_PRIMARY_STORAGE_TYPE
+                hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
+                if len(hostname_list) != 0:
+                    action.monUrls = []
+                    for hostname in hostname_list:
+                        action.monUrls.append("root:password@%s" % (hostname))
+                else:
+                    action.monUrls = pr.monUrls_.split(';')
+                xsky_mn_ip = hostname_list[1]
+                cmd = "rados lspools"
+                (retcode, output, erroutput) = ssh.execute(cmd, xsky_mn_ip, "root", "password", True, 22)
+
+                action.dataVolumePoolName = output
+                action.rootVolumePoolName = output
+                action.imageCachePoolName = output
                 action.zoneUuid = zinv.uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
@@ -666,6 +1118,7 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 thread = threading.Thread(target=_thread_for_action, args=(action,))
                 wait_for_thread_queue()
                 thread.start()
+            time.sleep(1) # To walk around "nfs4_discover_server_trunking unhandled error -512. Exiting with error EIO" in c74
 
         if xmlobject.has_element(zone, 'primaryStorages.simulatorPrimaryStorage'):
             if zone.duplication__ == None:
@@ -708,6 +1161,147 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
                 wait_for_thread_queue()
                 thread.start()
 
+        if xmlobject.has_element(zone, 'primaryStorages.aliyunNASPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+            ak_id = None
+            new_ak_id = None
+            for pr in xmlobject.safe_list(zone.primaryStorages.aliyunNASPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+                hostname_list = get_primary_storage_from_scenario_file(pr.name_, scenarioConfig, scenarioFile, deployConfig)
+                if len(hostname_list) == 0:
+                    nasPath = pr.url_.split(':')[1]
+                    cmd = "echo '%s *(rw,sync,no_root_squash)' > /etc/exports" % (nasPath)
+                    cmd_rst = "service nfs-server stop; service nfs-server start"
+                    os.system(cmd)
+                    os.system(cmd_rst)
+                    mn_ip = res_ops.get_resource(res_ops.MANAGEMENT_NODE, session_uuid=session_uuid)[0].hostName
+                    if mn_ip:
+                        uri = 'http://' + os.getenv('apiEndPoint').split('::')[-1] + '/mntarget'
+                        ak_id = (mn_ip + str(time.time())).replace('.', '')
+                        http.json_dump_post(uri, {"ak_id": ak_id, "mn_ip": mn_ip, "nfs_ip": mn_ip})
+#                         http.json_dump_post(uri, {"mn_ip": mn_ip, "nfs_ip": mn_ip})
+                # Update Global Config: user.define.api.endpoint
+                cfg_ops.change_global_config(category='aliyun',
+                                             name='user.define.api.endpoint',
+                                             value=os.getenv('apiEndPoint'),
+                                             session_uuid=session_uuid)
+                # Add KS
+#                 new_ak_id = os.getenv('NASAKID')
+                if os.path.exists('/home/nas_ak_id'):
+                    with open('/home/nas_ak_id', 'r') as f:
+                        new_ak_id = f.read()
+                default_ak_id = new_ak_id if new_ak_id else os.getenv('aliyunKey')
+                hyb_ops.add_hybrid_key_secret(name='ks_for_nas_test',
+                                              description='ks_for_nas_test',
+                                              key= ak_id if ak_id else default_ak_id,
+                                              secret=os.getenv('aliyunSecret'),
+                                              ks_type=os.getenv('datacenterType'),
+                                              sync='false',
+                                              session_uuid=session_uuid)
+                # Add DataCenter
+                hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
+                                                   description='dc_for_nas_test',
+                                                   region_id=os.getenv('regionId'),
+                                                   session_uuid=session_uuid)
+                # NAS file system and access group will be synced from remote automatically since 3.2.0
+                try:
+                    # Add NAS File System
+                    dcinvs = res_ops.get_resource(res_ops.DATACENTER, session_uuid=session_uuid)
+                    if dcinvs:
+                        dcinv = dcinvs[0]
+                    else:
+                        raise test_util.TestError("Can't find Any DataCenter.")
+                    nas_ops.add_aliyun_nas_file_system(datacenter_uuid=dcinv.uuid,
+                                                       fsid=os.getenv('fileSystemId'),
+                                                       name='setup_nasfs',
+                                                       session_uuid=session_uuid)
+                    # Add Aliyun Access Group
+                    nas_ops.add_aliyun_nas_access_group(datacenter_uuid=dcinv.uuid,
+                                                        group_name=os.getenv('groupName'),
+                                                        session_uuid=session_uuid)
+                except:
+                    pass
+                # Add AliyunNas PS
+                grpinvs = res_ops.get_resource(res_ops.ALIYUNNAS_ACCESSGROUP, session_uuid=session_uuid)
+                nasinvs = res_ops.get_resource(res_ops.NAS_FILESYSTEM, session_uuid=session_uuid)
+                if grpinvs and nasinvs:
+                    grpinv = grpinvs[0]
+                    nasinv = nasinvs[0]
+                else:
+                    raise test_util.TestError("Can't find Aliyun NAS Access Group or File system.")
+                action = api_actions.AddAliyunNasPrimaryStorageAction()
+                action.name = 'AliyunNas'
+                action.nasUuid = nasinv.uuid
+                action.accessGroupUuid = grpinv.uuid
+                action.url = '/' + str(time.time()).split('.')[0]
+                action.zoneUuid = zinv.uuid
+                action.sessionUuid = session_uuid
+                thread = threading.Thread(target=_thread_for_action, args=(action,))
+                wait_for_thread_queue()
+                thread.start()
+
+        if xmlobject.has_element(zone, 'primaryStorages.aliyunEBSPrimaryStorage'):
+            zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, \
+                    name=zone.name_)
+            zinv = get_first_item_from_list(zinvs, 'Zone', zone.name_, 'primary storage')
+
+#             # Add KS
+#             hyb_ops.add_hybrid_key_secret(name='ks_for_ebs_test',
+#                                             description='ks_for_ebs_test',
+#                                             key= 'zstack',
+#                                             secret='C8yz6qLPus7VuwLtGYdxUkMg',
+#                                             ks_type=os.getenv('datacenterType'),
+#                                             sync='false',
+#                                             session_uuid=session_uuid)
+
+            # Get DataCenter
+            dc_inv = hyb_ops.query_datacenter_local()
+            if dc_inv:
+                dc_inv = dc_inv[0]
+            else:
+                test_util.test_fail("No datacenter found in local")
+#             dc_inv = hyb_ops.add_datacenter_from_remote(datacenter_type=os.getenv('datacenterType'),
+#                                                 description='dc_for_ebs_test',
+#                                                 region_id=os.getenv('regionId'),
+#                                                 end_point=os.getenv('ebsEndPoint'),
+#                                                 session_uuid=session_uuid)
+
+            # Add Identity Zone
+            iz_inv = hyb_ops.get_identity_zone_from_remote(datacenter_type=os.getenv('datacenterType'), dc_uuid=dc_inv.uuid)
+            if iz_inv:
+                ebs_iz = iz_inv[0]
+            else:
+                test_util.test_fail('EBS Identity Zone was not found')
+            hyb_ops.add_identity_zone_from_remote(iz_type=os.getenv('datacenterType'), datacenter_uuid=dc_inv.uuid, zone_id=ebs_iz.zoneId)
+
+            for pr in xmlobject.safe_list(zone.primaryStorages.aliyunEBSPrimaryStorage):
+                if ps_name and ps_name != pr.name_:
+                    continue
+
+                # Add AliyunEBS PS
+                action = api_actions.AddAliyunEbsPrimaryStorageAction()
+                action.name = 'ebs'
+                iz_inv = hyb_ops.query_iz_local()
+                if iz_inv:
+                    action.identityZoneUuid = iz_inv[0].uuid
+                else:
+                    test_util.test_fail("No identity zone found in local")
+                action.type = os.getenv('datacenterType')
+                action.url = os.getenv('ebsEndPoint')
+                action.tdcConfigContent = '{"tdcPort": "20120","tdcRegion": "region1",\
+                                            "riverMaster": "nuwa://ECS-river/sys/houyi/river_master",\
+                                            "server": "192.168.0.1:10240,192.168.0.2:10240,192.168.0.3:10240",\
+                                            "proxy": "192.168.1.1:10240,192.168.1.2:10240,192.168.1.3:10240",\
+                                            "cluster": "ECS-river"}'
+                action.zoneUuid = zinv.uuid
+                action.sessionUuid = session_uuid
+                thread = threading.Thread(target=_thread_for_action, args=(action, True))
+                wait_for_thread_queue()
+                thread.start()
+
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone.name_ != zone_name:
             continue
@@ -715,6 +1309,34 @@ def add_primary_storage(scenarioConfig, scenarioFile, deployConfig, session_uuid
 
     wait_for_thread_done()
 
+def add_iscsi_server(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluster_name = None, zone_name = None):
+    iscsiLunList=[]
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+        if xmlobject.has_element(zone,"iscsiLun"):
+            iscsiLunList+=[lun for lun in xmlobject.safe_list(zone.iscsiLun)]
+    if(len(iscsiLunList) < 1):
+        return
+    target_ip = get_scsi_target_ip(scenarioFile,scenarioConfig = scenarioConfig)
+    pr = iscsiLunList[0]
+
+    def _add_iscsi_server(target_ip):
+        action = api_actions.AddIscsiServerAction()
+        action.name = pr.name_
+        action.ip = target_ip
+        action.port = 3260
+        action.chapUserName = None
+        action.chapUserPassword = None
+        action.sessionUuid = session_uuid
+        try:
+            evt = action.run()
+            test_util.test_logger(jsonobject.dumps(evt))
+        except Exception as e:
+            exc_info.append(sys.exc_info())
+
+    thread = threading.Thread(target=_add_iscsi_server, args=(target_ip,))
+    wait_for_thread_queue()
+    thread.start()
+    wait_for_thread_done()
 #Add Cluster
 def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluster_name = None, \
         zone_name = None):
@@ -742,6 +1364,21 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                     test_util.test_logger(jsonobject.dumps(evt))
         except:
             exc_info.append(sys.exc_info())
+     
+        try:
+            if xmlobject.has_element(cluster, 'iscsiLunRef'):
+                for lun in xmlobject.safe_list(cluster.iscsiLunRef):
+                    iscsi_server = generate_dup_name(generate_dup_name(lun.text_, zone_ref, 'z'), cluster_ref, 'c')
+                    iscsi_uuid = res_ops.get_resource(res_ops.ISCSI_SERVER, session_uuid, name=iscsi_server)[0].uuid
+                    action_iscsi = api_actions.AttachIscsiServerToClusterAction()
+                    action_iscsi.sessionUuid = session_uuid
+                    action_iscsi.uuid = iscsi_uuid
+                    action_iscsi.clusterUuid = cinv.uuid
+                    evt = action_iscsi.run()
+                    test_util.test_logger(jsonobject.dumps(evt))
+        except:
+            exc_info.append(sys.exc_info())
+                    
 
         if cluster.allL2NetworkRef__ == 'true':
             #find all L2 network in zone and attach to cluster
@@ -876,7 +1513,8 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                     action.sessionUuid = session_uuid
                     action.name = generate_dup_name(generate_dup_name(cluster.name_, zone_ref, 'z'), cluster_ref, 'c')
                     action.description = generate_dup_name(generate_dup_name(cluster.description__, zone_ref, 'z'), cluster_ref, 'c')
-        
+#                     if cluster.description_ == 'MiniCluster':
+#                         action.systemTags = ["cluster::migrate::network::cidr::99.99.99.0/24"]
                     action.hypervisorType = cluster.hypervisorType_
                     action.zoneUuid = zinv.uuid
                     thread = threading.Thread(target=_add_cluster, args=(action, zone_ref, cluster, cluster_ref, ))
@@ -884,11 +1522,70 @@ def add_cluster(scenarioConfig, scenarioFile, deployConfig, session_uuid, cluste
                     wait_for_thread_queue()
                     thread.start()
 
+    def _deploy_mini_cluster(zone):
+        if not xmlobject.has_element(zone, "clusters.cluster"):
+            return
+
+        if zone.duplication__ == None:
+            zone_duplication = 1
+        else:
+            zone_duplication = int(zone.duplication__)
+
+        if os.getenv('ZSTACK_SIMULATOR') == 'yes':
+            http = urllib3.PoolManager()
+            mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+            url = "http://%s:8080/zstack/simulators/query" % (mn_ip)
+            query_data = simplejson.dumps({'sql':'select * from KvmHost', 'type':'KvmHost'})
+            rsp = http.request('GET', url, body=query_data)
+            host_obj = jsonobject.loads(rsp.data)
+            vm_ip_list = [host.ip for host in host_obj]
+        else:
+            vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
+        for zone_ref in range(zone_duplication):
+            for cluster in xmlobject.safe_list(zone.clusters.cluster):
+                if cluster_name and cluster_name != cluster.name_:
+                    continue
+
+                if cluster.duplication__ == None:
+                    cluster_duplication = 1
+                else:
+                    cluster_duplication = int(cluster.duplication__)
+                for cluster_ref in range(cluster_duplication):
+                    zone_name = generate_dup_name(zone.name_, zone_ref, 'z')
+                    zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=zone_name)
+                    zinv = get_first_item_from_list(zinvs, 'Zone', zone_name, 'Cluster')
+                    action = api_actions.CreateMiniClusterAction()
+                    action.sessionUuid = session_uuid
+                    action.name = generate_dup_name(generate_dup_name(cluster.name_, zone_ref, 'z'), cluster_ref, 'c')
+                    action.description = generate_dup_name(generate_dup_name(cluster.description__, zone_ref, 'z'), cluster_ref, 'c')
+                    action.hypervisorType = cluster.hypervisorType_
+                    action.systemTags = ["cluster::migrate::network::cidr::99.99.99.0/24"]
+                    action.zoneUuid = zinv.uuid
+                    action.password = "password"
+                    action.sshPort = "22"
+                    hostManagementIps = vm_ip_list[0] + ',' + vm_ip_list[1]
+                    vm_ip_list = vm_ip_list[2:]
+                    action.hostManagementIps = hostManagementIps.split(',')
+                    print " action.hostManagementIps : %s" % action.hostManagementIps
+                    thread = threading.Thread(target=_add_cluster, args=(action, zone_ref, cluster, cluster_ref, ))
+                    wait_for_thread_queue()
+                    thread.start()
+
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone_name != zone.name_:
             continue 
-        _deploy_cluster(zone)
+        if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+            _deploy_mini_cluster(zone)
+        else:
+            _deploy_cluster(zone)
     wait_for_thread_done()
+    if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+        vm_ip_list = get_vm_ip_from_scenariofile(scenarioFile)
+        for ip in vm_ip_list:
+            cmd = "mkdir -p /opt/MegaRAID/MegaCli/;wget http://172.20.1.27/mirror/mini/MegaCli64 -O /opt/MegaRAID/MegaCli/MegaCli64;chmod a+x /opt/MegaRAID/MegaCli/MegaCli64"
+            ssh.execute(cmd, ip, 'root', 'password')
+            cmd = "wget http://172.20.1.27/mirror/mini/smartctl -O /usr/sbin/smartctl;chmod a+x /usr/sbin/smartctl"
+            ssh.execute(cmd, ip, 'root', 'password')
 
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone_name != zone.name_:
@@ -923,6 +1620,43 @@ def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deplo
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return None
 
+    s_l3_uuid = None
+    for zone in xmlobject.safe_list(deployConfig.deployerConfig.zones.zone):
+
+        if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
+
+            for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+
+                for l3network in xmlobject.safe_list(l2novlannetwork.l3Networks.l3BasicNetwork):
+                    if hasattr(l3network, 'category_') and l3network.category_ == 'System':
+                        for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+                            for vm in xmlobject.safe_list(host.vms.vm):
+                                if xmlobject.has_element(vm, 'nodeRef'):
+                                    for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                                        if hasattr(l3Network, 'l2NetworkRef'):
+
+                                            for l2networkref in xmlobject.safe_list(l3Network.l2NetworkRef):
+
+                                                if l2networkref.text_ == l2novlannetwork.name_:
+                                                    s_l3_uuid = l3Network.uuid_
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'nodeRef'):
+                if vm.nodeRef.text_ == nodeRefName:
+                    with open(scenarioFile, 'r') as fd:
+                        xmlstr = fd.read()
+                        fd.close()
+                        scenario_file = xmlobject.loads(xmlstr)
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                if s_l3_uuid == None:
+                                    return s_vm.ip_
+                                else:
+                                    for ip in xmlobject.safe_list(s_vm.ips.ip):
+                                        if ip.uuid_ == s_l3_uuid:
+                                            return ip.ip_
+
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
         for vm in xmlobject.safe_list(host.vms.vm):
             if xmlobject.has_element(vm, 'nodeRef'):
@@ -934,11 +1668,32 @@ def get_node_from_scenario_file(nodeRefName, scenarioConfig, scenarioFile, deplo
                         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                             if s_vm.name_ == vm.name_:
                                 return s_vm.ip_
+
     return None
 
 def get_nodes_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
         return None
+
+    s_l3_uuid = None
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+
+        if hasattr(zone.l2Networks, 'l2NoVlanNetwork'):
+
+            for l2novlannetwork in xmlobject.safe_list(zone.l2Networks.l2NoVlanNetwork):
+
+                for l3network in xmlobject.safe_list(l2novlannetwork.l3Networks.l3BasicNetwork):
+                    if hasattr(l3network, 'category_') and l3network.category_ == 'System':
+                        for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+                            for vm in xmlobject.safe_list(host.vms.vm):
+                                if xmlobject.has_element(vm, 'nodeRef'):
+                                    for l3Network in xmlobject.safe_list(vm.l3Networks.l3Network):
+                                        if hasattr(l3Network, 'l2NetworkRef'):
+
+                                            for l2networkref in xmlobject.safe_list(l3Network.l2NetworkRef):
+
+                                                if l2networkref.text_ == l2novlannetwork.name_:
+                                                    s_l3_uuid = l3Network.uuid_
 
     nodes_ip = ''
     for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
@@ -950,7 +1705,24 @@ def get_nodes_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
                     scenario_file = xmlobject.loads(xmlstr)
                     for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                         if s_vm.name_ == vm.name_:
+                            if s_l3_uuid == None:
+                                nodes_ip += ' %s' % s_vm.ip_
+                            else:
+                                for ip in xmlobject.safe_list(s_vm.ips.ip):
+                                    if ip.uuid_ == s_l3_uuid:
+                                        return ip.ip_
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'nodeRef'):
+                with open(scenarioFile, 'r') as fd:
+                    xmlstr = fd.read()
+                    fd.close()
+                    scenario_file = xmlobject.loads(xmlstr)
+                    for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                        if s_vm.name_ == vm.name_:
                             nodes_ip += ' %s' % s_vm.ip_
+
     return nodes_ip
 
 def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
@@ -967,11 +1739,51 @@ def get_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deplo
                         scenario_file = xmlobject.loads(xmlstr)
                         for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
                             if s_vm.name_ == vm.name_:
-                                if s_vm.managementIp_ != s_vm.ip_:
+                                if xmlobject.has_element(s_vm, 'managementIp_') and s_vm.managementIp_ != s_vm.ip_:
                                     return s_vm.managementIp_
                                 else:
                                     return s_vm.ip_
     return None
+
+def get_hosts_from_scenario_file(scenarioConfig, scenarioFile, deployConfig):
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return None
+
+    host_ips = ''
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if xmlobject.has_element(vm, 'hostRef'):
+                    with open(scenarioFile, 'r') as fd:
+                        xmlstr = fd.read()
+                        fd.close()
+                        scenario_file = xmlobject.loads(xmlstr)
+                        for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                            if s_vm.name_ == vm.name_:
+                                if xmlobject.has_element(s_vm, 'managementIp_') and s_vm.managementIp_ != s_vm.ip_:
+                                    host_ips += ' %s' % s_vm.managementIp_
+                                else:
+                                    host_ips += ' %s' % s_vm.ip_
+    return host_ips
+
+def get_iscsi_nfs_host_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return None
+
+    for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+        for vm in xmlobject.safe_list(host.vms.vm):
+            if vm.name_ == hostRefName:
+                with open(scenarioFile, 'r') as fd:
+                    xmlstr = fd.read()
+                    fd.close()
+                    scenario_file = xmlobject.loads(xmlstr)
+                    for s_vm in xmlobject.safe_list(scenario_file.vms.vm):
+                        if s_vm.name_ == vm.name_:
+                            if xmlobject.has_element(s_vm, 'managementIp_') and s_vm.managementIp_ != s_vm.ip_:
+                                return s_vm.managementIp_
+                            else:
+                                return s_vm.ip_
+    return None
+
 
 def get_host_obj_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, deployConfig):
     if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
@@ -989,6 +1801,55 @@ def get_host_obj_from_scenario_file(hostRefName, scenarioConfig, scenarioFile, d
                             if s_vm.name_ == vm.name_:
                                 return s_vm
     return None
+
+
+#Add sanlock
+def add_sanlock(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    '''
+    sanlock creation and enable for sharedblock ps
+    '''
+
+    import zstackwoodpecker.test_lib as test_lib
+
+    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-flat-imagestore-iscsi.xml"], ["scenario-config-iscsi.xml"]):
+        import scenario_operations as sce_ops
+        import zstacklib.utils.ssh as ssh
+
+        def _get_vm_config(vm_inv):
+            if hasattr(scenarioConfig.deployerConfig, 'hosts'):
+                for host in xmlobject.safe_list(scenarioConfig.deployerConfig.hosts.host):
+                    for vm in xmlobject.safe_list(host.vms.vm):
+                        if vm.name_ == vm_inv.name:
+                            return vm
+            return None
+
+        def _get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip):
+            cond = res_ops.gen_query_conditions('vmNics.ip', '=', vm_ip)
+            vm_inv = sce_ops.query_resource(zstack_management_ip, res_ops.VM_INSTANCE, cond).inventories[0]
+            return vm_inv
+
+        host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
+        vm_ip = host_ips[-1]
+        host_port = 22
+        zstack_management_ip = scenarioConfig.basicConfig.zstackManagementIp.text_
+
+        vm_inv = _get_vm_inv_by_vm_ip(zstack_management_ip, vm_ip)
+        vm_config = _get_vm_config(vm_inv)
+
+        #Below optimize is aim to migrate sanlock to separated partition, don't delete!!!
+        #cmd = "vgcreate --shared zstacksanlock /dev/mapper/mpatha1"
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+        #cmd = "vgchange --lock-start zstacksanlock"
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+        #vg_name = get_disk_uuid(scenarioFile)
+        #cmd = "lvmlockctl --gl-disable %s" %(vg_name)
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+
+        #cmd = "lvmlockctl --gl-enable zstacksanlock"
+        #sce_ops.exec_cmd_in_vm(cmd, vm_ip, vm_config, True, host_port)
+    
 
 #Add Host
 def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip = None, zone_name = None, \
@@ -1012,7 +1873,9 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
         
         cinvs = res_ops.get_resource(res_ops.CLUSTER, session_uuid, name=cluster_name)
         cinv = get_first_item_from_list(cinvs, 'Cluster', cluster_name, 'L3 network')
+        count = 0
         for host in xmlobject.safe_list(cluster.hosts.host):
+            count += 1
             if host_ip and host_ip != host.managementIp_:
                 continue
 
@@ -1039,7 +1902,7 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
                 action.sessionUuid = session_uuid
                 action.clusterUuid = cinv.uuid
                 action.hostTags = host.hostTags__
-                if zone_ref == 0 and cluster_ref == 0 and i == 0:
+                if zone_duplication == 0 and cluster_duplication == 0:
                     action.name = host.name_
                     action.description = host.description__
                     managementIp = get_host_from_scenario_file(host.name_, scenarioConfig, scenarioFile, deployConfig)
@@ -1052,9 +1915,21 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
                     action.description = generate_dup_name(generate_dup_name(generate_dup_name(host.description__, zone_ref, 'z'), cluster_ref, 'c'), i, 'h')
                     action.managementIp = generate_dup_host_ip(host.managementIp_, zone_ref, cluster_ref, i)
 
-                thread = threading.Thread(target=_thread_for_action, args = (action, ))
-                wait_for_thread_queue()
-                thread.start()
+                if count == 1 and xmlobject.has_element(deployConfig, 'backupStorages.xskycephBackupStorage'):
+                    print "skip xsky MN host add to computational node"
+                else:
+                    thread = threading.Thread(target=_thread_for_action, args = (action, True))
+                    wait_for_thread_queue()
+                    thread.start()
+                    if i != 1:
+                        time.sleep(1)
+                if count == 1 and xmlobject.has_element(host,"addToComputationalNode") and  host.addToComputationalNode.text_ == "True":
+                    thread = threading.Thread(target=_thread_for_action, args = (action, True))
+                    wait_for_thread_queue()
+                    thread.start()
+                    if i != 1:
+                        time.sleep(1)
+                        
 
     for zone in xmlobject.safe_list(deployConfig.zones.zone):
         if zone_name and zone_name != zone.name_:
@@ -1079,7 +1954,10 @@ def add_host(scenarioConfig, scenarioFile, deployConfig, session_uuid, host_ip =
                     cluster_duplication = int(cluster.duplication__)
 
                 for cluster_ref in range(cluster_duplication):
-                    _deploy_host(cluster, zone_ref, cluster_ref)
+                    if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+                        print "Mini Host have been added while creating mini cluster"
+                    else:
+                        _deploy_host(cluster, zone_ref, cluster_ref)
 
     wait_for_thread_done()
     test_util.test_logger('All add KVM host actions are done.')
@@ -1136,11 +2014,14 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
         if l3.domain_name__:
             action.dnsDomain = l3.domain_name__
 
+        if l3.hasattr('ipVersion_'):
+            action.ipVersion = l3.ipVersion_
         if l3.hasattr('category_'):
             action.category = l3.category_
         elif not l3.hasattr('system_') or l3.system_ == False:
             action.category = 'Private'
-
+        if l3.hasattr('type_'):
+            action.type = l3.type_
         try:
             evt = action.run()
         except:
@@ -1149,22 +2030,39 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
         test_util.test_logger(jsonobject.dumps(evt))
         l3_inv = evt.inventory
 
+        if l3.hasattr('ipVersion_'):
         #add dns
-        if xmlobject.has_element(l3, 'dns'):
-            for dns in xmlobject.safe_list(l3.dns):
-                action = api_actions.AddDnsToL3NetworkAction()
-                action.sessionUuid = session_uuid
-                action.dns = dns.text_
-                action.l3NetworkUuid = l3_inv.uuid
-                try:
-                    evt = action.run()
-                except:
-                    exc_info.append(sys.exc_info())
-                test_util.test_logger(jsonobject.dumps(evt))
-
-        #add ip range. 
-        if xmlobject.has_element(l3, 'ipRange'):
-            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid)
+            if xmlobject.has_element(l3, 'dns'):
+                for dns in xmlobject.safe_list(l3.dns):
+                    action = api_actions.AddDnsToL3NetworkAction()
+                    action.sessionUuid = session_uuid
+                    action.dns = dns.text_
+                    action.l3NetworkUuid = l3_inv.uuid
+                    try:
+                        evt = action.run()
+                    except:
+                        exc_info.append(sys.exc_info())
+                    test_util.test_logger(jsonobject.dumps(evt))
+            #add ip range. 
+            if xmlobject.has_element(l3, 'ipRange'):
+                do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, ipversion = 6)
+            else:
+                do_add_ip_cidr(l3.ipv6Cidr, l3_inv.uuid, session_uuid, ipversion = 6)
+        else:
+            if xmlobject.has_element(l3, 'dns'):
+                for dns in xmlobject.safe_list(l3.dns):
+                    action = api_actions.AddDnsToL3NetworkAction()
+                    action.sessionUuid = session_uuid
+                    action.dns = dns.text_
+                    action.l3NetworkUuid = l3_inv.uuid
+                    try:
+                        evt = action.run()
+                    except:
+                        exc_info.append(sys.exc_info())
+                    test_util.test_logger(jsonobject.dumps(evt))
+            #add ip range. 
+            if xmlobject.has_element(l3, 'ipRange'):
+                do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, ipversion = 4)
 
         #add network service.
         providers = {}
@@ -1227,7 +2125,7 @@ def add_l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_
 
 #Add Iprange
 def add_ip_range(deployConfig, session_uuid, ip_range_name = None, \
-        zone_name= None, l3_name = None):
+        zone_name= None, l3_name = None, ipversion = 4):
     '''
     Call by only adding an IP range. If the IP range is in L3 config, 
     add_l3_network will add ip range direclty. 
@@ -1275,31 +2173,95 @@ def add_ip_range(deployConfig, session_uuid, ip_range_name = None, \
 
             l3_invs = res_ops.get_resource(res_ops.L3_NETWORK, session_uuid, name = l3Name)
             l3_inv = get_first_item_from_list(l3_invs, 'L3 Network', l3Name, 'IP range')
-            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, \
-                    ip_range_name)
+            if ipversion == 4:
+                do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, \
+                        ip_range_name, ipversion = 4)
+            else:
+                if xmlobject.has_element(l3, 'ipRange'):
+                    do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, \
+                        ip_range_name, ipversion = 6)
+                else:
+                    do_add_ip_cidr(l3.ipv6Cidr, l3_inv.uuid, session_uuid, \
+                        ip_cidr_name, ipversion = 6)
 
 def do_add_ip_range(ip_range_xml_obj, l3_uuid, session_uuid, \
-        ip_range_name = None):
+        ip_range_name = None, ipversion = 4):
 
     for ir in xmlobject.safe_list(ip_range_xml_obj):
         if ip_range_name and ip_range_name != ir.name_:
             continue
 
-        action = api_actions.AddIpRangeAction()
-        action.sessionUuid = session_uuid
-        action.description = ir.description__
-        action.endIp = ir.endIp_
-        action.gateway = ir.gateway_
-        action.l3NetworkUuid = l3_uuid
-        action.name = ir.name_
-        action.netmask = ir.netmask_
-        action.startIp = ir.startIp_
-        try:
-            evt = action.run()
-        except Exception as e:
-            exc_info.append(sys.exc_info())
-            raise e
-        test_util.test_logger(jsonobject.dumps(evt))
+        if ipversion == 4:
+            action = api_actions.AddIpRangeAction()
+            action.sessionUuid = session_uuid
+            action.description = ir.description__
+            action.endIp = ir.endIp_
+            action.gateway = ir.gateway_
+            action.l3NetworkUuid = l3_uuid
+            action.name = ir.name_
+            action.netmask = ir.netmask_
+            action.startIp = ir.startIp_
+            try:
+                evt = action.run()
+            except Exception as e:
+                exc_info.append(sys.exc_info())
+                raise e
+            test_util.test_logger(jsonobject.dumps(evt))
+        else:
+            action = api_actions.AddIpv6RangeAction()
+            action.sessionUuid = session_uuid
+            action.description = ir.description__
+            action.endIp = ir.endIp_
+            action.gateway = ir.gateway_
+            action.l3NetworkUuid = l3_uuid
+            action.name = ir.name_
+            action.startIp = ir.startIp_
+            action.addressMode = ir.addressMode__
+            action.prefixLen = ir.prefixLen_
+            try:
+                evt = action.run()
+            except Exception as e:
+                exc_info.append(sys.exc_info())
+                raise e
+            test_util.test_logger(jsonobject.dumps(evt))
+
+def do_add_ip_cidr(ip_cidr_xml_obj, l3_uuid, session_uuid, \
+        ip_cidr_name = None, ipversion = 4):
+
+    for ic in xmlobject.safe_list(ip_cidr_xml_obj):
+        if ip_cidr_name and ip_cidr_name != ic.name_:
+            continue
+
+        if ipversion == 4:
+            action = api_actions.AddIpRangeByNetworkCidrAction()
+            action.sessionUuid = session_uuid
+            action.description = ic.description__
+            action.endIp = ir.endIp_
+            action.gateway = ir.gateway_
+            action.l3NetworkUuid = l3_uuid
+            action.name = ir.name_
+            action.netmask = ir.netmask_
+            action.startIp = ir.startIp_
+            try:
+                evt = action.run()
+            except Exception as e:
+                exc_info.append(sys.exc_info())
+                raise e
+            test_util.test_logger(jsonobject.dumps(evt))
+        else:
+            action = api_actions.AddIpv6RangeByNetworkCidrAction()
+            action.sessionUuid = session_uuid
+            action.description = ic.description__
+            action.l3NetworkUuid = l3_uuid
+            action.name = ic.name_
+            action.networkCidr = ic.ipv6Cidr__
+            action.addressMode = ic.addressMode__
+            try:
+                evt = action.run()
+            except Exception as e:
+                exc_info.append(sys.exc_info())
+                raise e
+            test_util.test_logger(jsonobject.dumps(evt))
 
 #Add Network Service
 def add_network_service(deployConfig, session_uuid):
@@ -1378,6 +2340,8 @@ def do_add_network_service(net_service_xml_obj, l3_uuid, providers, \
 
 #Add Image
 def add_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    global irg_uuid
+    global bs_uuid_list
     def _add_image(action):
         increase_image_thread()
         try:
@@ -1388,10 +2352,16 @@ def add_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
         finally:
             decrease_image_thread()
 
+    if irg_uuid is not None:
+        bs_ops.add_bs_to_image_replication_group(irg_uuid, bs_uuid_list)
+
     if not xmlobject.has_element(deployConfig, 'images.image'):
         return
 
     for i in xmlobject.safe_list(deployConfig.images.image):
+        if i.hasattr('label_') and i.label_ == 'lazyload':
+            print "lazyload image: %s will be added in case" % (i.name_)
+            continue
         for bsref in xmlobject.safe_list(i.backupStorageRef):
             bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=bsref.text_)
             bs = get_first_item_from_list(bss, 'backup storage', bsref.text_, 'image')
@@ -1415,9 +2385,9 @@ def add_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
             action.hypervisorType = i.hypervisorType__
             action.name = i.name_
             action.url = i.url_
-            action.timeout = 1800000
+            action.timeout = 3600000
             if i.hasattr('system_'):
-                action.system = i.system_
+                action.system = i.system__
             if i.hasattr('systemTags_'):
                 action.systemTags = i.systemTags_.split(',')
             thread = threading.Thread(target = _add_image, args = (action, ))
@@ -1517,17 +2487,274 @@ def add_pxe_server(scenarioConfig, scenarioFile, deployConfig, session_uuid):
 
     #Add VM -- Pass
 
-def _thread_for_action(action):
+def add_vcenter(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    def _add_vcenter(vcenter):
+        action = api_actions.AddVCenterAction()
+        action.name = vcenter.name_
+        action.domainName = vcenter.domainName_
+        action.username = vcenter.username_
+        action.password = vcenter.password_
+        action.sessionUuid = session_uuid
+        zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=vcenter.zoneRef.text_)
+        zinv = get_first_item_from_list(zinvs, 'zone', vcenter.zoneRef.text_, 'add vcenter')
+        action.zoneUuid = zinv.uuid
+    
+        try:
+            evt = action.run()
+            test_util.test_logger(jsonobject.dumps(evt))
+        except Exception as e:
+            exc_info.append(sys.exc_info())
+    
+    if not xmlobject.has_element(deployConfig, 'vcenter'):
+        return
+    vcenter = deployConfig.vcenter
+    thread = threading.Thread(target=_add_vcenter, args=(vcenter,))
+    wait_for_thread_queue()
+    thread.start()
+    wait_for_thread_done()
+
+def add_vcenter_image(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    def _add_image(action):
+        increase_image_thread()
+        try:
+            evt = action.run()
+            test_util.test_logger(jsonobject.dumps(evt))
+        except:
+            exc_info.append(sys.exc_info())
+        finally:
+            decrease_image_thread()
+
+    if not xmlobject.has_element(deployConfig, 'vcenter.images.image'):
+        return
+
+    for i in xmlobject.safe_list(deployConfig.vcenter.images.image):
+        if i.hasattr('label_') and i.label_ == 'lazyload':
+            print "lazyload image: %s will be added in case" % (i.name_)
+            continue
+        for bsref in xmlobject.safe_list(i.backupStorageRef):
+            bss = res_ops.get_resource(res_ops.BACKUP_STORAGE, session_uuid, name=bsref.text_)
+            bs = get_first_item_from_list(bss, 'backup storage', bsref.text_, 'image')
+            action = api_actions.AddImageAction()
+            action.sessionUuid = session_uuid
+            #TODO: account uuid will be removed later.
+            action.accountUuid = inventory.INITIAL_SYSTEM_ADMIN_UUID
+            action.backupStorageUuids = [bs.uuid]
+            action.bits = i.bits__
+            if not action.bits:
+                action.bits = 64
+            action.description = i.description__
+            action.format = i.format_
+            action.mediaType = i.mediaType_
+            action.guestOsType = i.guestOsType__
+            if not action.guestOsType:
+                action.guestOsType = 'unknown'
+            action.platform = i.platform__
+            if not action.platform:
+                action.platform = 'Linux'
+            action.hypervisorType = i.hypervisorType__
+            action.name = i.name_
+            action.url = i.url_
+            action.timeout = 1800000
+            if i.hasattr('system_'):
+                action.system = i.system_
+            if i.hasattr('systemTags_'):
+                action.systemTags = i.systemTags_.split(',')
+            thread = threading.Thread(target = _add_image, args = (action, ))
+            print 'before add image1: %s' % i.url_
+            wait_for_image_thread_queue()
+            print 'before add image2: %s' % i.url_
+            thread.start()
+            print 'add image: %s' % i.url_
+
+    print 'vcenter images add command are executed'
+    wait_for_thread_done(True)
+    print 'vcenter images have been added'
+
+def add_vcenter_l2l3_network(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    if not xmlobject.has_element(deployConfig, "vcenter.l2Networks"):
+        return
+
+    def attachL2ToCluster(l2_inv, session_uuid):
+        test_util.test_logger(l2_inv)
+        datacenter = xmlobject.safe_list(vcenter.datacenters.datacenter)[0]
+        cluster_name = xmlobject.safe_list(datacenter.clusters.cluster)[0].name_
+        conditions = res_ops.gen_query_conditions('name', '=', cluster_name)
+        cluster = res_ops.query_resource(res_ops.CLUSTER, conditions)[0]
+
+        action = api_actions.AttachL2NetworkToClusterAction()
+        action.l2NetworkUuid = l2_inv.uuid
+        action.clusterUuid = cluster.uuid
+        action.sessionUuid = session_uuid
+        try:
+            evt = action.run()
+            test_util.test_logger(jsonobject.dumps(evt))
+        except:
+            exc_info.append(sys.exc_info())
+
+    def createL2Network(l2, session_uuid):
+        # create l2Network
+        zone = res_ops.query_resource(res_ops.ZONE)[0]
+        action = api_actions.CreateL2NoVlanNetworkAction()
+        action.name = l2.name_
+        action.physicalInterface = l2.physicalInterface_
+        action.zoneUuid = zone.uuid
+        action.sessionUuid = session_uuid
+        if hasattr(l2, 'vlan'):
+            action.vlan = l2.vlan_
+        evt = action.run()
+        test_util.test_logger(jsonobject.dumps(evt))
+        return evt.inventory
+
+
+    vcenter = xmlobject.safe_list(deployConfig.vcenter)[0]
+    if  xmlobject.has_element(vcenter, "l2Networks.l2NoVlanNetwork"):
+        for l2 in  xmlobject.safe_list(vcenter.l2Networks.l2NoVlanNetwork):
+            # create l2Network
+            l2_inv = createL2Network(l2, session_uuid)
+
+            # attach l2Network to cluster
+            attachL2ToCluster(l2_inv, session_uuid)
+
+            # create l3Network
+            if not xmlobject.has_element(l2, "l3Networks.l3BasicNetwork"):
+                continue
+            add_vcenter_l3_network(l2, session_uuid)
+
+    if  xmlobject.has_element(vcenter, "l2Networks.l2VlanNetwork"):
+        for l2 in  xmlobject.safe_list(vcenter.l2Networks.l2VlanNetwork):
+            # create l2Network
+            l2_inv = createL2Network(l2, session_uuid)
+
+            # attach l2Network to cluster
+            attachL2ToCluster(l2_inv, session_uuid)
+
+            # create l3Network
+            if not xmlobject.has_element(l2, "l3Networks.l3BasicNetwork"):
+                continue
+            add_vcenter_l3_network(l2, session_uuid)     
+def add_vcenter_l3_network(l2, session_uuid):
+    for l3 in xmlobject.safe_list(l2.l3Networks.l3BasicNetwork):
+        # create l3Network
+        action = api_actions.CreateL3NetworkAction()
+        action.sessionUuid = session_uuid
+        action.name = l3.name_
+        action.type = inventory.L3_BASIC_NETWORK_TYPE
+
+        conditions = res_ops.gen_query_conditions('name', '=', l2.name_)
+        l2_network = res_ops.query_resource(res_ops.L2_NETWORK, conditions)[0]
+        action.l2NetworkUuid = l2_network.uuid
+
+        if l3.domain_name__:
+            action.dnsDomain = l3.domain_name__
+
+        if l3.hasattr('category_'):
+            action.category = l3.category_
+        elif not l3.hasattr('system_') or l3.system_ == False:
+            action.category = 'Private'
+
+        if l3.hasattr('type_'):
+            action.type = l3.type_
+
+        try:
+            evt = action.run()
+            test_util.test_logger(jsonobject.dumps(evt))
+        except:
+            exc_info.append(sys.exc_info())
+
+        #add dns
+        l3_inv = evt.inventory
+        if xmlobject.has_element(l3, 'dns'):
+            for dns in xmlobject.safe_list(l3.dns):
+                action = api_actions.AddDnsToL3NetworkAction()
+                action.sessionUuid = session_uuid
+                action.dns = dns.text_
+                action.l3NetworkUuid = l3_inv.uuid
+                try:
+                    evt = action.run()
+                    test_util.test_logger(jsonobject.dumps(evt))
+                except:
+                    exc_info.append(sys.exc_info())
+
+        #add ip range.
+        if xmlobject.has_element(l3, 'ipRange'):
+            do_add_ip_range(l3.ipRange, l3_inv.uuid, session_uuid, ipversion = 4)
+        #add network service.
+        providers = {}
+        action = api_actions.QueryNetworkServiceProviderAction()
+        action.sessionUuid = session_uuid
+        action.conditions = []
+        try:
+            reply = action.run()
+        except:
+            exc_info.append(sys.exc_info())
+        for pinv in reply:
+            providers[pinv.name] = pinv.uuid
+
+        if xmlobject.has_element(l3, 'networkService'):
+            do_add_network_service(l3.networkService, l3_inv.uuid, providers, session_uuid)
+
+def add_vcenter_vrouter(scenarioConfig, scenarioFile, deployConfig, session_uuid):
+    if not xmlobject.has_element(deployConfig, 'vcenter.virtualRouterOfferings'):
+        return
+
+    for i in xmlobject.safe_list(deployConfig.vcenter.virtualRouterOfferings.virtualRouterOffering):
+        action = api_actions.CreateVirtualRouterOfferingAction()
+        action.sessionUuid = session_uuid
+        action.name = i.name__
+        action.decription = i.description_
+        action.cpuNum = i.cpuNum_
+
+        if i.memorySize__:
+            action.memorySize = sizeunit.get_size(i.memorySize_)
+        elif i.memoryCapacity_:
+            action.memorySize = sizeunit.get_size(i.memoryCapacity_)
+
+        action.isDefault = i.isDefault__
+        action.type = 'VirtualRouter'
+
+        zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=i.zoneRef.text_)
+        zinv = get_first_item_from_list(zinvs, 'zone', i.zoneRef.text_, 'virtual router offering')
+        action.zoneUuid = zinv.uuid
+
+        cond = res_ops.gen_query_conditions('zoneUuid', '=', zinv.uuid)
+        cond1 = res_ops.gen_query_conditions('name', '=', i.managementL3NetworkRef.text_, cond)
+        minvs = res_ops.query_resource(res_ops.L3_NETWORK, cond1, session_uuid)
+        minv = get_first_item_from_list(minvs, 'Management L3 Network', i.managementL3NetworkRef.text_, 'virtualRouterOffering')
+        action.managementNetworkUuid = minv.uuid
+
+        cond2 = res_ops.gen_query_conditions('name', '=', i.publicL3NetworkRef.text_, cond)
+        pinvs = res_ops.query_resource(res_ops.L3_NETWORK, cond2, session_uuid)
+        pinv = get_first_item_from_list(pinvs, 'Public L3 Network', i.publicL3NetworkRef.text_, 'virtualRouterOffering')
+        action.publicNetworkUuid = pinv.uuid
+
+        iinvs = res_ops.get_resource(res_ops.IMAGE, session_uuid, name=i.imageRef.text_)
+        iinv = get_first_item_from_list(iinvs, 'Image', i.imageRef.text_, 'virtualRouterOffering')
+        action.imageUuid = iinv.uuid
+
+        try:
+            evt = action.run()
+        except:
+            exc_info.append(sys.exc_info())
+        test_util.test_logger(jsonobject.dumps(evt))
+
+
+
+def _thread_for_action(action, retry=False):
     try:
         evt = action.run()
         test_util.test_logger(jsonobject.dumps(evt))
     except:
-        exc_info.append(sys.exc_info())
+        if retry:
+            _thread_for_action(action)
+        else:
+            exc_info.append(sys.exc_info())
 
 #Add Virtual Router Offering
 def add_virtual_router(scenarioConfig, scenarioFile, deployConfig, session_uuid, l3_name = None, \
         zone_name = None):
 
+    if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+        return
     if not xmlobject.has_element(deployConfig, 'instanceOfferings.virtualRouterOffering'):
         return
 
@@ -1586,25 +2813,351 @@ def add_virtual_router(scenarioConfig, scenarioFile, deployConfig, session_uuid,
 
     wait_for_thread_done()
 
-def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None):
+    for i in xmlobject.safe_list(deployConfig.instanceOfferings.virtualRouterOffering):
+        if xmlobject.has_element(i, 'l3BasicNetwork'):
+            for l3net in xmlobject.safe_list(i.l3BasicNetwork):
+                action = api_actions.CreateSystemTagAction()
+                action.sessionUuid = session_uuid
+                action.timeout = 30000
+                action.resourceType = 'InstanceOfferingVO'
+
+                cond = res_ops.gen_query_conditions('type','=','VirtualRouter')
+                vr_instance_uuid = res_ops.query_resource(res_ops.INSTANCE_OFFERING,cond)[0].uuid
+                action.resourceUuid = vr_instance_uuid
+
+                zinvs = res_ops.get_resource(res_ops.ZONE, session_uuid, name=i.zoneRef.text_)
+                zinv = get_first_item_from_list(zinvs, 'zone', i.zoneRef.text_, 'virtual router offering')
+                cond = res_ops.gen_query_conditions('zoneUuid', '=', zinv.uuid)
+                cond1 = res_ops.gen_query_conditions('name', '=', l3net.text_, cond)
+                l3_network = res_ops.query_resource(res_ops.L3_NETWORK, cond1, session_uuid)
+                action.tag = 'guestL3Network::' + l3_network[0].uuid
+
+                thread = threading.Thread(target = _thread_for_action, args = (action, ))
+                wait_for_thread_queue()
+                thread.start()
+
+    wait_for_thread_done()
+
+def json_post(uri, body=None, headers={}, method='POST', fail_soon=False):
+    ret = []
+    def post(_):
+        try:
+            pool = urllib3.PoolManager(timeout=120.0, retries=urllib3.util.retry.Retry(15))
+            header = {'Content-Type': 'application/json', 'Connection': 'close'}
+            for k in headers.keys():
+                header[k] = headers[k]
+
+            if body is not None:
+                assert isinstance(body, types.StringType)
+                header['Content-Length'] = str(len(body))
+                content = pool.urlopen(method, uri, headers=header, body=str(body)).data
+            else:
+                header['Content-Length'] = '0'
+                content = pool.urlopen(method, uri, headers=header).data
+
+            pool.clear()
+            ret.append(content)
+            return True
+        except Exception as e:
+            if fail_soon:
+                raise e
+            return False
+
+    post(None)
+    return ret[0]
+
+#Add Backup Storage
+def add_simulator_backup_storage(scenarioConfig, scenarioFile, deployConfig):
+    resources = []
+    if xmlobject.has_element(deployConfig, 'backupStorages.sftpBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.sftpBackupStorage):
+            data = {}
+            data['type'] = 'SftpBackupStorage'
+            data['data'] = {}
+            data['data']['ip'] = bs.hostname_
+            data['data']['path'] = bs.url_
+            data['data']['id'] = bs.name_
+	    if hasattr(bs, 'totalCapacity_') and bs.totalCapacity_ != "":
+               	data['data']['totalCapacity'] = bs.totalCapacity_
+	    if hasattr(bs, 'availableCapacity_') and bs.availableCapacity_ != "":
+               	data['data']['availableCapacity'] = bs.availableCapacity_
+            resources.append(data)
+
+    if xmlobject.has_element(deployConfig, 'backupStorages.imageStoreBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.imageStoreBackupStorage):
+            data = {}
+            data['type'] = 'ImageStoreBackupStorage'
+            data['data'] = {}
+            data['data']['ip'] = bs.hostname_
+            data['data']['path'] = bs.url_
+            data['data']['id'] = bs.name_
+            resources.append(data)
+
+    if xmlobject.has_element(deployConfig, 'backupStorages.miniBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.miniBackupStorage):
+            data = {}
+            data['type'] = 'ImageStoreBackupStorage'
+            data['data'] = {}
+            data['data']['ip'] = bs.hostname_
+            data['data']['path'] = bs.url_
+            data['data']['id'] = bs.name_
+            resources.append(data)
+
+    if xmlobject.has_element(deployConfig, 'backupStorages.cephBackupStorage'):
+        for bs in xmlobject.safe_list(deployConfig.backupStorages.cephBackupStorage):
+            data = {}
+            data['type'] = 'CephBackupStorage'
+            data['data'] = {}
+            data['data']['fsid'] = "445ce4c1-bab0-449e-a684-a3fe80be844d"
+            data['data']['id'] = bs.name_
+	    if hasattr(bs, 'totalCapacity_') and bs.totalCapacity_ != "":
+               	data['data']['totalCapacity'] = bs.totalCapacity_
+	    if hasattr(bs, 'availableCapacity_') and bs.availableCapacity_ != "":
+               	data['data']['availableCapacity'] = bs.availableCapacity_
+            resources.append(data)
+            for mon_url in bs.monUrls_.split(';'):
+                mon_data = {}
+                mon_data['type'] = 'CephBackupStorageMon'
+                mon_data['data'] = {}
+                mon_data['data']['ip'] = mon_url.split('@')[1]
+                mon_data['data']['monAddr'] = mon_url.split('@')[1]
+                mon_data['data']['id'] = mon_data['data']['ip']
+                mon_data['data']['cephId'] = bs.name_
+                resources.append(mon_data)
+
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/batch-create" % (mn_ip)
+    ret = json_post(url, simplejson.dumps({"resources": resources}))
+
+#Add Primary Storage
+def add_simulator_primary_storage(scenarioConfig, scenarioFile, deployConfig):
+    if not xmlobject.has_element(deployConfig, 'zones.zone'):
+        test_util.test_logger('Not find zones.zone in config, skip primary storage deployment')
+        return
+
+    resources = []
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+        if xmlobject.has_element(zone, 'primaryStorages.localPrimaryStorage'):
+            for pr in xmlobject.safe_list(zone.primaryStorages.localPrimaryStorage):
+                data = {}
+                data['type'] = 'LocalStorage'
+                data['data'] = {}
+                data['data']['path'] = pr.url_
+                data['data']['id'] = pr.name_
+                data['data']['name'] = pr.name_
+	        if hasattr(pr, 'totalCapacity_') and pr.totalCapacity_ != "":
+                    data['data']['totalCapacity'] = pr.totalCapacity_
+	        if hasattr(pr, 'availableCapacity_') and pr.availableCapacity_ != "":
+                    data['data']['availableCapacity'] = pr.availableCapacity_
+                resources.append(data)
+    
+        if xmlobject.has_element(zone, 'primaryStorages.cephPrimaryStorage'):
+            for pr in xmlobject.safe_list(zone.primaryStorages.cephPrimaryStorage):
+                data = {}
+                data['type'] = 'CephPrimaryStorage'
+                data['data'] = {}
+                data['data']['fsid'] = "445ce4c1-bab0-449e-a684-a3fe80be844d"
+                data['data']['id'] = pr.name_
+	        if hasattr(pr, 'totalCapacity_') and pr.totalCapacity_ != "":
+                    data['data']['totalCapacity'] = pr.totalCapacity_
+	        if hasattr(pr, 'availableCapacity_') and pr.availableCapacity_ != "":
+                    data['data']['availableCapacity'] = pr.availableCapacity_
+                resources.append(data)
+                for mon_url in pr.monUrls_.split(';'):
+                    mon_data = {}
+                    mon_data['type'] = 'CephPrimaryStorageMon'
+                    mon_data['data'] = {}
+                    mon_data['data']['ip'] = mon_url.split('@')[1]
+                    mon_data['data']['monAddr'] = mon_url.split('@')[1]
+                    mon_data['data']['id'] = mon_data['data']['ip']
+                    mon_data['data']['cephId'] = pr.name_
+                    resources.append(mon_data)
+    
+                if hasattr(pr, 'dataVolumePoolName_') and pr.dataVolumePoolName_ != "":
+                    pool_data = {}
+                    pool_data['type'] = 'CephBackupStoragePool'
+                    pool_data['data'] = {}
+                    pool_data['data']['cephId'] = pr.dataVolumePoolName_
+                    pool_data['data']['name'] = pr.dataVolumePoolName_
+                    pool_data['data']['id'] = pr.dataVolumePoolName_
+                    resources.append(pool_data)
+                if hasattr(pr, 'rootVolumePoolName_') and pr.rootVolumePoolName_ != "":
+                    pool_data = {}
+                    pool_data['type'] = 'CephBackupStoragePool'
+                    pool_data['data'] = {}
+                    pool_data['data']['cephId'] = pr.dataVolumePoolName_
+                    pool_data['data']['name'] = pr.dataVolumePoolName_
+                    pool_data['data']['id'] = pr.dataVolumePoolName_
+                    resources.append(pool_data)
+                if hasattr(pr, 'imageCachePoolName_') and pr.imageCachePoolName_ != "":
+                    pool_data = {}
+                    pool_data['type'] = 'CephBackupStoragePool'
+                    pool_data['data'] = {}
+                    pool_data['data']['cephId'] = pr.dataVolumePoolName_
+                    pool_data['data']['name'] = pr.dataVolumePoolName_
+                    pool_data['data']['id'] = pr.dataVolumePoolName_
+                    resources.append(pool_data)
+
+        if xmlobject.has_element(zone, 'primaryStorages.nfsPrimaryStorage'):
+            for pr in xmlobject.safe_list(zone.primaryStorages.nfsPrimaryStorage):
+                data = {}
+                data['type'] = 'NfsPrimaryStorage'
+                data['data'] = {}
+                data['data']['id'] = pr.name_
+                data['data']['ip'] = pr.url_.split(':')[0]
+                data['data']['mountPoint'] = pr.url_.split(':')[1]
+	        if hasattr(pr, 'totalCapacity_') and pr.totalCapacity_ != "":
+                    data['data']['totalCapacity'] = bs.totalCapacity_
+	        if hasattr(pr, 'availableCapacity_') and pr.availableCapacity_ != "":
+                    data['data']['availableCapacity'] = pr.availableCapacity_
+                resources.append(data)
+    
+        if xmlobject.has_element(zone, 'primaryStorages.sharedMountPointPrimaryStorage'):
+            for pr in xmlobject.safe_list(zone.primaryStorages.sharedMountPointPrimaryStorage):
+                data = {}
+                data['type'] = 'SharedMountPointPrimaryStorage'
+                data['data'] = {}
+                data['data']['path'] = pr.url_
+                data['data']['id'] = pr.name_
+	        if hasattr(pr, 'totalCapacity_') and pr.totalCapacity_ != "":
+                    data['data']['totalCapacity'] = pr.totalCapacity_
+	        if hasattr(pr, 'availableCapacity_') and pr.availableCapacity_ != "":
+                    data['data']['availableCapacity'] = pr.availableCapacity_
+                resources.append(data)
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/batch-create" % (mn_ip)
+    ret = json_post(url, simplejson.dumps({"resources": resources}))
+
+#Add Host
+def add_simulator_host(scenarioConfig, scenarioFile, deployConfig):
+    if not xmlobject.has_element(deployConfig, 'zones.zone'):
+        test_util.test_logger('Not find zones.zone in config, skip primary storage deployment')
+        return
+
+    resources = []
+    for zone in xmlobject.safe_list(deployConfig.zones.zone):
+        if not xmlobject.has_element(zone, 'clusters.cluster'):
+            continue
+
+        if zone.duplication__ == None:
+            zone_duplication = 1
+        else:
+            zone_duplication = int(zone.duplication__)
+
+
+        for zone_ref in range(zone_duplication):
+            for cluster in xmlobject.safe_list(zone.clusters.cluster):
+                if cluster.duplication__ == None:
+                    cluster_duplication = 1
+                else:
+                    cluster_duplication = int(cluster.duplication__)
+
+                for cluster_ref in range(cluster_duplication):
+                    for host in xmlobject.safe_list(cluster.hosts.host):
+                        if host.duplication__ == None:
+                            host_duplication = 1
+                        else:
+                            host_duplication = int(host.duplication__)
+            
+                        for host_ref in range(host_duplication):
+                            data = {}
+                            data['type'] = 'KvmHost'
+                            data['data'] = {}
+                            if zone_duplication == 0 and cluster_duplication == 0 and host_duplication == 0:
+                                data['data']['ip'] = host.managementIp_
+                                data['data']['id'] = host.name_
+                            else:
+                                data['data']['ip'] = generate_dup_host_ip(host.managementIp_, zone_ref, cluster_ref, host_ref)
+                                data['data']['id'] = generate_dup_name(generate_dup_name(generate_dup_name(host.name_, zone_ref, 'z'), cluster_ref, 'c'), host_ref, 'h')
+                            data['data']['username'] = host.username_
+                            data['data']['password'] = host.password__
+                            if hasattr(host, 'cpuNum_') and host.cpuNum_ != "":
+                                data['data']['cpuNum'] = host.cpuNum_
+                            if hasattr(host, 'totalCpu_') and host.totalCpu_ != "":
+                                data['data']['totalCpu'] = host.totalCpu_
+                            if hasattr(host, 'cpuSockets_') and host.cpuSockets_ != "":
+                                data['data']['cpuSockets'] = host.cpuSockets_
+                            if hasattr(host, 'usedCpu_') and host.usedCpu_ != "":
+                                data['data']['usedCpu'] = host.usedCpu_
+                            if hasattr(host, 'totalMemory_') and host.totalMemory_ != "":
+                                data['data']['totalMemory'] = host.totalMemory_
+                            if hasattr(host, 'usedMemory_') and host.usedMemory_ != "":
+                                data['data']['usedMemory'] = host.usedMemory_
+                            resources.append(data)
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/batch-create" % (mn_ip)
+    ret = json_post(url, simplejson.dumps({"resources": resources}))
+
+def deploy_simulator_database(deploy_config, scenario_config = None, scenario_file = None):
+    operations = [
+            add_simulator_backup_storage,
+            add_simulator_primary_storage,
+            add_simulator_host
+            ]
+    for operation in operations:
+        try:
+            operation(scenario_config, scenario_file, deploy_config)
+        except Exception as e:
+            test_util.test_logger('[Error] zstack simluator deployment meets exception when doing: %s . The real exception are:.' % operation.__name__)
+            print('----------------------Exception Reason------------------------')
+            traceback.print_exc(file=sys.stdout)
+            print('-------------------------Reason End---------------------------\n')
+            raise e
+
+    test_util.test_logger('[Done] zstack simulator database was created successfully.')
+
+def deploy_simulator_agent_script(url_path, script):
+    data = dict()
+    data['urlPath'] = url_path
+    data['script'] = script
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/agent-pre-handlers/add" % (mn_ip)
+    ret = json_post(url, simplejson.dumps(data))
+
+def remove_simulator_agent_script(url_path):
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/agent-pre-handlers/remove" % (mn_ip)
+    ret = json_post(url, url_path)
+
+def query_all_simulator_agent_script():
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/agent-customize-handlers/get" % (mn_ip)
+    ret = json_post(url, None)
+    return ret
+
+def remove_all_simulator_agent_script():
+    mn_ip = res_ops.query_resource(res_ops.MANAGEMENT_NODE)[0].hostName
+    url = "http://%s:8080/zstack/simulators/agent-customize-handlers/removeAll" % (mn_ip)
+    ret = json_post(url, None)
+
+def deploy_initial_database(deploy_config, scenario_config = None, scenario_file = None, ipversion = 4):
     operations = [
             add_backup_storage,
             add_zone,
             add_l2_network,
             add_primary_storage,
+            add_iscsi_server,
             add_cluster,
             add_host,
+            add_sanlock,
             add_l3_network,
             add_image,
             add_disk_offering,
             add_instance_offering,
             add_virtual_router,
-            add_pxe_server
+            #add_pxe_server,
+            add_vcenter,
+            add_vcenter_image,
+	    add_vcenter_l2l3_network,
+            add_vcenter_vrouter
             ]
     for operation in operations:
         session_uuid = account_operations.login_as_admin()
         try:
-            operation(scenario_config, scenario_file, deploy_config, session_uuid)
+            if ipversion == 6 and operation == "add_l3_network":
+                operation(scenario_config, scenario_file, deploy_config, session_uuid, ipversion = 6)
+            else:
+                operation(scenario_config, scenario_file, deploy_config, session_uuid)
         except Exception as e:
             test_util.test_logger('[Error] zstack deployment meets exception when doing: %s . The real exception are:.' % operation.__name__)
             print('----------------------Exception Reason------------------------')
@@ -1691,3 +3244,625 @@ def get_nfs_ip_for_seperate_network(scenarioConfig, virtual_host_ip, nfs_ps_name
                             return vm_inv_nic.ip
 
     return None
+
+def create_datacenter(dcname=None, service_instance=None, folder=None):
+    from pyVmomi import vim
+    if folder is None:
+        folder = service_instance.content.rootFolder
+
+    if folder is not None and isinstance(folder, vim.Folder):
+        dc_moref = folder.CreateDatacenter(name=dcname)
+        return dc_moref
+
+def create_cluster(datacenter=None, clustername=None, cluster_spec=None):
+    from pyVmomi import vim
+    if datacenter is None:
+        test_util.test_fail("Miss datacenter for cluster")
+    if clustername is None:
+        clustername = "cluster1"
+    if cluster_spec is None:
+        cluster_spec = vim.cluster.ConfigSpecEx()
+    host_folder = datacenter.hostFolder
+    cluster = host_folder.CreateClusterEx(name=clustername, spec=cluster_spec)
+    return cluster
+
+def add_vc_host(cluster=None, host_spec=None, asConnected=True):
+    from pyVim import task
+    if cluster is None:
+        test_util.test_fail("Miss cluster for host")
+    if host_spec is None:
+        test_util.test_fail("Miss host_spec for host")
+    TASK = cluster.AddHost_Task(spec=host_spec, asConnected=True)
+    task.WaitForTask(TASK)
+    host_inf = TASK.info.result
+    return host_inf
+
+def setup_iscsi_device(host=None, target_ip=None):
+    from pyVmomi import vim
+    #iscsi device name -> hba.device
+    def get_iscsi_device(host=None):
+        hba_list = host.config.storageDevice.hostBusAdapter
+        for hba in hba_list:
+            if hba.model == "iSCSI Software Adapter":
+                return hba
+
+    #TODO: now iscsi adapter shares the vnic with management network,
+    # we need to add a seperate storage network for this
+    # vnic device name -> vnic.device
+    def get_iscsi_candidate_vnic(host=None):
+        iscsi_hba = get_iscsi_device(host=host).device
+        available_vnic = host.configManager.iscsiManager.QueryCandidateNics(iScsiHbaName=iscsi_hba)
+        for vnic in available_vnic:
+            if vnic.vnic.portgroup == "Management Network":
+                return vnic.vnic
+
+    def bind_vnic_to_iscsi(iScsiHbaName=None, vnicDevice=None):
+        host.configManager.iscsiManager.BindVnic(iScsiHbaName=iScsiHbaName, vnicDevice=vnicDevice)
+
+    #targets is target object list
+    def add_iscsi_send_target(iScsiHbaName=None, target_ip=None):
+        targets = []
+        target = vim.host.InternetScsiHba.SendTarget()
+        target.address = target_ip
+        targets.append(target)
+        host.configManager.storageSystem.AddInternetScsiSendTargets(iScsiHbaDevice=iScsiHbaName, targets=targets)
+
+    def rescan_allhba():
+        host.configManager.storageSystem.RescanAllHba()
+        host.configManager.storageSystem.RescanVmfs()
+
+    host_obj = host
+    host_obj.configManager.storageSystem.UpdateSoftwareInternetScsiEnabled(enabled=True)
+    candidate_vnic_device = get_iscsi_candidate_vnic(host=host_obj).device
+    iscsihba_name = get_iscsi_device(host=host_obj).device
+    bind_vnic_to_iscsi(iScsiHbaName=iscsihba_name, vnicDevice=candidate_vnic_device)
+    rescan_allhba()
+    add_iscsi_send_target(iScsiHbaName=iscsihba_name, target_ip=target_ip)
+    rescan_allhba()
+
+def create_datastore(host=None, dsname=None):
+    #TODO: support iscsi disk for now
+    #device_path -> disk.devicePath
+    #display_name -> disk.displayName
+    def available_disk_vmfs(host=host):
+        disk_list = host.configManager.datastoreSystem.QueryAvailableDisksForVmfs()
+        for disk in disk_list:
+            if "iSCSI" in disk.displayName:
+                return disk
+            else:
+                continue
+
+    def query_datastore_create_option(host=None):
+        device_path = available_disk_vmfs(host=host).devicePath
+        create_option = host.configManager.datastoreSystem.QueryVmfsDatastoreCreateOptions(device_path)[0]
+        return create_option
+
+    vmfs_create_spec = query_datastore_create_option(host=host).spec
+    vmfs_create_spec.vmfs.volumeName = dsname
+    datastore = host.configManager.datastoreSystem.CreateVmfsDatastore(vmfs_create_spec)
+    return datastore
+
+def create_nfs_datastore(host=None, remotehost=None, mount_point_path=None, ds_name=None):
+    from pyVmomi import vim
+    spec = vim.host.NasVolume.Specification()
+    spec.accessMode="readWrite"
+    spec.securityType = 'AUTH_SYS'
+    spec.remoteHost = remotehost
+    spec.remotePath = mount_point_path
+    spec.remoteHostNames = remotehost
+    spec.localPath = ds_name
+    host.configManager.datastoreSystem.CreateNasDatastore(spec=spec)
+
+#To get the vswitch list from the host
+#vswitch_obj = host.config.network.vswitch
+def addvswitch_portgroup(host=None, vswitch="vSwitch0", portgroup=None, vlanId=0):
+    from pyVmomi import vim
+    portgroup_spec = vim.host.PortGroup.Specification()
+    portgroup_spec.vswitchName = vswitch
+    portgroup_spec.name = portgroup
+    portgroup_spec.vlanId = int(vlanId)
+    network_policy = vim.host.NetworkPolicy()
+    network_policy.security = vim.host.NetworkPolicy.SecurityPolicy()
+    network_policy.security.allowPromiscuous = True
+    network_policy.security.macChanges = False
+    network_policy.security.forgedTransmits = False
+    portgroup_spec.policy = network_policy
+
+    host.configManager.networkSystem.AddPortGroup(portgroup_spec)
+
+def cleanup_datacenter(datacenter=None):
+    from pyVim import task
+    TASK = datacenter.Destroy_Task()
+    task.WaitForTask(TASK)
+
+def create_dvswitch(datacenter=None, name='DvSwitch0', DVSCreateSpec=None):
+    from pyVmomi import vim
+    from pyVim import task
+    if not DVSCreateSpec:
+        DVSCreateSpec = vim.DistributedVirtualSwitch.CreateSpec(
+            configSpec=vim.DistributedVirtualSwitch.ConfigSpec(name=name)
+        )
+    folder = datacenter.networkFolder
+    Task = folder.CreateDVS_Task(spec=DVSCreateSpec)
+    task.WaitForTask(Task)
+    return Task.info.result
+
+
+def adddvswitch_portgroup(DVSwitch=None, name='DPortGroup0', vlanId=0):
+    from pyVmomi import vim
+    from pyVim import task
+    vlan = vim.dvs.VmwareDistributedVirtualSwitch.VlanIdSpec()
+    vlan.vlanId = int(vlanId)
+    defaultPortConfig = vim.dvs.VmwareDistributedVirtualSwitch.VmwarePortConfigPolicy()
+    defaultPortConfig.vlan = vlan
+
+    DVPortgroupConfigSpec = vim.dvs.DistributedVirtualPortgroup.ConfigSpec()
+    DVPortgroupConfigSpec.name = name
+    DVPortgroupConfigSpec.type = 'ephemeral'
+    DVPortgroupConfigSpec.autoExpand = False
+    DVPortgroupConfigSpec.defaultPortConfig = defaultPortConfig
+
+    Task = DVSwitch.CreateDVPortgroup_Task(spec=DVPortgroupConfigSpec)
+    task.WaitForTask(Task)
+    return Task.info.result
+
+def clone_vm_from_vm(datacenter=None, name='vm-0', power=True):
+    from pyVmomi import vim
+    from pyVim import task
+    resource_pool = get_obj(content, [vim.ResourcePool])[0]
+    vm_template = get_obj(content, [vim.VirtualMachine])[0]
+
+    relospec = vim.vm.RelocateSpec()
+    relospec.datastore = get_obj(content, [vim.Datastore])[0]
+    relospec.pool = resource_pool
+
+    relospec = vim.vm.RelocateSpec()
+    clonespec = vim.vm.CloneSpec()
+    clonespec.location = relospec
+    clonespec.powerOn = power
+
+    Task = vm_template.Clone(folder=datacenter.vmFolder, name=name, spec=clonespec)
+    task.WaitForTask(Task)
+
+
+def powerOn_vm(vm):
+    from pyVim import task
+    Task = vm.PowerOnVM_Task()
+    task.WaitForTask(Task)
+
+class OvfHandler(object):
+    """
+    OvfHandler handles most of the OVA operations.
+    It processes the tarfile, matches disk keys to files and
+    uploads the disks, while keeping the progress up to date for the lease.
+    """
+
+    def __init__(self, ovafile):
+        """
+        Performs necessary initialization, opening the OVA file,
+        processing the files and reading the embedded ovf file.
+        """
+        import tarfile
+        self.handle = self._create_file_handle(ovafile)
+        self.tarfile = tarfile.open(fileobj=self.handle)
+        ovffilename = list(filter(lambda x: x.endswith(".ovf"),
+                                  self.tarfile.getnames()))[0]
+        ovffile = self.tarfile.extractfile(ovffilename)
+        self.descriptor = ovffile.read().decode()
+
+    def _create_file_handle(self, entry):
+        """
+        A simple mechanism to pick whether the file is local or not.
+        This is not very robust.
+        """
+        return WebHandle(entry)
+
+    def get_descriptor(self):
+        return self.descriptor
+
+    def set_spec(self, spec):
+        """
+        The import spec is needed for later matching disks keys with
+        file names.
+        """
+        self.spec = spec
+
+    def get_disk(self, fileItem, lease):
+        """
+        Does translation for disk key to file name, returning a file handle.
+        """
+        ovffilename = list(filter(lambda x: x == fileItem.path,
+                                  self.tarfile.getnames()))[0]
+        return self.tarfile.extractfile(ovffilename)
+
+    def get_device_url(self, fileItem, lease):
+        for deviceUrl in lease.info.deviceUrl:
+            if deviceUrl.importKey == fileItem.deviceId:
+                return deviceUrl
+        raise Exception("Failed to find deviceUrl for file %s" % fileItem.path)
+
+    def upload_disks(self, lease, host):
+        """
+        Uploads all the disks, with a progress keep-alive.
+        """
+        from pyVmomi import vim, vmodl
+        self.lease = lease
+        try:
+            self.start_timer()
+            for fileItem in self.spec.fileItem:
+                self.upload_disk(fileItem, lease, host)
+            lease.Complete()
+        except vmodl.MethodFault as e:
+            lease.Abort(e)
+        except Exception as e:
+            lease.Abort(vmodl.fault.SystemError(reason=str(e)))
+            raise
+
+    def upload_disk(self, fileItem, lease, host):
+        """
+        Upload an individual disk. Passes the file handle of the
+        disk directly to the urlopen request.
+        """
+        import ssl
+        from six.moves.urllib.request import Request, urlopen
+        ovffile = self.get_disk(fileItem, lease)
+        if ovffile is None:
+            return
+        deviceUrl = self.get_device_url(fileItem, lease)
+        url = deviceUrl.url.replace('*', host)
+        headers = {'Content-length': get_tarfile_size(ovffile)}
+        if hasattr(ssl, '_create_unverified_context'):
+            sslContext = ssl._create_unverified_context()
+        else:
+            sslContext = None
+        req = Request(url, ovffile, headers)
+        urlopen(req, context=sslContext)
+
+    def start_timer(self):
+        from threading import Timer
+        """
+        A simple way to keep updating progress while the disks are transferred.
+        """
+        Timer(5, self.timer).start()
+
+    def timer(self):
+        """
+        Update the progress and reschedule the timer if not complete.
+        """
+        from pyVmomi import vim
+        try:
+            prog = self.handle.progress()
+            self.lease.Progress(prog)
+            if self.lease.state not in [vim.HttpNfcLease.State.done,
+                                        vim.HttpNfcLease.State.error]:
+                self.start_timer()
+            sys.stderr.write("Progress: %d%%\r" % prog)
+        except:  # Any exception means we should stop updating progress.
+            pass
+
+
+class WebHandle(object):
+    def __init__(self, url):
+        from six.moves.urllib.request import Request, urlopen
+        self.url = url
+        r = urlopen(url)
+        if r.code != 200:
+            raise Exception('not found url')
+        self.headers = self._headers_to_dict(r)
+        if 'accept-ranges' not in self.headers:
+            raise Exception("Site does not accept ranges")
+        self.st_size = int(self.headers['content-length'])
+        self.offset = 0
+
+    def _headers_to_dict(self, r):
+        result = {}
+        if hasattr(r, 'getheaders'):
+            for n, v in r.getheaders():
+                result[n.lower()] = v.strip()
+        else:
+            for line in r.info().headers:
+                if line.find(':') != -1:
+                    n, v = line.split(': ', 1)
+                    result[n.lower()] = v.strip()
+        return result
+
+    def tell(self):
+        return self.offset
+
+    def seek(self, offset, whence=0):
+        if whence == 0:
+            self.offset = offset
+        elif whence == 1:
+            self.offset += offset
+        elif whence == 2:
+            self.offset = self.st_size - offset
+        return self.offset
+
+    def seekable(self):
+        return True
+
+    def read(self, amount):
+	from six.moves.urllib.request import Request, urlopen
+        start = self.offset
+        end = self.offset + amount - 1
+        req = Request(self.url,
+                      headers={'Range': 'bytes=%d-%d' % (start, end)})
+        r = urlopen(req)
+        self.offset += amount
+        result = r.read(amount)
+        r.close()
+        return result
+
+    # A slightly more accurate percentage
+    def progress(self):
+        return int(100.0 * self.offset / self.st_size)
+
+
+def get_tarfile_size(tarfile):
+    """
+    Determine the size of a file inside the tarball.
+    If the object has a size attribute, use that. Otherwise seek to the end
+    and report that.
+    """
+    if hasattr(tarfile, 'size'):
+        return tarfile.size
+    size = tarfile.seek(0, 2)
+    tarfile.seek(0, 0)
+    return size
+
+
+def deploy_ova(service_instance=None, datacenter=None, datastore=None, resourcepool=None, path=None):
+    from pyVmomi import vim
+    from pyVim import task
+    ovf_handle = OvfHandler(path)
+    ovfManager = service_instance.content.ovfManager
+
+    cisp = vim.OvfManager.CreateImportSpecParams()
+    cisr = ovfManager.CreateImportSpec(ovf_handle.get_descriptor(),
+                                       resourcepool, datastore, cisp)
+
+    if len(cisr.error):
+        for error in cisr.error:
+            test_util.test_logger("%s" % error)
+        test_util.test_logger("some errors prevent import of this OVA")
+    ovf_handle.set_spec(cisr)
+
+    lease = resourcepool.ImportVApp(cisr.importSpec, datacenter.vmFolder)
+    while lease.state == vim.HttpNfcLease.State.initializing:
+        time.sleep(1)
+
+    if lease.state == vim.HttpNfcLease.State.error:
+        test_util.test_fail("vim.HttpNfcLease.State.error")
+    if lease.state == vim.HttpNfcLease.State.done:
+        test_util.test_fail("vim.HttpNfcLease.State.done")
+
+    ovf_handle.upload_disks(lease, os.environ.get('vcenter'))
+    return cisr.importSpec.configSpec.name
+
+
+def create_vm(name="vm-0", vm_folder=None, resource_pool=None, host=None):
+    from pyVim import task
+    from pyVmomi import vim
+
+    datastore = host.datastore[0].name
+    datastore_path = '[' + datastore + '] ' + name
+
+    vmx_file = vim.vm.FileInfo(logDirectory=None,
+                               snapshotDirectory=None,
+                               suspendDirectory=None,
+                               vmPathName=datastore_path)
+
+    config = vim.vm.ConfigSpec(name=name, memoryMB=128, numCPUs=1,
+                               files=vmx_file, guestId='dosGuest',
+                               version='vmx-07')
+    Task = vm_folder.CreateVM_Task(config=config, pool=resource_pool)
+    task.WaitForTask(Task)
+    return Task.info.result
+
+def add_vswitch_to_host(host=None, vsname=None, hostname=None):
+    from pyVim import task
+    from pyVmomi import vim
+    tmp = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ.get("zstackManagementIp")
+    cond = res_ops.gen_query_conditions('name', '=', hostname)
+    import scenario_operations as sce_ops
+    vm = sce_ops.query_resource(os.environ.get("zstackManagementIp"), res_ops.VM_INSTANCE, cond).inventories[0]
+    l3_uuid = os.environ.get("vmL3Uuid2")
+    for net in vm.vmNics:
+        if net.l3NetworkUuid == l3_uuid:
+            mac = net.mac
+    for pnic in host.config.network.pnic:
+        if mac == pnic.mac:
+            nic = pnic.device
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = tmp
+    brige = vim.host.VirtualSwitch.BondBridge()
+    brige.nicDevice = [nic,]
+    spec = vim.host.VirtualSwitch.Specification()
+    spec.bridge = brige
+    spec.numPorts = 128
+    host.configManager.networkSystem.AddVirtualSwitch(vswitchName=vsname, spec=spec)
+
+def add_host_to_dvswitch(host=None, dvswitch=None, hostname=None):
+    from pyVim import task
+    from pyVmomi import vim
+    tmp = os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP']
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = os.environ.get("zstackManagementIp")
+    cond = res_ops.gen_query_conditions('name', '=', hostname)
+    import scenario_operations as sce_ops
+    vm = sce_ops.query_resource(os.environ.get("zstackManagementIp"), res_ops.VM_INSTANCE, cond).inventories[0]
+    l3_uuid = os.environ.get("vmL3Uuid3")
+    for net in vm.vmNics:
+        if net.l3NetworkUuid == l3_uuid:
+            mac = net.mac
+    for pnic in host.config.network.pnic:
+        if mac == pnic.mac:
+            nic = pnic.device
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = tmp
+
+    backing = vim.dvs.HostMember.PnicBacking(pnicSpec=[vim.dvs.HostMember.PnicSpec(pnicDevice=nic), ])
+    host_config = vim.dvs.HostMember.ConfigSpec(host=host, backing=backing, operation='add')
+    config = vim.DistributedVirtualSwitch.ConfigSpec(host=[host_config, ], configVersion=dvswitch.config.configVersion)
+    Task = dvswitch.ReconfigureDvs_Task(spec=config)
+    task.WaitForTask(Task)
+
+def add_vm_to_dvsportgroup(vm=None, dportgroup=None):
+    from pyVim import task
+    from pyVmomi import vim
+
+    virtual_nic_device = vim.vm.device.VirtualE1000()
+
+    backing = vim.vm.device.VirtualEthernetCard.DistributedVirtualPortBackingInfo()
+    backing.port = vim.dvs.PortConnection()
+    backing.port.switchUuid = dportgroup.config.distributedVirtualSwitch.uuid
+    backing.port.portgroupKey = dportgroup.key
+    virtual_nic_device.backing = backing
+
+    virtual_nic_device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
+    virtual_nic_device.connectable.startConnected = True
+    virtual_nic_device.connectable.allowGuestControl = True
+    virtual_nic_device.connectable.connected = False
+    virtual_nic_device.connectable.status = 'untried'
+
+    virtual_nic_device.addressType = 'assigned'
+
+    device_config = vim.vm.device.VirtualDeviceSpec()
+    device_config.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
+    device_config.device = virtual_nic_device
+
+    spec = vim.vm.ConfigSpec(deviceChange=[device_config, ])
+    Task = vm.ReconfigVM_Task(spec=spec)
+    task.WaitForTask(Task)
+
+def add_vm_to_portgroup(vm=None, portgroup=None):
+    from pyVim import task
+    from pyVmomi import vim
+
+    virtual_nic_device = vim.vm.device.VirtualE1000()
+
+    backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
+    backing.network = portgroup
+    backing.deviceName = portgroup.name
+    virtual_nic_device.backing = backing
+
+    virtual_nic_device.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
+    virtual_nic_device.connectable.startConnected = True
+    virtual_nic_device.connectable.allowGuestControl = True
+    virtual_nic_device.connectable.connected = False
+    virtual_nic_device.connectable.status = 'untried'
+
+    virtual_nic_device.addressType = 'assigned'
+
+    device_config = vim.vm.device.VirtualDeviceSpec()
+    device_config.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
+    device_config.device = virtual_nic_device
+
+    spec = vim.vm.ConfigSpec(deviceChange=[device_config, ])
+    Task = vm.ReconfigVM_Task(spec=spec)
+    task.WaitForTask(Task)
+
+def get_obj(content, vimtype, name=None):
+    obj = None
+    container = content.viewManager.CreateContainerView(
+        content.rootFolder, vimtype, True)
+    if name:
+        for c in container.view:
+            if c.name == name:
+                obj = c
+                return obj
+    return container.view
+
+def deploy_initial_vcenter(deploy_config, scenario_config = None, scenario_file = None):
+    from pyVmomi import vim
+    from pyVim import connect
+    from pyVim import task
+    import atexit
+    import zstackwoodpecker.operations.vcenter_operations as vct_ops
+    import zstackwoodpecker.test_lib as test_lib
+
+    vcenter = os.environ.get('vcenter')
+    vcenteruser = os.environ.get('vcenteruser')
+    vcenterpwd = os.environ.get('vcenterpwd')
+    SI = connect.SmartConnectNoSSL(host=vcenter, user=vcenteruser, pwd=vcenterpwd, port=443)
+    if not SI:
+       test_util.test_fail("Unable to connect to the vCenter %s" % vcenter) 
+
+    atexit.register(connect.Disconnect, SI)
+
+    content = SI.RetrieveContent()
+    exist_dc = get_obj(content, [vim.Datacenter])
+    for dc in exist_dc:
+        exist_cluster = vct_ops.get_cluster(content)
+        for cluster in exist_cluster:
+            vct_ops.remove_cluster(cluster)
+        cleanup_datacenter(datacenter=dc)
+    
+    if not xmlobject.has_element(deploy_config, 'vcenter.datacenters.datacenter'):
+        return
+
+    for datacenter in xmlobject.safe_list(deploy_config.vcenter.datacenters.datacenter):
+        vc_dc = create_datacenter(dcname=datacenter.name_, service_instance=SI)
+        if xmlobject.has_element(datacenter, 'dswitch'):
+            for dswitch in xmlobject.safe_list(datacenter.dswitch):
+                dvswitch = create_dvswitch(datacenter=vc_dc, name=dswitch.name_)
+                for dportgroup in xmlobject.safe_list(dswitch.dportgroups.dportgroup):
+                    adddvswitch_portgroup(DVSwitch=dvswitch, name=dportgroup.name_, vlanId=dportgroup.vlanId_)
+        for cluster in xmlobject.safe_list(datacenter.clusters.cluster):
+            vc_cl = create_cluster(datacenter=vc_dc, clustername=cluster.name_)
+            for host in xmlobject.safe_list(cluster.hosts.host):
+                managementIp = get_host_from_scenario_file(host.name_, scenario_config, scenario_file, deploy_config)
+                test_lib.check_vcenter_host(managementIp)
+		vc_hs_spec = vim.host.ConnectSpec(hostName=managementIp,
+                                                userName=host.username_,
+                                                password=host.password_,
+                                                sslThumbprint=host.thumbprint_,
+                                                force=False)
+                vc_hs = add_vc_host(cluster=vc_cl, host_spec=vc_hs_spec, asConnected=True)
+                #The ESXi hosts are created from 1 template, so the default local storage shares the
+                #same devicePath for different ESXi host, which will make only 1 host can be added 
+                #into datacenter, here we work around to delete the datastore after host is added.
+                if xmlobject.has_element(host, "iScsiStorage"):
+                    for datastore in vc_hs.datastore:
+                        datastore.Destroy()
+                    target = get_iscsi_nfs_host_from_scenario_file(host.iScsiStorage.target_, scenario_config, scenario_file, deploy_config)
+                    setup_iscsi_device(host=vc_hs, target_ip=target)
+                    time.sleep(10)
+                    if not vc_hs.datastore:
+                        vc_ds = create_datastore(host=vc_hs, dsname=host.iScsiStorage.vmfsdatastore.name_)
+                if xmlobject.has_element(host, "nfsStorage"):
+                    for datastore in vc_hs.datastore:
+                        datastore.Destroy()
+                    target = get_iscsi_nfs_host_from_scenario_file(host.nfsStorage.target_, scenario_config, scenario_file, deploy_config)
+                    vc_ds = create_nfs_datastore(host=vc_hs, remotehost=target, mount_point_path=host.nfsStorage.path_, ds_name=host.nfsStorage.nasdatastore.name_)
+                if xmlobject.has_element(host, "vswitchs"):
+                    for vswitch in xmlobject.safe_list(host.vswitchs.vswitch):
+                        if vswitch.name_ == "vSwitch0":
+                            for port_group in xmlobject.safe_list(vswitch.portgroup):
+                                addvswitch_portgroup(host=vc_hs, vswitch=vswitch.name_, portgroup=port_group.text_, vlanId=port_group.vlanId_)
+                        else:
+                            add_vswitch_to_host(host=vc_hs, vsname=vswitch.name_, hostname=host.ref_)
+                            for port_group in xmlobject.safe_list(vswitch.portgroup):
+                                addvswitch_portgroup(host=vc_hs, vswitch=vswitch.name_, portgroup=port_group.text_, vlanId=port_group.vlanId_)
+                if xmlobject.has_element(host, "dswitchRef"):
+                    add_host_to_dvswitch(host=vc_hs, dvswitch=dvswitch, hostname=host.ref_)
+		for vm in xmlobject.safe_list(host.vms.vm):
+                    resource_pool = vc_cl.resourcePool
+                    vc_vm = create_vm(name=vm.name_,vm_folder=vc_dc.vmFolder,resource_pool=resource_pool,host=vc_hs)
+		    powerOn_vm(vc_vm)
+                    if xmlobject.has_element(vm, "portgroupRef"):
+                        for portgroup1 in xmlobject.safe_list(vm.portgroupRef):
+                            portgroup1_vc = get_obj(content, [vim.Network], name=portgroup1.text_)
+                            add_vm_to_portgroup(vm=vc_vm, portgroup=portgroup1_vc)
+                    if xmlobject.has_element(vm, "dportgroupRef"):
+                        for dportgroup1 in xmlobject.safe_list(vm.dportgroupRef):
+                            dportgroup1_vc = get_obj(content, [vim.dvs.DistributedVirtualPortgroup], name=dportgroup1.text_)
+                            add_vm_to_dvsportgroup(vm=vc_vm, dportgroup=dportgroup1_vc)
+            if xmlobject.has_element(cluster, "templates"):
+	        for template in xmlobject.safe_list(cluster.templates.template):
+                    name = deploy_ova(service_instance=SI,
+                                      datacenter=vc_dc,
+                                      datastore=vc_cl.datastore[0],
+                                      resourcepool=vc_cl.resourcePool,
+                                      path=template.path_)
+                    get_obj(content, [vim.VirtualMachine], name).MarkAsTemplate()
+    test_util.test_logger('[Done] zstack initial vcenter environment was created successfully.')
+

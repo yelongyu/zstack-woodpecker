@@ -72,6 +72,7 @@ woodpecker_root_dir=`git rev-parse --show-toplevel`
 git_version_file=`dirname ${virtualenv_file}`/../woodpecker_version
 if [ -d "${woodpecker_root_dir}/zstackwoodpecker" ]; then
     cd ${woodpecker_root_dir}/zstackwoodpecker &>/dev/null
+    echo -e "$scenario_config" |grep 'esxi' && echo -e "pip install pyVmomi" >> install.sh
     git diff |grep '+++' >/dev/null 2>&1
     if [ $? -eq 0 ]; then
         echo "Woodpecker source is updated, will reinstall zstack-woodpecker... please don't use ctrl-c to terminate installation, until the installation is finished."

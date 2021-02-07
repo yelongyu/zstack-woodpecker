@@ -13,6 +13,7 @@ import zstacktestagent.plugins.vm as vm_plugin
 import zstacktestagent.plugins.host as host_plugin
 import zstacktestagent.testagent as testagent
 import apibinding.inventory as inventory
+import zstacklib.utils.shell as shell
 
 class zstack_vcenter_lbl_checker(checker_header.TestChecker):
     '''check virtual router load balancer listener. '''
@@ -24,13 +25,18 @@ class zstack_vcenter_lbl_checker(checker_header.TestChecker):
     def get_ssh_ip_result(self):
         vm = self.vm_list[0]
         host = test_lib.lib_get_vm_host(vm)
-        vm_command = '/sbin/ip a|grep inet'
         port = self.lbl.get_creation_option().get_load_balancer_port()
-        vm_cmd_result = test_lib.lib_execute_ssh_cmd(self.vip_ip, \
+        iport = self.lbl.get_creation_option().get_instance_port()
+        if iport == 22:
+            vm_command = '/sbin/ip a|grep inet'
+            vm_cmd_result = test_lib.lib_execute_ssh_cmd(self.vip_ip, \
                 test_lib.lib_get_vm_username(vm), \
                 test_lib.lib_get_vm_password(vm), \
                 vm_command,\
                 port = port)
+        if iport == 80:
+            vm_command = 'curl %s:%s' % (self.vip_ip, port)
+            vm_cmd_result = shell.call('%s' % vm_command)
 
         if not vm_cmd_result:
             test_util.test_logger('Checker result: FAIL to execute test ssh command in vip: %s for lb: %s.' % (self.vip_ip, self.lbl_uuid))
@@ -92,8 +98,8 @@ class zstack_vcenter_lbl_checker(checker_header.TestChecker):
         self.vm_list = []
         self.vm_ip_test_dict = {}
 
-        if self.lbl.get_creation_option().get_instance_port() != 22:
-            test_util.test_logger('LBL target port is not 22, skip test.')
+        if self.lbl.get_creation_option().get_instance_port() != 22 and self.lbl.get_creation_option().get_instance_port() != 80:
+            test_util.test_logger('LBL target port is not 22 and 80, skip test.')
             return self.judge(self.exp_result)
 
         for vm_nic_uuid in self.vm_nic_uuids:

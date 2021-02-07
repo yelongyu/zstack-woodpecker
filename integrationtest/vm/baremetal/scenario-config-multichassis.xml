@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-multichassis.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-multichassis.tmpt</scenarioConfigTemplate>
+</testConfig>

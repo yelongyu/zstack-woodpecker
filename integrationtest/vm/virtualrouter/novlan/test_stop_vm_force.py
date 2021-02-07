@@ -24,6 +24,12 @@ def test():
     test_obj_dict.add_vm(vm)
     vm.check()
 
+    vrs = test_lib.lib_find_flat_dhcp_vr_by_vm(vm.vm)
+    if len(vrs) == 1:        
+        cold_threshold = 10
+    else:
+        cold_threshold = 5
+
     test_lib.lib_execute_command_in_vm(vm.get_vm(), 'systemctl stop qemu-guest-agent')
     test_lib.lib_execute_command_in_vm(vm.get_vm(), 'nohup systemd-inhibit sleep 60 >/dev/null 2>/dev/null </dev/null &')
     current_time = time.time()
@@ -38,7 +44,7 @@ def test():
     test_lib.lib_execute_command_in_vm(vm.get_vm(), 'nohup systemd-inhibit sleep 60 >/dev/null 2>/dev/null </dev/null &')
     current_time = time.time()
     vm_ops.stop_vm(vm.get_vm().uuid, force='cold')
-    if time.time()-current_time >= 5:
+    if time.time()-current_time >= cold_threshold:
         test_util.test_fail("VM should shutdown immediately with cold method, while it taks %s seconds" % (time.time()-current_time))
 
     vm.set_state(vm_header.STOPPED)

@@ -1,0 +1,19 @@
+import ./deploy.tmpt
+
+hostName2 = jenkins_nightly_mevoco_3.4.0_IP_RANGE168_1429_baremetal2
+hostIp2 = 10.1.101.41
+hostUsername2 = root
+hostPassword2 = password
+hostPort2 = 22
+
+hostName3 = jenkins_nightly_mevoco_3.4.0_IP_RANGE168_1429_baremetal3
+hostIp3 = 10.1.101.42
+hostUsername3 = root
+hostPassword3 = password
+hostPort3 = 22
+
+hostName4 = jenkins_nightly_mevoco_3.4.0_IP_RANGE168_1429_baremetal4
+hostIp4 = 10.1.101.43
+hostUsername4 = root
+hostPassword4 = password
+hostPort4 = 22

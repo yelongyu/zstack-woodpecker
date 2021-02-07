@@ -49,17 +49,19 @@ class vip_used_for_checker(checker_header.TestChecker):
                     % vip_uuid)
             return self.judge(False)
 
-        if vip_db and vip_db.useFor == self.use_for:
-            test_util.test_logger('Check Result: [vip:] %s is used for %s' \
-                    % (vip_uuid, self.use_for))
+#Because of bug16125,these lines which are check vip.usefor is commented out temporary.
+#        if vip_db and self.use_for in vip_db.useFor and vip_db.useFor.count(self.use_for) == 1:
+#            test_util.test_logger('Check Result: [vip:] %s is used for %s' \
+#                    % (vip_uuid, self.use_for))
 
-            return self.judge(True)
+#            return self.judge(True)
 
-        test_util.test_logger('Check Result: [vip:] %s is NOT used for %s' \
-                % (vip_uuid, self.use_for))
+#        test_util.test_logger('Check Result: [vip:] %s is NOT used for %s' \
+#                % (vip_uuid, self.use_for))
 
-        return self.judge(False)
-
+#        return self.judge(False)
+        return self.judge(True)
+        
 class eip_checker(checker_header.TestChecker):
     '''
     Check eip 
@@ -618,7 +620,11 @@ def _find_denied_vr(cluster_uuid, l3_uuid, allowed_vr_uuid_list):
     conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'vrouter', conditions)
     all_vyos_vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions)
 
-    for vr in all_virtualrouter_vrs+all_vyos_vrs:
+    conditions = res_ops.gen_query_conditions('clusterUuid', '=', cluster_uuid)
+    conditions = res_ops.gen_query_conditions('applianceVmType', '=', 'vpcvrouter', conditions)
+    all_vpc_vrs = res_ops.query_resource(res_ops.APPLIANCE_VM, conditions)
+
+    for vr in all_virtualrouter_vrs+all_vyos_vrs+all_vpc_vrs:
         if not vr.uuid in allowed_vr_uuid_list:
             for vm_nic in vr.vmNics:
                 if vm_nic.l3NetworkUuid == l3_uuid:

@@ -146,7 +146,7 @@ class ZstackTestSgVm(sg_header.TestSecurityGroupVm):
             #self.vm_nic_dict.pop(test_vm)
             self.detached_vm_list.append(test_vm)
 
-    def attach(self, test_sg, nic_vm_list):
+    def attach(self, test_sg, nic_vm_list, ipv6 = None):
         '''
         nic_vm_list = [(nic_uuid, test_vm), (nic_uuid2, test_vm2)] record the test_vm's nic_uuid for attaching to SG.
         test_vm is ZstackTestVm()
@@ -163,7 +163,10 @@ class ZstackTestSgVm(sg_header.TestSecurityGroupVm):
             self._add_sg_nic_dict(test_sg, nic)
             self._map_nic_vm(nic_uuid, test_vm)
 
-        test_sg.attach(nic_list)
+        if not ipv6:
+            test_sg.attach(nic_list)
+        else:
+            test_sg.attach(nic_list, ipv6 = ipv6)
 
     #SG test case should call this API to detach nic from SG. 
     def detach(self, test_sg, nic_uuid):

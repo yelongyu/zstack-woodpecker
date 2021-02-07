@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-vyos-ceph-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-ceph-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

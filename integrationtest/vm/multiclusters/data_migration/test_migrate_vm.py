@@ -15,7 +15,12 @@ data_migration = test_stub.DataMigration()
 
 def test():
     data_migration.create_vm()
+    data_migration.copy_data()
+
     data_migration.migrate_vm()
+    data_migration.check_data()
+    data_migration.check_origin_data_exist()
+    data_migration.clean_up_ps_trash_and_check()
     data_migration.vm.destroy()
     test_util.test_pass('Migrate VM Test Success')
 

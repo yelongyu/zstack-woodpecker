@@ -66,6 +66,9 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
 
+    ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
+    if ps.type == inventory.LOCAL_STORAGE_TYPE:
+        test_util.test_skip('unable to live migrate vm with volumes on local storage, skip test.')
     test_stub.ensure_all_vrs_on_host(host_uuid)
 
     #vm.check()
@@ -87,7 +90,7 @@ def test():
     vm_stop_time = None
     cond = res_ops.gen_query_conditions('name', '=', 'ls_vm_ha_self_start')
     cond = res_ops.gen_query_conditions('uuid', '=', vm.vm.uuid, cond)
-    for i in range(0, 240):
+    for i in range(0, 300):
         vm_stop_time = i
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Stopped":
             test_stub.start_host(test_host, test_lib.all_scenario_config)
@@ -95,13 +98,13 @@ def test():
             break
         time.sleep(1)
     if vm_stop_time is None:
-        vm_stop_time = 240    
-    for i in range(vm_stop_time, 240):
+        vm_stop_time = 300    
+    for i in range(vm_stop_time, 300):
         if res_ops.query_resource(res_ops.VM_INSTANCE, cond)[0].state == "Starting":
             break
         time.sleep(1)
     else:
-        test_util.test_fail("vm has not been changed to running as expected within 180s.")
+        test_util.test_fail("vm has not been changed to running as expected within 300s.")
 
 
     vm.destroy()

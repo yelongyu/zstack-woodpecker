@@ -50,6 +50,8 @@ def test():
             break 
 
     vrs = test_lib.lib_find_vr_by_l3_uuid(vr_l3_uuid)
+    if len(vrs) < 1:
+        test_util.test_skip('VR is required for testing')
     public_l3 = test_lib.lib_find_vr_pub_nic(vrs[0]).l3NetworkUuid
 
     vm_create_option = test_util.VmOption()

@@ -129,16 +129,17 @@ def get_host_by_consul_leader(scenarioConfig, scenarioFile):
     if len(mn_host_list) < 1:
         return []
     host_list = []
-    for host in mn_host_list:
-        host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
-        cmd = "consul info |grep -i leader_addr | awk '{print $3}' | awk -F ':' '{print $1}'"
-        try:
+    for i in range(5):
+        for host in mn_host_list:
+            host_config = sce_ops.get_scenario_config_vm(host.name_, scenarioConfig)
+            cmd = "consul info |grep -i leader_addr | awk '{print $3}' | awk -F ':' '{print $1}'"
             host_ip = test_lib.lib_execute_ssh_cmd(host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
-        except:
-            test_util.test_logger("@@@host.ip_: %s exception when execute consul info" %(host.ip_))
-            continue
-        if host_ip != "" and host_ip != False and host_ip.count('.') == 3:
-            return host_ip.strip()
+            if host_ip != "" and host_ip != False and host_ip.count('.') == 3:
+                return host_ip.strip()
+            else:
+                test_util.test_logger("@@@host.ip_: %s exception when execute consul info" %(host.ip_))
+        time.sleep(1)
+
     return ""
 
 def get_host_by_mn_vm_consul(scenarioConfig, scenarioFile):
@@ -228,6 +229,7 @@ def get_host_by_mn_vm(scenarioConfig, scenarioFile):
         except Exception, e:
             test_util.test_logger("@@get host exception@@:%s" %(str(e)))
             continue
+
     test_util.test_logger("@@DEBUG@@: host_list=<%s>" %(str(host_list)))
     return host_list
 
@@ -253,16 +255,35 @@ def get_mn_host(scenarioConfig, scenarioFile):
     test_util.test_logger("@@DEBUG@@: %s" %(str(mn_host_list)))
     return mn_host_list
 
+def get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, index):
+    test_util.test_logger("@@DEBUG@@:<scenarioConfig:%s><scenarioFile:%s><scenarioFile is existed: %s>" \
+                          %(str(scenarioConfig), str(scenarioFile), str(os.path.exists(scenarioFile))))
+    if scenarioConfig == None or scenarioFile == None or not os.path.exists(scenarioFile):
+        return mn_host_list
+
+    test_util.test_logger("@@DEBUG@@: after config file exist check")
+    with open(scenarioFile, 'r') as fd:
+        xmlstr = fd.read()
+        fd.close()
+        scenario_file = xmlobject.loads(xmlstr)
+        return xmlobject.safe_list(scenario_file.vms.vm)[index]
+
 def migrate_mn_vm(origin_host, target_host, scenarioConfig):
+
+    host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
+    set_migration_speed_cmd = "virsh migrate-setspeed 'ZStack Management Node VM' 50"
+    if not test_lib.lib_execute_ssh_cmd(origin_host.managementIp_, host_config.imageUsername_, host_config.imagePassword_, set_migration_speed_cmd, 30):
+        test_util.test_fail("failed to set speed on original host:<%s>" %(origin_host.managementIp_))
+
     if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-pub.xml"]) or \
        test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-pub.xml"]):
         cmd = 'zsha migrate %s' % (target_host.managementIp_)
-        host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
-        test_lib.lib_execute_ssh_cmd(origin_host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+        if not test_lib.lib_execute_ssh_cmd(origin_host.managementIp_, host_config.imageUsername_, host_config.imagePassword_,cmd, 360):
+            test_util.test_fail("failed to run %s, maybe timeout refer to before log." %(cmd))
     else:
         cmd = 'zsha migrate %s' % (target_host.ip_)
-        host_config = sce_ops.get_scenario_config_vm(origin_host.name_, scenarioConfig)
-        test_lib.lib_execute_ssh_cmd(origin_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd)
+        if not test_lib.lib_execute_ssh_cmd(origin_host.ip_, host_config.imageUsername_, host_config.imagePassword_,cmd, 360):
+            test_util.test_fail("failed to run %s, maybe timeout refer to before log." %(cmd))
 
 
 def upgrade_zsha(scenarioConfig, scenarioFile):
@@ -309,45 +330,102 @@ def pick_randomized_ip(prefix="192.168.254."):
     combined_ip = prefix + str(var)
     return combined_ip
 
+def get_ceph_mon_addr(ceph_mon_ip):
+    cmd = r"ceph mon stat|grep -o '\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}:6789'"
+    ret, output, stderr = ssh.execute(cmd, ceph_mon_ip, "root", "password", False, 22)
+    return r"\"MonAddrs\": " + str(output.strip('\n').split('\n')) + ','
+
 def prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
     if len(mn_host_list) < 1:
         return False
-    l2network_name = os.environ.get('l2PublicNetworkName')
+    #l2network_name = os.environ.get('l2PublicNetworkName')
     #nic_name = os.environ.get('nodeNic').replace("eth", "zsn")
-    mn_ip = os.environ.get('zstackHaVip')
-    mn_netmask = os.environ.get('nodeNetMask')
-    mn_gateway = os.environ.get('nodeGateway')
     for i in range(len(mn_host_list)):
-        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-man.xml"]) or \
+        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
+            os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].storageIp_,config_json))
+        elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml"], ["scenario-config-nfs-sep-man.xml"]) or \
+                         test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nonmon-ceph.xml"], ["scenario-config-storage-separate-ceph.xml"]) or \
                          test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-ceph-3-nets-sep.xml"], ["scenario-config-ceph-sep-man.xml"]):
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].ip_,config_json))
         else:
             os.system('sed -i s/host-%d/%s/g %s' % (i+1, mn_host_list[i].managementIp_,config_json))
 
     os.system('sed -i s/nic/%s/g %s' % ("zsn", config_json))
-    os.system('sed -i s/mn_ip/%s/g %s' % (mn_ip,config_json))
-    os.system('sed -i s/mn_netmask/%s/g %s' % (mn_netmask,config_json))
-    os.system('sed -i s/mn_gateway/%s/g %s' % (mn_gateway,config_json))
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+        host_ips = sce_ops.dump_scenario_file_ips(scenarioFile)
+        mn_ip = ""
+        mn_gateway = ""
+        mn_netmask = ""
+        for host_ip in host_ips:
+            cmd = "hostname"
+            ret, hostname, stderr = ssh.execute(cmd, host_ip, "root", "password", True, 22)
+            host_ip_new_lst = host_ip.split('.')
+            host_ip_new_lst[3] = '200'
+            mn_ip_new = '.'.join(host_ip_new_lst)
+            mn_ip = mn_ip + mn_ip_new + '@' + hostname + ', '
+            host_ip_new_lst[3] = '1'
+            mn_gateway_new = '.'.join(host_ip_new_lst)
+            mn_gateway = mn_gateway + mn_gateway_new + '@' + hostname + ', '
+            mn_netmask_new = "255.255.255.0"
+            mn_netmask = mn_netmask + mn_netmask_new + '@' + hostname + ', '
+        mn_ip = mn_ip.strip().strip(',').replace('\n', '')
+        mn_netmask = mn_netmask.strip().strip(',').replace('\n', '')
+        mn_gateway = mn_gateway.strip().strip(',').replace('\n', '')
+        test_util.test_logger("mn_ip=:%s:; mn_netmask=:%s:; mn_gateway=:%s:" %(mn_ip, mn_netmask, mn_gateway))
+        os.system('sed -i "s/mn_ip/%s/g" %s' % (mn_ip,config_json))
+        os.system('sed -i "s/mn_netmask/%s/g" %s' % (mn_netmask,config_json))
+        os.system('sed -i "s/mn_gateway/%s/g" %s' % (mn_gateway,config_json))
+    else:
+        mn_ip = os.environ.get('zstackHaVip')
+        mn_netmask = os.environ.get('nodeNetMask')
+        mn_gateway = os.environ.get('nodeGateway')
+        os.system('sed -i "s/mn_ip/%s/g" %s' % (mn_ip,config_json))
+        os.system('sed -i "s/mn_netmask/%s/g" %s' % (mn_netmask,config_json))
+        os.system('sed -i "s/mn_gateway/%s/g" %s' % (mn_gateway,config_json))
+
     mn_ha_storage_type = sce_ops.get_mn_ha_storage_type(scenarioConfig, scenarioFile, deploy_config)
     if mn_ha_storage_type == 'ceph':
         os.system('sed -i s/FileConf/CephConf/g %s' % (config_json))
-
-    if mn_ha_storage_type == 'nfs':
+    elif mn_ha_storage_type == 'fusionstor':
+        os.system('sed -i s/FileConf/FstrConf/g %s' % (config_json))
+    elif mn_ha_storage_type == 'nfs':
         #stor_vm_ip = "10.0.0.2"
-        stor_vm_ip = adapt_pick_ip_not_used_in_scenario_file(scenarioFile)
+        #stor_vm_ip = adapt_pick_ip_not_used_in_scenario_file(scenarioFile)
+        stor_vm_ip = os.environ.get('zstackHaVip3')
         stor_vm_netmask = os.environ.get('storNetMask')
         stor_vm_gateway = os.environ.get('storGateway')
         os.system('sed -i s/stor_ip1/%s/g %s' % (stor_vm_ip,config_json))
         os.system('sed -i s/stor_netmask1/%s/g %s' % (stor_vm_netmask,config_json))
         os.system('sed -i s/stor_gateway1/%s/g %s' % (stor_vm_gateway,config_json))
 
-    man_vm_ip = pick_randomized_ip()
+    #man_vm_ip = pick_randomized_ip()
+    man_vm_ip = os.environ.get('zstackHaVip2')
     man_vm_netmask = os.environ.get('manNetMask')
     man_vm_gateway = os.environ.get('manGateway')
     os.system('sed -i s/man_ip1/%s/g %s' % (man_vm_ip,config_json))
     os.system('sed -i s/man_netmask1/%s/g %s' % (man_vm_netmask,config_json))
     os.system('sed -i s/man_gateway1/%s/g %s' % (man_vm_gateway,config_json))
+
+    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-fusionstor-3-nets-sep.xml"], ["scenario-config-fusionstor-3-nets-sep.xml"]):
+        #stor_vm_ip = adapt_pick_ip_not_used_in_scenario_file(scenarioFile)
+        stor_vm_ip = os.environ.get('zstackHaVip3')
+        stor_vm_netmask = os.environ.get('storNetMask')
+        stor_vm_gateway = os.environ.get('storGateway')
+        os.system('sed -i s/stor_ip1/%s/g %s' % (stor_vm_ip,config_json))
+        os.system('sed -i s/stor_netmask1/%s/g %s' % (stor_vm_netmask,config_json))
+        os.system('sed -i s/stor_gateway1/%s/g %s' % (stor_vm_gateway,config_json))
+    elif test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nonmon-ceph.xml"], ["scenario-config-storage-separate-ceph.xml"]):
+        ceph_mon_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_
+        os.system("sed -i '/MonAddrs/d' %s" % (config_json))
+        os.system("sed -i /Type/a\ \"%s\" %s" % (get_ceph_mon_addr(ceph_mon_ip).replace("'", '\\\"'), config_json))
+        os.system("sed -i 's:\"MonAddrs:  \"MonAddrs:g' %s" % (config_json))
+        stor_vm_ip = os.environ.get('zstackHaVip3')
+        stor_vm_netmask = os.environ.get('storNetMask')
+        stor_vm_gateway = os.environ.get('storGateway')
+        os.system('sed -i s/stor_ip1/%s/g %s' % (stor_vm_ip,config_json))
+        os.system('sed -i s/stor_netmask1/%s/g %s' % (stor_vm_netmask,config_json))
+        os.system('sed -i s/stor_gateway1/%s/g %s' % (stor_vm_gateway,config_json))
 
 def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
     mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
@@ -365,7 +443,9 @@ def prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json):
 def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, deploy_tool, mn_img):
     prepare_config_json(scenarioConfig, scenarioFile, deploy_config, config_json)
     mn_ha_storage_type = sce_ops.get_mn_ha_storage_type(scenarioConfig, scenarioFile, deploy_config)
-    if mn_ha_storage_type == 'ceph':
+    if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nonmon-ceph.xml"], ["scenario-config-storage-separate-ceph.xml"]):
+        pass
+    elif mn_ha_storage_type == 'ceph':
         os.system('sed -i s/node/ceph-/g %s' %(config_json))
     test_host = get_mn_host(scenarioConfig,scenarioFile)[0]
     test_host_ip = test_host.ip_
@@ -384,23 +464,125 @@ def deploy_ha_env(scenarioConfig, scenarioFile, deploy_config, config_json, depl
 
     if mn_ha_storage_type == 'ceph':
 
+        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-nonmon-ceph.xml"], ["scenario-config-storage-separate-ceph.xml"]):
+            ceph_node_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, 0).ip_ 
+            mn_image_path = "/home/%s/mn.qcow2" % ceph_node_ip
+            ssh.scp_file(mn_img, mn_image_path, ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
+            woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
+            qemu_kvm_repo_path = "/home/%s/qemu-kvm-ev.repo" % woodpecker_vm_ip
+            ssh.scp_file(qemu_kvm_repo_path, "/etc/yum.repos.d/qemu-kvm-ev.repo", ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
+            cmd0="yum install -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev qemu-img"
+            test_util.test_logger("[%s] %s" % (ceph_node_ip, cmd0))
+            ssh.execute(cmd0, ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+            os.system("sshpass -p %s scp -r %s@%s:/etc/ceph /tmp/" %(test_host_config.imagePassword_, test_host_config.imageUsername_, ceph_node_ip))
+            for i in xrange(1,4,1):
+                mn_node_ip = get_host_by_index_in_scenario_file(scenarioConfig, scenarioFile, i).ip_ 
+                cmd0="yum repolist all|grep ceph-hammer"
+                ret, stdout, stderr = ssh.execute(cmd0, mn_node_ip, "root", "password", False, 22)
+                test_util.test_logger("ret=%s" % (ret))
+                if str(ret) == "0":
+                    yum_cmd = "yum --disablerepo=* --enablerepo=zstack-local,ceph-hammer -y install ceph >/dev/null 2>&1"
+                else:
+                    yum_cmd = "yum --disablerepo=* --enablerepo=zstack-local,ceph -y install ceph >/dev/null 2>&1"
+
+                test_util.test_logger("[%s] %s" % (mn_node_ip, yum_cmd))
+                ssh.execute(yum_cmd, mn_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+                os.system("sshpass -p %s scp -r /tmp/ceph %s@%s:/etc/" %(test_host_config.imagePassword_, test_host_config.imageUsername_, mn_node_ip))
+        else:
+            ceph_node_ip = test_host_ip
+
         cmd1="ceph osd pool create zstack 128"
-        test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
-        ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        test_util.test_logger("[%s] %s" % (ceph_node_ip, cmd1))
+        ssh.execute(cmd1, ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
         cmd2="qemu-img convert -f qcow2 -O raw %s rbd:zstack/mnvm.img" % mn_image_path
-        test_util.test_logger("[%s] %s" % (test_host_ip, cmd2))
-        ssh.execute(cmd2, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        test_util.test_logger("[%s] %s" % (ceph_node_ip, cmd2))
+        if test_lib.lib_execute_ssh_cmd(ceph_node_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, cmd2, timeout=7200 ) == False:
+            test_util.test_fail("fail to run cmd: %s on %s" %(cmd2, ceph_node_ip))
 
     elif mn_ha_storage_type == 'nfs':
         prepare_etc_hosts(scenarioConfig, scenarioFile, deploy_config, config_json)
-        cmd1 = "cp %s /storage/mnvm.img" % (mn_image_path)
+        #cmd1 = "cp %s /storage/mnvm.img" % (mn_image_path)
+        #test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
+        #ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml", "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
+                                                 ["scenario-config-nfs-sep-pub.xml"]):
+            nfs_url = sce_ops.get_mn_ha_nfs_url(scenarioConfig, scenarioFile, deploy_config, False)
+        else:
+            nfs_url = sce_ops.get_mn_ha_nfs_url(scenarioConfig, scenarioFile, deploy_config)
+
+        nfsIP = nfs_url.split(':')[0]
+        nfsPath = nfs_url.split(':')[1]
+
+        qcow2_nfs_path = "%s/mnvm.qcow2" %(nfsPath)
+        raw_nfs_path = "%s/mnvm.img" %(nfsPath)
+        #mn_image_nfs_server_path = "/home/%s/mn.qcow2" % nfsIP
+        woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
+        #mn_image_nfs_server_path = "/home/%s/mn.qcow2" % test_host_ip
+        mn_image_nfs_server_path = "/home/%s/mn.qcow2" % woodpecker_vm_ip
+        test_util.test_logger("scp from %s to %s:%s" % (mn_image_nfs_server_path, nfsIP, qcow2_nfs_path))
+        ssh.scp_file(mn_image_nfs_server_path, qcow2_nfs_path, nfsIP, test_host_config.imageUsername_, test_host_config.imagePassword_)
+
+        if test_lib.lib_cur_cfg_is_a_and_b(["test-config-vyos-flat-dhcp-nfs-sep-pub-man.xml", "test-config-vyos-flat-dhcp-nfs-mul-net-pubs.xml"], \
+                                                 ["scenario-config-nfs-sep-pub.xml"]):
+            cmd1 = "mv /storage/mnvm.qcow2 /storage/mnvm.img"
+            test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
+            ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        else:
+            woodpecker_vm_ip = shell.call("ip r | grep src | head -1 | awk '{print $NF}'").strip()
+            qemu_kvm_repo_path = "/home/%s/qemu-kvm-ev.repo" % woodpecker_vm_ip
+            ssh.scp_file(qemu_kvm_repo_path, "/etc/yum.repos.d/qemu-kvm-ev.repo", test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_)
+            cmd1="yum install -y --disablerepo=* --enablerepo=zstack-local,qemu-kvm-ev qemu-img"
+
+            #cmd1 = r"yum install -y qemu-img --disablerepo=* --enablerepo=zstack-local"
+            test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
+            ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+
+            #cmd1 = "qemu-img convert -p -f qcow2 -O raw %s %s" % (qcow2_nfs_path, raw_nfs_path)
+            #test_util.test_logger("[%s] %s" % (nfsIP, cmd1))
+            #ssh.execute(cmd1, nfsIP, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+            cmd1 = "qemu-img convert -p -f qcow2 -O raw /storage/mnvm.qcow2 /storage/mnvm.img"
+            test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
+            ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+
+    elif mn_ha_storage_type == 'fusionstor':
+        cmd1 = "lichbd pool create zstack -p nbd"
         test_util.test_logger("[%s] %s" % (test_host_ip, cmd1))
         ssh.execute(cmd1, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        cmd2 = "lichbd vol import %s zstack/mnvm.img -p nbd" %(mn_image_path)
+        test_util.test_logger("[%s] %s" % (test_host_ip, cmd2))
+        ssh.execute(cmd2, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+        cmd3 = "lich.inspect --localize /default/zstack/mnvm.img 0"
+        test_util.test_logger("[%s] %s" % (test_host_ip, cmd3))
+        ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
 
     cmd3='%s install -p %s -c %s' % (installer_path, host_password, config_path)
     test_util.test_logger("[%s] %s" % (test_host_ip, cmd3))
-    ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+
+    #ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, True, 22)
+
+    ret, output, stderr = ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, False, 22)
+    test_util.test_logger("cmd=%s; ret=%s; output=%s; stderr=%s" %(cmd3, ret, output, stderr))
+
+    if str(ret)=="0":
+        return
+
+    allow_retry_times = 5
+    while allow_retry_times > 0 and "please retry or check log" in output:
+        time.sleep(5)
+        ret, output, stderr = ssh.execute(cmd3, test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, False, 22)
+        if ret==0:
+            test_util.test_logger("zsha install successfully, jump out retry.")
+            return
+        else:
+            test_util.test_logger("retry_times=%s; cmd=%s; ret=%s; output=%s; stderr=%s" %(allow_retry_times, cmd3, ret, output, stderr))
+        allow_retry_times = allow_retry_times - 1
+
+    if str(ret)!="0":
+        test_util.test_fail("fail to run cmd: %s on %s" %(cmd3, test_host_ip))
+
+    #if test_lib.lib_execute_ssh_cmd(test_host_ip, test_host_config.imageUsername_, test_host_config.imagePassword_, cmd3, timeout=3600 ) == False:
+    #    test_util.test_fail("fail to run cmd: %s on %s" %(cmd3, test_host_ip))
 
 
 l2network_nic = None
@@ -567,7 +749,7 @@ def ensure_bss_host_connected_from_stop(scenarioFile, scenarioConfig, deploy_con
             bss_host_ip.append(bs.hostname)
 
         for bs_host_ip in bss_host_ip:
-            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 300):
                 bss_host_ip.remove(bs_host_ip)
 
         mn_host_list = get_mn_host(scenarioConfig, scenarioFile)
@@ -577,7 +759,7 @@ def ensure_bss_host_connected_from_stop(scenarioFile, scenarioConfig, deploy_con
                     recover_host(mn_host, scenarioConfig, deploy_config)
 
         for bs_host_ip in bss_host_ip:
-            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 300):
                 bss_host_ip.remove(bs_host_ip)
 
         if bss_host_ip:
@@ -597,7 +779,7 @@ def ensure_bss_host_connected_from_sep_net_down(scenarioFile, scenarioConfig, do
             bss_host_ip.append(bs.hostname)
 
         for bs_host_ip in bss_host_ip:
-            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 300):
                 bss_host_ip.remove(bs_host_ip)
 
         if downMagt:
@@ -612,7 +794,7 @@ def ensure_bss_host_connected_from_sep_net_down(scenarioFile, scenarioConfig, do
                     reopen_host_network(mn_host, scenarioConfig, param_l2_nic=l2network_nic)
 
         for bs_host_ip in bss_host_ip:
-            if test_lib.lib_wait_target_up(bs_host_ip, '22', 120):
+            if test_lib.lib_wait_target_up(bs_host_ip, '22', 300):
                 bss_host_ip.remove(bs_host_ip)
 
         if bss_host_ip:
@@ -711,3 +893,104 @@ def sce_is_sep_man():
             return True
     else:
         return False
+
+
+def auto_set_mn_ip(scenario_file):
+    import re
+    host_ip_lst = sce_ops.dump_scenario_file_ips(scenario_file)
+    host_ip = host_ip_lst[0]
+    for i in range(60):
+        time.sleep(10)
+        #cmd = "zsha status|head -n 2|tail -n 1|cut -d: -f1"
+        cmd = "zsha status|head -n 5|grep -v stale|grep running|tail -n 1|cut -d: -f1"
+        test_util.test_logger("@@@DEBUG->cmd=<%s>;host_ip=<%s>" %(cmd, host_ip))
+        ret, mn_host_ip, stderr = ssh.execute(cmd, host_ip, "root", "password", False, 22) 
+        if re.match(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", mn_host_ip):
+            test_util.test_logger("find mn_host_ip=%s" %(mn_host_ip))
+            break
+    else:
+        test_util.test_fail("not find valid mn_host_ip within 300s")
+
+    mn_host_ip_lst = mn_host_ip.split('.')
+    mn_host_ip_lst[3] = '200'
+    mn_ip = '.'.join(mn_host_ip_lst)
+    os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'] = mn_ip
+    os.environ['zstackHaVip'] = mn_ip
+    test_util.test_logger("@@@DEBUG->in auto_set_mn_ip@@@ os\.environ\[\'ZSTACK_BUILT_IN_HTTP_SERVER_IP\'\]=%s; os\.environ\[\'zstackHaVip\'\]=%s"	\
+                          %(os.environ['ZSTACK_BUILT_IN_HTTP_SERVER_IP'], os.environ['zstackHaVip']) )
+    cmd = 'sed -i "s/zstackHaVip = .*$/zstackHaVip = %s/g" /root/.zstackwoodpecker/integrationtest/vm/mn_ha/deploy.tmpt' %(mn_ip)
+    test_util.test_logger("@@@DEBUG->replace zstackHaVip @@@: %s" %cmd)
+    os.system(cmd)
+    
+
+
+def restart_mn_node_with_long_timeout():
+
+    mn_ip = os.environ['zstackHaVip']
+
+    test_lib.lib_wait_target_up(mn_ip, '22', 120)
+
+    cmd = "zstack-ctl status|grep 'MN status'|awk '{print $3}'"
+    ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", False, 22)
+
+    if stdout.strip().strip('\n').lower() != "running":
+
+        check_mn_tool_path = "%s/%s" %(os.environ.get('woodpecker_root_path'), '/tools/check_mn_start.sh')
+        test_util.test_logger("check_mn_tool_path:[%s],mn_ip:[%s]" %(check_mn_tool_path, mn_ip))
+        ssh.scp_file(check_mn_tool_path, "/home/check_mn_start.sh", mn_ip, "root", "password")
+
+        cmd = "bash /home/check_mn_start.sh"
+        ret1, stdout1, stderr1 = ssh.execute(cmd, mn_ip, "root", "password", False, 22)
+        test_util.test_logger("check_mn_start.sh stdout1:[%s],stderr1:[%s]" %(stdout1,stderr1))
+
+        if str(ret1) == "0" :
+            cmd = "zstack-ctl stop"
+            ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+            cmd = "zstack-ctl configure ThreadFacade.maxThreadNum=200"
+            ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+            cmd = "zstack-ctl start_node --timeout 3000"
+            ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+            cmd = "zstack-ctl start_ui"
+            ret, stdout, stderr = ssh.execute(cmd, mn_ip, "root", "password", True, 22)
+
+            #modify zstack start script
+            cmd = r'sed -i "s:zstack-ctl start:zstack-ctl start_node --timeout 3000:g" /etc/init.d/zstack-server'
+            test_lib.lib_execute_ssh_cmd(mn_ip, "root", "password", cmd)
+            time.sleep(1)
+            cmd = r'sed -i "/zstack-ctl start_node --timeout 3000/ a\    ZSTACK_HOME=\$zstack_app zstack-ctl start_ui" /etc/init.d/zstack-server'
+            test_lib.lib_execute_ssh_cmd(mn_ip, "root", "password", cmd)
+
+        else:
+            test_util.test_logger("find mn not self-started as expected, checked by /home/check_mn_start.sh")
+
+    else:
+        test_util.test_logger("find zstack MN is running.")
+        
+
+def wrapper_of_wait_for_management_server_start(wait_start_timeout, EXTRA_SUITE_SETUP_SCRIPT=None):
+    import zstackwoodpecker.operations.node_operations as node_operations
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+        test_util.test_logger("@@@DEBUG->IS VPC CEPH@@@")
+        if os.environ.get('zstackHaVip'):
+            old_mn_ip = os.environ['zstackHaVip']
+        auto_set_mn_ip(test_lib.scenario_file)
+        if EXTRA_SUITE_SETUP_SCRIPT and EXTRA_SUITE_SETUP_SCRIPT != "":
+            cmd = 'sed -i "s/%s/%s/g" %s' %(old_mn_ip, os.environ['zstackHaVip'], EXTRA_SUITE_SETUP_SCRIPT)
+            test_util.test_logger("@@@DEBUG-> run cmd: %s @@@ " %(cmd))
+            os.system(cmd)
+
+    try:
+        node_operations.wait_for_management_server_start(wait_start_timeout)
+    except:
+        restart_mn_node_with_long_timeout()
+
+
+
+def return_pass_ahead_if_3sites(msg):
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+        test_util.test_pass(msg)
+
+
+def return_skip_ahead_if_3sites(msg):
+    if os.path.basename(os.environ.get('WOODPECKER_SCENARIO_CONFIG_FILE')).strip() == "scenario-config-vpc-ceph-3-sites.xml":
+        test_util.test_skip(msg)

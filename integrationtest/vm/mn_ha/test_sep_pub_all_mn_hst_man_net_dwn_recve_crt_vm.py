@@ -71,16 +71,15 @@ def test():
     elif len(new_mn_host) > 1:
         test_util.test_fail("management node VM runs on more than one host after its former host down")
 
-    try:
-        node_ops.wait_for_management_server_start(300)
-    except:
-        test_util.test_fail("management node does not recover after MN VM is running")
+    #node_ops.wait_for_management_server_start(300)
+    test_stub.wrapper_of_wait_for_management_server_start(600)
 
     test_stub.ensure_hosts_connected(exclude_host=[mn_host_list[need_recover_mn_host_list[0]]])
     test_stub.ensure_bss_host_connected_from_sep_net_down(test_lib.scenario_file, test_lib.all_scenario_config, downMagt=True)
     test_stub.ensure_bss_connected()
     test_stub.ensure_pss_connected()
 
+    test_stub.return_pass_ahead_if_3sites("TEST PASS")
     vm = test_stub.create_basic_vm()
 
     vm.check()

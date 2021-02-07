@@ -1,0 +1,12 @@
+import ./deploy.tmpt
+import ./deploy-1-mini-cluster.tmpt
+
+miniPrimaryStorageName = PS-1
+miniBackupStorageName = BS-1
+zoneName = Zone-1
+l2Vlan21 = 1121
+imageStoreBackupStorageName2 = mini-imagestore
+hostPort = 22
+instanceOfferingMemory_l = 2G
+instanceOfferingCpuNum_l = 2
+imageUrl_vdbench = http://172.20.1.28/mirror/diskimages/centos_vdbench.qcow2

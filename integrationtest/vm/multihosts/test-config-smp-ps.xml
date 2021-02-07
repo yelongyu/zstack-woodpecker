@@ -1,5 +1,0 @@
-<testConfig>
-    <deployConfig>deploy-smp-ps.xml</deployConfig>
-    <deployConfigTemplate>deploy-smp-ps.tmpt</deployConfigTemplate>
-    <pingTestTarget>zstack.org</pingTestTarget>
-</testConfig>

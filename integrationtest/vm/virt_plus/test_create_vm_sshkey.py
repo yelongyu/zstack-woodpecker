@@ -27,10 +27,11 @@ def test():
     vm = test_stub.create_vm(image_name = os.environ.get('sshkeyImageName'), system_tags = ["%s::%s" % (vm_header.SSHKEY, os.environ.get('sshkeyPubKey'))], instance_offering_uuid = instance_offering_uuid)
     test_obj_dict.add_vm(vm)
     vm_ip = vm.get_vm().vmNics[0].ip
-    time.sleep(60)
-    
+    test_lib.lib_wait_target_up(vm_ip, '22', 240)
+    time.sleep(10)
+   
     for i in range(5):
-        ssh_cmd = 'ssh -i %s -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s echo pass' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
+        ssh_cmd = 'timeout 5 ssh -i %s -oPasswordAuthentication=no -oStrictHostKeyChecking=no -oCheckHostIP=no -oUserKnownHostsFile=/dev/null %s echo pass' % (os.environ.get('sshkeyPriKey_file'), vm_ip)
         process_result = test_stub.execute_shell_in_process(ssh_cmd, tmp_file)
         if process_result == 0:
             break

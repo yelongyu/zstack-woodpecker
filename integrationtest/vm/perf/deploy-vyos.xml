@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<!--basicConfig will set basic test environment, include where is zstack.war, apatch path, puppetmaster namet etc.-->
+<basicConfig>
+  <!-- The following configurations are path in test machine. 
+       Even if the ZStack server is not running in test machine,
+       the catalina path and zstack.war should be firstly put in test machine.
+  -->
+  <zstackPkg>$zstackPkg</zstackPkg>
+  <zstackInstallScript>$zstackInstallScript</zstackInstallScript>
+  <zstackInstallPath>$zstackInstallPath</zstackInstallPath>
+  <zstackProperties>$zstackPropertiesPath</zstackProperties>
+  <testAgent>$zstackTestAgentPkgPath</testAgent>
+  <db>
+    <!-- Database server IP address or hostname -->
+    <server>$DBServer</server>
+    <username>$DBUserName</username>
+    <server_root_password>$hostPassword</server_root_password>
+    <!-- <password>$DBPassword</password>
+    <port>$DBPort</port> -->
+  </db>
+  <rabbitmq>
+      <server>$rabbitmqServerIp</server>
+      <password>$hostPassword</password>
+  </rabbitmq>
+</basicConfig>
+
+<!--deployConfig define the zstack test infraastructure, including computer resource, network infrastructure etc.  -->
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+    <nodes description="Woodpecker will send zstack command to the 1st node. 
+        multi nodes support real hosts or docker (if providing dockerImage and 
+        it is found in `docker images`). "> 
+      <node name="$node1Name" ip="$node1Ip"
+        username="$nodeUserName" password="$nodePassword"
+        description="The default node 1. It could be same as test machine."/>
+    <!-- multi node setting
+    <nodes description="Testing machine is default node 1. multi nodes support 
+        real hosts or docker(if providing dockerImage and it is found in 
+        `docker images`).">
+        <node name="$node2Name" dockerImage="$node2DockerImage" ip="$node2Ip" 
+            username="$nodeUserName"  password="$nodePassword"
+            description="multi nodes have same catalinaHome as node 1"/>
+        <node name="$node3Name" dockerImage="$node3DockerImage" ip="$node3Ip" 
+            username="$nodeUserName"  password="$nodePassword"
+            description="multi nodes have same catalinaHome as node 1" />
+    -->
+    </nodes> 
+
+    <instanceOfferings>
+        <instanceOffering name="$instanceOfferingName_s"
+            description="Test" 
+            memoryCapacity="$instanceOfferingMemory_s" 
+            cpuNum="$instanceOfferingCpuNum_s"
+            cpuSpeed="$instanceOfferingCpuSpeed_s" />
+        <virtualRouterOffering name="$virtualRouterOfferingName_s"
+            memoryCapacity="$virtualRouterOfferingMemory_s" cpuSpeed="$virtualRouterOfferingCpuSpeed_s" cpuNum="$virtualRouterOfferingCpuNum_s" isDefault="true">
+            <zoneRef>$zoneName</zoneRef>
+            <!--<managementL3NetworkRef>$l3ManagementNetworkName</managementL3NetworkRef>-->
+            <managementL3NetworkRef>$l3PublicNetworkName</managementL3NetworkRef>
+            <publicL3NetworkRef>$l3PublicNetworkName</publicL3NetworkRef>
+            <imageRef>$virtualRouterImageName</imageRef>
+        </virtualRouterOffering>      
+    </instanceOfferings>
+
+    <backupStorages>
+        <cephBackupStorage name="$cephBackupStorageName"
+            description="Test" 
+            monUrls="$cephBackupStorageMonUrls" 
+            poolName="$cephBackupStoragePoolName"
+        />
+    </backupStorages>
+
+    <images>
+        <image name="$imageName_s" 
+          description="Small Test Image Template" 
+          mediaType="$rootMediaType" format="$rootImageFormat"
+          url="$imageUrl_s" 
+          username="$imageUsername" password="$imagePassword">
+          <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        </image>
+        <image name="$imageName_net" 
+          description="Test Image Template for network test" 
+          mediaType="$rootMediaType" format="$rootImageFormat"
+          url="$imageUrl_net" 
+          username="$imageUsername" password="$imagePassword">
+          <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        </image>
+        <image name="$virtualRouterImageName"
+          description="virtual router image"
+          mediaType="$rootMediaType" format="$rootImageFormat"
+          username="$vrImageUsername" password="$vrImagePassword"
+          url="$virtualRouterImageUrl" system="True">
+          <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+        </image> 
+    </images>
+
+    <diskOfferings>
+        <diskOffering name="$largeDiskOfferingName" 
+            description="large Disk Offering" 
+            diskSize="$largeDiskOfferingSize" />
+
+        <diskOffering name="$mediumDiskOfferingName" 
+            description="Medium Disk Offering" 
+            diskSize="$mediumDiskOfferingSize" />
+
+        <diskOffering name="$smallDiskOfferingName" 
+            description="Small Disk Offering" 
+            diskSize="$smallDiskOfferingSize" /> 
+    </diskOfferings>
+
+    <zones>
+        <zone name="$zoneName" description="Test">
+          <backupStorageRef>$cephBackupStorageName</backupStorageRef>
+            <primaryStorages>
+              <cephPrimaryStorage name="$cephPrimaryStorageName"
+                  description="Test Ceph PS" 
+                  poolName="$cephBackupStoragePoolName"
+                  monUrls="$cephPrimaryStorageMonUrls" 
+                  dataVolumePoolName="$cephPrimaryStorageDataVolumePoolName"
+                  rootVolumePoolName="$cephPrimaryStorageRootVolumePoolName"
+                  imageCachePoolName="$cephPrimaryStorageImageCachePoolName"
+              />
+            </primaryStorages>
+            <clusters>
+                <cluster name="$clusterName" description="Test"
+                    hypervisorType="$clusterHypervisorType">
+                    <hosts>
+                        <host name="$hostName" description="Test" managementIp="$hostIp"
+                            username="$hostUsername" password="$hostPassword" />
+                        <host name="$hostName2" description="Test2" managementIp="$hostIp2"
+                            username="$hostUsername" password="$hostPassword" />
+                        <host name="$hostName3" description="Test3" managementIp="$hostIp3"
+                            username="$hostUsername" password="$hostPassword" />
+                    </hosts>
+                    <primaryStorageRef>$cephPrimaryStorageName</primaryStorageRef>
+                    <l2NetworkRef>$l2PublicNetworkName</l2NetworkRef>
+                    <l2NetworkRef>$l2VlanNetworkName4</l2NetworkRef>
+                </cluster>
+            </clusters>
+
+            <l2Networks>
+                <l2NoVlanNetwork name="$l2PublicNetworkName" description="Basic L2 for public network"
+                  physicalInterface="$l2PublicNetworkInterface">
+                  <l3Networks>
+                    <l3BasicNetwork name="$l3PublicNetworkName" category="Public" description="Basic L3 Network without Vlan for public network">
+                      <ipRange name="$ipRangeName" description="Test"
+                        startIp="$ipRangeStartIp" endIp="$ipRangeEndIp" gateway="$ipRangeGateway"
+                        netmask="$ipRangeNetmask" />
+                      <dns>$DNSServer</dns>
+                      <networkService provider="Flat Network Service Provider">
+                        <serviceType>DHCP</serviceType>
+                        <serviceType>Userdata</serviceType>
+                      </networkService>
+                      <networkService provider="SecurityGroup">
+                        <serviceType>SecurityGroup</serviceType>
+                      </networkService>
+                    </l3BasicNetwork>
+                  </l3Networks>
+                </l2NoVlanNetwork>                  
+
+                <l2VlanNetwork name="$l2VlanNetworkName4" description="guest l2 vlan network4, it is for test small ip range."
+                  physicalInterface="$l2NetworkPhysicalInterface" vlan="$l2Vlan4">
+                  <l3Networks>
+                    <l3BasicNetwork name="$l3VlanNetworkName4" description = "guest test vlan network with DHCP DNS with limited ip range" domain_name="$L3VlanNetworkDomainName4">
+                      <ipRange name="$vlanIpRangeName4" startIp="$vlanIpRangeStart4" endIp="$vlanIpRangeEnd4"
+                        gateway="$vlanIpRangeGateway4" netmask="$vlanIpRangeNetmask4"/>
+                      <dns>$DNSServer</dns>
+                      <networkService provider="VirtualRouter">
+                        <serviceType>DHCP</serviceType>
+                        <serviceType>DNS</serviceType>
+                        <serviceType>SNAT</serviceType>
+                        <serviceType>PortForwarding</serviceType>
+                        <serviceType>Eip</serviceType>
+                      </networkService>
+                      <networkService provider="SecurityGroup">
+                        <serviceType>SecurityGroup</serviceType>
+                      </networkService>
+                    </l3BasicNetwork>
+                  </l3Networks>
+                </l2VlanNetwork>
+            </l2Networks>
+        </zone>
+    </zones>
+</deployerConfig>
+</config>
+

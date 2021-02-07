@@ -109,6 +109,7 @@
       description="Small Test Image Template for windows platform" 
       mediaType="$rootMediaType" format="$rootImageFormat"
       url="$imageUrl_windows" platform="Windows"
+      label="lazyload"
       username="$winImageUsername" password="$winImagePassword">
       <backupStorageRef>$cephBackupStorageName</backupStorageRef>
     </image>

@@ -6,7 +6,9 @@ New Integration Test for stopping VM operation
 '''
 
 import zstackwoodpecker.test_util as test_util
-import test_stub
+import zstackwoodpecker.test_lib as test_lib
+
+test_stub = test_lib.lib_get_specific_stub()
 
 vm = None
 
@@ -25,3 +27,4 @@ def error_cleanup():
     global vm
     if vm:
         vm.destroy()
+

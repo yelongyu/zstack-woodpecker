@@ -1,0 +1,4 @@
+import ../scenario.tmpt
+import ./deploy-imagestore-ceph.tmpt
+cephStorageOfferingUuid = 1234
+volumeName = test_volume

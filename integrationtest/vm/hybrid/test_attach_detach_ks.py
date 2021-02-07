@@ -20,23 +20,23 @@ ks_inv = None
 def test():
     global ks_inv
     global datacenter_inv
-    ks_existed = hyb_ops.query_aliyun_key_secret()
+    ks_existed = hyb_ops.query_hybrid_key_secret()
     if not ks_existed:
-        ks_inv = hyb_ops.add_aliyun_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
+        ks_inv = hyb_ops.add_hybrid_key_secret('test_hybrid', 'test for hybrid', os.getenv('aliyunKey'), os.getenv('aliyunSecret'))
     else:
         ks_inv = ks_existed[0]
-    hyb_ops.detach_aliyun_key(ks_inv.uuid)
-    ks_detach = hyb_ops.query_aliyun_key_secret()
+    hyb_ops.detach_hybrid_key(ks_inv.uuid)
+    ks_detach = hyb_ops.query_hybrid_key_secret()
     assert ks_detach[0].current == 'false'
-    hyb_ops.attach_aliyun_key(ks_inv.uuid)
-    ks_attach = hyb_ops.query_aliyun_key_secret()
+    hyb_ops.attach_hybrid_key(ks_inv.uuid)
+    ks_attach = hyb_ops.query_hybrid_key_secret()
     assert ks_attach[0].current == 'true'
     test_util.test_pass('Detach Attach Aliyun Key and Secret Success')
 
 def env_recover():
     global ks_inv
     if ks_inv:
-        hyb_ops.del_aliyun_key_secret(ks_inv.uuid)
+        hyb_ops.del_hybrid_key_secret(ks_inv.uuid)
 
 #Will be called only if exception happens in test().
 def error_cleanup():

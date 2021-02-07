@@ -1,0 +1,1 @@
+../../basic/test_delete_vm_console_password.py

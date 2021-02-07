@@ -21,7 +21,7 @@ import os
 
 vm = None
 host_uuid = None
-max_time = 180
+max_time = 300
 host_ip = None
 max_attempts = None
 storagechecker_timeout = None
@@ -65,7 +65,11 @@ def test():
     vm.set_creation_option(vm_creation_option)
     vm.create()
 
-    test_stub.ensure_host_has_no_vr(host_uuid)
+    vr_hosts = test_stub.get_host_has_vr()
+    mn_hosts = test_stub.get_host_has_mn()
+    nfs_hosts = test_stub.get_host_has_nfs()
+    if not test_stub.ensure_vm_not_on(vm.get_vm().uuid, vm.get_vm().hostUuid, vr_hosts+mn_hosts+nfs_hosts):
+        test_util.test_fail("Not find out a suitable host")
 
     #vm.check()
     host_ip = test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp
@@ -76,9 +80,9 @@ def test():
     #test_stub.down_host_network(host_ip, test_lib.all_scenario_config)
     host_username = os.environ.get('hostUsername')
     host_password = os.environ.get('hostPassword')
-    t = test_stub.async_exec_ifconfig_nic_down_up(180, host_ip, host_username, host_password, "zsn1")
+    t = test_stub.async_exec_ifconfig_nic_down_up(300, host_ip, host_username, host_password, "zsn1")
 
-    time.sleep(180)
+    time.sleep(300)
 
     vm.update()
     if test_lib.lib_find_host_by_vm(vm.get_vm()).managementIp == host_ip:
@@ -93,7 +97,7 @@ def test():
 
     t.join()
 
-    test_util.test_pass('Test VM ha change to running within 180s Success')
+    test_util.test_pass('Test VM ha change to running within 300s Success')
 
 #Will be called only if exception happens in test().
 def error_cleanup():

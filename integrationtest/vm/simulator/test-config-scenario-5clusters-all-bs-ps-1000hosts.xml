@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-5clusters-all-bs-ps-1000hosts.xml</deployConfig>
+    <deployConfigTemplate>deploy-5clusters-all-bs-ps-1000hosts.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

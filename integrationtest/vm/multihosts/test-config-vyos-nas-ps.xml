@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-vyos-nas-ps.xml</deployConfig>
+    <deployConfigTemplate>deploy-vyos-nas-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

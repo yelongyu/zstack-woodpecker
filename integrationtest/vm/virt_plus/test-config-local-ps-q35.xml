@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-local-ps-q35.xml</deployConfig>
+    <deployConfigTemplate>deploy-local-ps.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

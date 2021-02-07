@@ -14,7 +14,7 @@ import config_operations
 import os
 import inspect
 
-def add_ldap_server(name, description, url, base, username, password, encryption='None', systemtags=None, session_uuid=None):
+def add_ldap_server(name, description, url, base, username, password, scope, encryption='None', systemtags=None, session_uuid=None):
     action = api_actions.AddLdapServerAction()
     action.name = name
     action.description = description
@@ -22,6 +22,7 @@ def add_ldap_server(name, description, url, base, username, password, encryption
     action.base = base
     action.username = username
     action.password = password
+    action.scope = scope
     action.encryption = encryption
     if systemtags != None:
         action.systemTags = systemtags

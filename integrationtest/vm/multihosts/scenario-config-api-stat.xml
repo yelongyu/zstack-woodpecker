@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-api-stat.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-api-stat.tmpt</scenarioConfigTemplate>
+</testConfig>

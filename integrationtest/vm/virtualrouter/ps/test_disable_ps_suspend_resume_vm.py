@@ -40,9 +40,10 @@ def test():
     host_uuid = host.uuid
     test_obj_dict.add_vm(vm)
     vm.check()
-    ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
-    ps_uuid = ps.uuid
-    ps_ops.change_primary_storage_state(ps_uuid, 'disable')
+    #ps = test_lib.lib_get_primary_storage_by_vm(vm.get_vm())
+    #ps_uuid = ps.uuid
+    #ps_ops.change_primary_storage_state(ps_uuid, 'disable')
+    test_stub.disable_all_pss()
     if not test_lib.lib_wait_target_up(vm.get_vm().vmNics[0].ip, '22', 90):
         test_util.test_fail('VM is expected to running when PS change to disable state')
 
@@ -53,7 +54,8 @@ def test():
     vm.resume()
     vm.check()
 
-    ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    #ps_ops.change_primary_storage_state(ps_uuid, 'enable')
+    test_stub.enable_all_pss()
     host_ops.reconnect_host(host_uuid)
     vm_ops.reconnect_vr(vr_uuid)
     vm.destroy()

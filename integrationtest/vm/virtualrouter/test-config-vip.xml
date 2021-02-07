@@ -1,0 +1,5 @@
+<testConfig>
+    <deployConfig>deploy-vip.xml</deployConfig>
+    <deployConfigTemplate>deploy-ipsec.tmpt</deployConfigTemplate>
+    <pingTestTarget>zstack.org</pingTestTarget>
+</testConfig>

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 
 Create an unified test_stub to share test operations
@@ -15,11 +16,14 @@ import zstackwoodpecker.zstack_test.zstack_test_volume as test_volume
 import zstackwoodpecker.operations.image_operations as img_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.account_operations as acc_ops
+import zstackwoodpecker.zstack_test.zstack_test_eip as zstack_eip_header
+import zstackwoodpecker.zstack_test.zstack_test_vip as zstack_vip_header
+import time
 import re
 
 
 def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
-              image_uuid=None, session_uuid=None):
+              image_uuid=None, strategy_type='InstantStart', session_uuid=None):
     if not vm_creation_option:
         instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(
             os.environ.get('instanceOfferingName_s')).uuid
@@ -49,6 +53,8 @@ def create_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
 
     if session_uuid:
         vm_creation_option.set_session_uuid(session_uuid)
+
+    vm_creation_option.set_strategy_type(strategy_type)
 
     vm = test_vm.ZstackTestVm()
     vm.set_creation_option(vm_creation_option)
@@ -99,6 +105,15 @@ def create_vm_with_volume(vm_creation_option=None, data_volume_uuids=None,
     return create_vm(vm_creation_option, data_volume_uuids,
                      session_uuid=session_uuid)
 
+def create_stop_vm(vm_creation_option=None, strategy_type='CreateStopped',
+                          session_uuid=None):
+    return create_vm(vm_creation_option=vm_creation_option, strategy_type=strategy_type,
+                     session_uuid=session_uuid)
+
+def create_justcreate_vm(vm_creation_option=None, strategy_type='JustCreate',
+                          session_uuid=None):
+    return create_vm(vm_creation_option=vm_creation_option, strategy_type=strategy_type,
+                     session_uuid=session_uuid)
 
 def create_vm_with_iso(vm_creation_option=None, session_uuid=None):
     img_option = test_util.ImageOption()
@@ -108,10 +123,9 @@ def create_vm_with_iso(vm_creation_option=None, session_uuid=None):
     bs_uuid = res_ops.query_resource_fields(res_ops.BACKUP_STORAGE, [],
                                             session_uuid)[0].uuid
     img_option.set_backup_storage_uuid_list([bs_uuid])
-    os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/test.iso" %
-              (os.environ.get('zstackInstallPath')))
-    img_option.set_url('http://%s:8080/zstack/static/test.iso' %
-                       (os.environ.get('node1Ip')))
+#    os.system("echo fake iso for test only >  %s/apache-tomcat/webapps/zstack/static/zstack-repo/7/x86_64/os/test.iso" % (os.environ.get('zstackInstallPath')))
+#    img_option.set_url('http://%s:8080/zstack/static/zstack-repo/7/x86_64/os/test.iso' % (os.environ.get('node1Ip')))
+    img_option.set_url(os.environ.get('imageServer')+'/iso/CentOS-x86_64-7.2-Minimal.iso')
     image_uuid = img_ops.add_iso_template(img_option).uuid
 
     return create_vm(vm_creation_option, None, root_disk_uuid, image_uuid,
@@ -200,5 +214,129 @@ def get_vm_console_protocol(uuid, session_uuid=None):
     test_util.action_logger('Get VM Console protocol:  %s ' % evt.protocol)
     return evt
 
+def create_vnc_vm(vm_creation_option=None, volume_uuids=None, root_disk_uuid=None,
+              image_uuid=None,system_tag="vmConsoleMode::vnc", session_uuid=None):
+    if not vm_creation_option:
+        instance_offering_uuid = test_lib.lib_get_instance_offering_by_name(
+            os.environ.get('instanceOfferingName_s')).uuid
+        cond = res_ops.gen_query_conditions('mediaType', '!=', 'ISO')
+        cond = res_ops.gen_query_conditions('platform', '=', 'Linux', cond)
+        image_uuid = res_ops.query_resource(
+            res_ops.IMAGE, cond, session_uuid)[0].uuid
+        l3net_uuid = res_ops.get_resource(
+            res_ops.L3_NETWORK, session_uuid)[0].uuid
+        vm_creation_option = test_util.VmOption()
+        vm_creation_option.set_instance_offering_uuid(instance_offering_uuid)
+        vm_creation_option.set_image_uuid(image_uuid)
+        vm_creation_option.set_l3_uuids([l3net_uuid])
+        vm_creation_option.set_system_tags([system_tag])
 
+    if volume_uuids:
+        if isinstance(volume_uuids, list):
+            vm_creation_option.set_data_disk_uuids(volume_uuids)
+        else:
+            test_util.test_fail(
+                'volume_uuids type: %s is not "list".' % type(volume_uuids))
 
+    if root_disk_uuid:
+        vm_creation_option.set_root_disk_uuid(root_disk_uuid)
+
+    if image_uuid:
+        vm_creation_option.set_image_uuid(image_uuid)
+
+    if session_uuid:
+        vm_creation_option.set_session_uuid(session_uuid)
+
+    vm = test_vm.ZstackTestVm()
+    vm.set_creation_option(vm_creation_option)
+    vm.create()
+    return vm
+
+def ensure_hosts_connected(wait_time):
+    for i in range(wait_time):
+        time.sleep(1)
+        host_list = res_ops.query_resource(res_ops.HOST)
+        for host in host_list:
+            if not "connected" in host.status.lower():
+                test_util.test_logger("found not connected ps status: %s" %(host.status))
+                break
+        else:
+            return
+    else:
+        test_util.test_fail("host status didn't change to Connected within %s, therefore, failed" % (wait_time))
+
+def create_vip(vip_name=None, l3_uuid=None, session_uuid = None, required_ip=None):
+    if not vip_name:
+        vip_name = 'test vip'
+    if not l3_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+
+    vip_creation_option = test_util.VipOption()
+    vip_creation_option.set_name(vip_name)
+    vip_creation_option.set_l3_uuid(l3_uuid)
+    vip_creation_option.set_session_uuid(session_uuid)
+    vip_creation_option.set_requiredIp(required_ip)
+
+    vip = zstack_vip_header.ZstackTestVip()
+    vip.set_creation_option(vip_creation_option)
+    vip.create()
+
+    return vip
+
+def create_eip(eip_name=None, vip_uuid=None, vnic_uuid=None, vm_obj=None, \
+        session_uuid = None):
+    if not vip_uuid:
+        l3_name = os.environ.get('l3PublicNetworkName')
+        l3_uuid = test_lib.lib_get_l3_by_name(l3_name).uuid
+        vip_uuid = net_ops.acquire_vip(l3_uuid).uuid
+
+    eip_option = test_util.EipOption()
+    eip_option.set_name(eip_name)
+    eip_option.set_vip_uuid(vip_uuid)
+    eip_option.set_vm_nic_uuid(vnic_uuid)
+    eip_option.set_session_uuid(session_uuid)
+    eip = zstack_eip_header.ZstackTestEip()
+    eip.set_creation_option(eip_option)
+    if vnic_uuid and not vm_obj:
+        test_util.test_fail('vm_obj can not be None in create_eip() API, when setting vm_nic_uuid.')
+    eip.create(vm_obj)
+    return eip
+
+def construct_elaboration_json(json):
+    json_path = json.rsplit("/", 1)[0]
+    json_file = json.rsplit("/", 1)[1]
+    if not os.path.isdir(json_path):
+        os.makedirs(json_path)
+    if os.path.exists(json):
+        os.remove(json)
+    os.mknod(json, 0666)
+    fd = open(json, "w")
+
+    str = """[
+  {
+    "category": "ACCOUNT",
+    "code": "1000",
+    "regex": "wrong account name or password",
+    "message_cn": "登陆帐号/密码出错",
+    "message_en": "wrong account name or password",
+    "operation_cn": "检查输入的登陆帐号或密码",
+    "operation_en": "check the account / password for login"
+  },
+  {
+    "category": "ACCOUNT",
+    "code": "1000",
+    "regex": "The session is invalid, either wrong session id or the session has been expired",
+    "message_cn": "session过期，或者提供了不正确的session id",
+    "message_en": "The session is invalid, either wrong session id or the session has been expired",
+    "operation_cn": "重新登陆",
+    "operation_en": "need login again"
+  },
+  {
+    "category": "HOST",
+    "operation_en": "test"
+  }
+]"""
+    fd.write(str)
+    fd.flush()
+    fd.close()

@@ -1,13 +1,13 @@
 zstackPkg = ~/sanitytest/zstack-offline-installer-test.bin
 zstackInstallScript = ~/sanitytest/install.sh
-#zstackInstallPath should be carefully set. The contents in this folder will be deleted permanently in testing. 
+#zstackInstallPath should be carefully set. The contents in this folder will be deleted permanently in testing.
 zstackInstallPath = /usr/local/zstacktest
 zstackPropertiesPath = ~/sanitytest/conf/zstack.properties
 zstackTestAgentPkgPath = ~/sanitytest/zstacktestagent.tar.bz
 DBServer = 10.1.101.40
 
 DBAdminUser = root
-DBAdminPassword = 
+DBAdminPassword =
 
 DBUserName = zstack
 DBPassword =
@@ -19,13 +19,13 @@ node1Name = centos1
 node1Ip = 10.1.101.40
 
 node2Name = centos5
-node2DockerImage = 
+node2DockerImage =
 node2Ip = 10.1.101.45
 nodeUserName = root
 nodePassword = 1
 
 node3Name = centos6
-node3DockerImage = 
+node3DockerImage =
 node3Ip = 10.0.101.46
 
 instanceOfferingName_s = small-vm
@@ -33,6 +33,15 @@ instanceOfferingMemory_s = 128M
 instanceOfferingCpuNum_s = 1
 instanceOfferingCpuSpeed_s = 512
 
+instanceOfferingName_win = windos-vm
+instanceOfferingMemory_win = 8G
+instanceOfferingCpuNum_win = 8
+
+imageName_linux_UEFI = image_for_UEFI
+imageUrl_linux_UEFI = http://192.168.200.100/mirror/diskimages/CentOS74_UEFI.qcow2
+
+imageName_win2016_UEFI = image_for_UEFI
+imageUrl_win2016_UEFI = http://192.168.200.100/mirror/diskimages/Windows2016_UEFI.qcow2
 virtualRouterOfferingName_s = virtual-router-vm
 virtualRouterOfferingMemory_s = 512M
 virtualRouterOfferingCpuNum_s = 2
@@ -42,18 +51,18 @@ sftpBackupStorageName = sftp
 sftpBackupStorageUrl = /home/sftpBackupStorage
 sftpBackupStorageUsername = root
 sftpBackupStoragePassword = 1
-sftpBackupStorageHostname = 10.1.101.40
+sftpBackupStorageHostname = 127.1.101.40
 sftpBackupStoragePort = 22
 
 sftpBackupStorageName2 = sftp2
 sftpBackupStorageUrl2 = /home/sftpBackupStorage
 sftpBackupStorageUsername2 = root
 sftpBackupStoragePassword2 = 1
-sftpBackupStorageHostname2 = 10.1.101.41
+sftpBackupStorageHostname2 = 127.1.101.41
 sftpBackupStoragePort2 = 22
 
 nfsPrimaryStorageName = nfs
-nfsPrimaryStorageUrl = 10.1.101.1:/home/nfs
+nfsPrimaryStorageUrl = 127.1.101.1:/home/nfs
 
 imageName_s = f18
 rootImageFormat = raw
@@ -68,7 +77,11 @@ imageUrl_net = http://10.1.101.1/image/centos_400m_140527.img
 
 imageName_windows = windows
 imageUrl_windows = http://192.168.200.16/mirror/diskimages/windows-2012-cn-qcow2.qcow2
+winImageUsername = Administrator
+winImagePassword = linux@123
 imageName_other = other
+winImageUsername = Administrater
+winImagePassword = password
 
 rootDiskOfferingName = root-disk
 rootDiskOfferingSize = 1G
@@ -82,7 +95,7 @@ clusterName = cluster1
 clusterHypervisorType = KVM
 
 hostName = centos1
-hostIp = 10.1.101.40
+hostIp = 127.1.101.40
 #hostName = ubuntu
 #hostIp = 10.1.101.10
 #hostName = centos7
@@ -100,6 +113,7 @@ l2NetworkPhysicalInterface = eth0
 
 l2PublicNetworkName = l2-public
 l2PublicNetworkInterface = eth0
+l2PublicNetworkInterface1 = eth1
 
 l2ManagementNetworkName = l2-management
 l2ManagementNetworkInterface = eth1
@@ -128,7 +142,7 @@ l2Vlan5 = 25
 l2VlanNetworkName6 = vlan-test-load-balance
 l2Vlan6 = 26
 
-#L3 network names should be same, test case will rely on name. 
+#L3 network names should be same, test case will rely on name.
 l3ManagementNetworkName = management network
 l3PublicNetworkName = public network
 l3NoVlanNetworkName1 = l3_user_defined_vlan1
@@ -161,6 +175,27 @@ ipRangeStartIp = 10.0.101.150
 ipRangeEndIp = 10.0.101.250
 ipRangeNetmask = 255.255.255.0
 ipRangeGateway = 10.0.101.1
+
+#IPv6
+ipv6RangeName = host IPv6 range
+ipv6RangeStartIp = 1000::2
+ipv6RangeEndIp = 1000::20
+ipv6prefix_length = 64
+ipv6RangeGateway = 1000::1
+ipv6DNSServer = 240c::6666
+ipv6CidrName = host IPv6 Cidr
+ipv6Cidr = 1000:2000:3000:4000::1/64
+ipv6ImageUrl = http://192.168.200.100/mirror/diskimages/centos7_ipv6.qcow2
+ipv6ImageName = IPv6 test
+l2VlanNetworkName_ipv6 = ipv6_private_network
+l2Vlan_ipv6 = 1111
+ipv6Cidr_private = 2000:3000:4000:5000::1/64
+ipv6CidrName_private = host IPv6 Cidr private
+ipv6ImagesgUrl = http://192.168.200.100/mirror/diskimages/centos7_ipv6_sg.qcow2
+ipv6ImageNamesg = IPv6 test SG
+l2PublicNetworkName_1 = l2-public-1
+l3PrivateNetworkName = private network IPv6
+l3PublicNetworkName1 = public network IPv6
 
 noVlanIpRangeName1 = guest novlan range 1
 noVlanIpRangeStart1 = 10.250.0.2
@@ -225,5 +260,22 @@ vrImageUsername = root
 vrImagePassword = password
 bootOptionPicture = /home/boot.png
 
-testIsoName = testIso                                                                                                                                                                        
+testIsoName = testIso
 testIsoUrl = http://10.1.101.1/image/ttylinux-virtio_i486-16.1.iso
+
+testQGAImageName = testQGAImage
+testQGAImageUrl = http://192.168.200.100/mirror/diskimages/CentOS7.4-Cloudinit-QGA-8G.qcow2
+
+iperfUrl = https://iperf.fr/download/fedora/iperf3-3.1.3-1.fc24.x86_64.rpm
+imageServer = http://10.1.101.1/
+
+smtpServer = smtp.domain.com
+popServer = pop3.domain.com
+smtpPort = 25
+mailUsername = test@domain.com
+mailPassword = 0
+
+imageUrl_vdbench = http://10.1.101.1/diskimages/centos_vdbench.qcow2
+emptyimageUrl = http://10.1.101.1/diskimages/empty_disk.qcow2
+
+imageUrl_raw = http://10.1.101.1/diskimages/centos7-test-6G.raw

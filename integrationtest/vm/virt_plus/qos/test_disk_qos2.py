@@ -10,6 +10,7 @@ import zstackwoodpecker.operations.host_operations as host_ops
 import zstackwoodpecker.operations.resource_operations as res_ops
 import zstackwoodpecker.operations.volume_operations as vol_ops
 import zstackwoodpecker.operations.vm_operations as vm_ops
+import zstackwoodpecker.operations.tag_operations as tag_ops
 
 _config_ = {
         'timeout' : 600,
@@ -26,18 +27,18 @@ def test():
 
     #unit is KB
     volume_bandwidth = 25*1024*1024
-    new_offering = test_lib.lib_create_instance_offering(volume_bandwidth = volume_bandwidth)
-    new_offering_uuid = new_offering.uuid
+#    new_offering = test_lib.lib_create_instance_offering(volume_bandwidth = volume_bandwidth)
+#    new_offering_uuid = new_offering.uuid
 
-    vm = test_stub.create_vm(vm_name = 'vm_volume_qos', \
-            instance_offering_uuid = new_offering.uuid)
+    vm = test_stub.create_vm(vm_name = 'vm_volume_qos')
     test_obj_dict.add_vm(vm)
 
     vm.check()
 
     volume_creation_option = test_util.VolumeOption()
-    disk_offering = test_lib.lib_get_disk_offering_by_name(os.environ.get('largeDiskOfferingName'))
+    disk_offering = test_lib.lib_create_disk_offering(diskSize=1073741824,name="1G")
     volume_creation_option.set_disk_offering_uuid(disk_offering.uuid)
+    tag_ops.create_system_tag('DiskOfferingVO', disk_offering.uuid, "volumeTotalBandwidth::26214400")
     
     volume_creation_option.set_name('volume-1')
     volume = test_stub.create_volume(volume_creation_option)
@@ -50,7 +51,6 @@ def test():
     test_stub.make_ssh_no_password(vm_inv)
     test_stub.install_fio(vm_inv)
     test_stub.test_fio_bandwidth(vm_inv, volume_bandwidth, mount_point)
-    vm_ops.delete_instance_offering(new_offering_uuid)
     test_lib.lib_robot_cleanup(test_obj_dict)
 
     test_util.test_pass('VM Disk QoS Test Pass')

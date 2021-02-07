@@ -1,0 +1,4 @@
+<testConfig>
+    <scenarioConfig>scenario-multi-nic.xml</scenarioConfig>
+    <scenarioConfigTemplate>scenario-multi-nic.tmpt</scenarioConfigTemplate>
+</testConfig>

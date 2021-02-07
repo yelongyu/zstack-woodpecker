@@ -10,7 +10,7 @@ import zstackwoodpecker.test_lib as test_lib
 import zstackwoodpecker.operations.account_operations as acc_ops
 
 vm = None
-test_stub = test_lib.lib_get_test_stub()
+test_stub = test_lib.lib_get_specific_stub()
 
 def test():
     global vm
@@ -39,3 +39,4 @@ def error_cleanup():
             vm.destroy()
         except:
             pass
+
